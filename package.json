@@ -1,0 +1,46 @@
+{
+  "name": "moltyjs",
+  "version": "0.0.1",
+  "description": "A tiny ODM for MongoDB with multy tenancy support.",
+  "main": "lib/index.js",
+  "scripts": {
+    "dev": "watch \"npm run build\" src",
+    "build": "babel src -d lib",
+    "test": "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-core/register --require babel-polyfill --recursive --watch --reporter spec --timeout 5000",
+    "prepublish": "npm run build",
+    "release": "np"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yonirt/moltyjs.git"
+  },
+  "author": {
+    "name": "Mario Lemes",
+    "email": "mariolemesmedina@gmail.com",
+    "url": "https://twitter.com/mario_lemes"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Yonirt/moltyjs/issues"
+  },
+  "homepage": "https://github.com/Yonirt/moltyjs#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1",
+    "np": "^2.18.2",
+    "watch": "^1.0.2"
+  },
+  "dependencies": {
+    "await-to-js": "^2.0.1",
+    "bson": "^1.0.4",
+    "generic-pool": "^3.2.0",
+    "lodash": "^4.17.4",
+    "mongodb": "^3.0.0-rc0"
+  }
+}
