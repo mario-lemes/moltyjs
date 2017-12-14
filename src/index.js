@@ -13,7 +13,7 @@ class Molty {
     this.connection = null;
 
     // Binding methods
-    this.model = this.model.bind(this);
+    this.Model = this.Model.bind(this);
     this.connect = this.connect.bind(this);
   }
 

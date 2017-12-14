@@ -2,7 +2,7 @@ const { expect } = require('chai');
 
 const Document = require('../document');
 const Molty = require('../index');
-const { Schema, connect, model } = Molty;
+const { Schema, connect, Model } = Molty;
 
 const Middleware = require('../middleware');
 
@@ -23,8 +23,8 @@ describe('# Hooks', () => {
       uri: 'mongodb://localhost:27017/test',
     };
     conn = connect(options);
-    const m2 = model(s2, 'TestModel2');
-    const m3 = model(s3, 'TestModel3');
+    const m2 = Model(s2, 'TestModel2');
+    const m3 = Model(s3, 'TestModel3');
 
     newDoc = m2.new({
       test: ['OOOKK', 'YEEEES'],

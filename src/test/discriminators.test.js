@@ -1,8 +1,8 @@
 const { expect } = require('chai');
-const Model = require('../model');
+
 const Document = require('../document');
 const Molty = require('../index');
-const { Schema, connect, model } = Molty;
+const { Schema, connect, Model } = Molty;
 
 const Middleware = require('../middleware');
 
@@ -24,7 +24,7 @@ describe('# Discriminators', () => {
 
     conn = connect(options);
 
-    const m = model(s2, 'TestModel5');
+    const m = Model(s2, 'TestModel5');
     mDiscriminator = m.discriminator(sDiscriminator, 'TestModel5Discriminator');
 
     newDiscriminatorDoc = mDiscriminator.new({
@@ -42,6 +42,7 @@ describe('# Discriminators', () => {
   });
 
   it('Creating a new model which inherit all the properties from nother model', () => {
+    const Model = require('../model');
     const model = Molty.models['TestModel5'];
     expect(model).to.be.an.instanceof(Model);
     expect(model).to.have.property('_schemaNormalized');

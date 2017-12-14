@@ -290,7 +290,6 @@ class Model {
 
       // Enum validation
       if (!isInEnum(schema[key].enum, payload[key])) {
-        console.log(schema[key], payload);
         throw new Error(
           'Value assigned to ' +
             key +

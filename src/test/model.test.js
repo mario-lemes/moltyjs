@@ -2,7 +2,7 @@ const { expect } = require('chai');
 
 const Document = require('../document');
 const Molty = require('../index');
-const { Schema, connect, model } = Molty;
+const { Schema, connect, Model } = Molty;
 
 const Middleware = require('../middleware');
 
@@ -22,7 +22,7 @@ describe('# Model', () => {
     };
 
     conn = connect(options);
-    const m = model(s, 'TestModel');
+    const m = Model(s, 'TestModel');
 
     newDoc = m.new({
       test: ['OOOKK', 'YEEEES'],
