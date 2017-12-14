@@ -19,7 +19,11 @@ class Document {
     this._discriminator = discriminator ? discriminator : null;
 
     // Assigning a proper ObjectId
-    this._data['_id'] = mongoClient.ObjectId();
+    if (!this._data['_id']) {
+      this._data['_id'] = mongoClient.ObjectId();
+    } else if (!mongoClient.isValidObjectId(this._data['_id'])) {
+      throw new Error('Document _id is not a proper Mongo Object Id');
+    }
 
     // Applying static methods to the document
     Object.keys(methods).forEach(key => {

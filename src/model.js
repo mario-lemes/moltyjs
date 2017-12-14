@@ -223,12 +223,13 @@ class Model {
    */
   _validatePayloadFieldNames(payload, schema) {
     Object.keys(payload).forEach(key => {
-      if (schema[key] === undefined)
+      if (schema[key] === undefined && key !== '_id') {
         throw new Error(
           'Field name ' +
             key +
             ' does not correspond to any field name on the schema',
         );
+      }
 
       // Objects nested
       if (!schema[key].type && isObject(schema[key])) {
