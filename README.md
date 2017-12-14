@@ -52,7 +52,7 @@ Molty Schema are based on Mongoose Schema structure with some changes on the dec
 To create a new Schema use the "Schema()" constructor passing the schema and the options:
 
 ```javascript
-const { connect, Schema } = require('moltys');
+const { Schema } = require('moltys');
 
 const newSchema = Schema(
   {
@@ -103,6 +103,16 @@ _timestamps_: Optional
 _inheritOptions_: Optional
 --_discriminatorKey_: Required once "_inheritOptions_" is set
 --_merge_: Optional ['methods', 'preHooks', 'postHooks']
+
+## Create a new Model
+
+Once we have created our schema we need to register as a model so we can start to create, find, updete and delete documents. To do this you must provide the a proper schema and a model name. The model name will be the collection name on the DB so use the criteria you want since Molty does not make any accomodation on them like auto plurilize.
+
+```javascript
+const { Model } = require('moltys');
+
+const TestModel = model(newSchema, 'TestModel');
+```
 
 # TODO
 

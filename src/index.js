@@ -18,13 +18,14 @@ class Molty {
   }
 
   /**
-   * model(): Create a ne model associated to a schema with an specifyc name
+   * Model(): Create a new model associated to a schema with an specifyc name.
+   * Used as a model contructor of the Model class.
    * @param {Schema} schema
    * @param {String} modelName
    *
    * @returns {Model}
    */
-  model(schema, modelName) {
+  Model(schema, modelName) {
     if (this.connection === null)
       throw new Error(
         'You must first connect to the DB before creating a model.',
