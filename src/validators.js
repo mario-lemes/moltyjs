@@ -55,8 +55,7 @@ const isSupportedType = function(t) {
     t === Array ||
     isArray(t) ||
     t === Object ||
-    t instanceof Object ||
-    typeof t.documentClass === 'function'
+    t instanceof Object
   );
 };
 
@@ -75,12 +74,6 @@ const isType = function(value, type) {
     return isArray(value);
   } else if (type === Object) {
     return isObject(value);
-    // } else if (type.documentClass && type.documentClass() === 'document') {
-    //   return isDocument(value) || DB().isNativeId(value);
-    // } else if (type.documentClass && type.documentClass() === 'embedded') {
-    //   return isEmbeddedDocument(value);
-    // } else if (type === DB().nativeIdType()) {
-    //   return isNativeId(value);
   } else {
     throw new Error('Unsupported type: ' + type);
   }

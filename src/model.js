@@ -105,6 +105,8 @@ class Model {
     this._validatePayloadFieldNames(payload, this._schemaNormalized);
     // Normalize the payload with the model schema
     let data = this._normalizePayload(payload, this._schemaNormalized);
+    // Validate all the values
+    this._validatePayloadFieldValues(data, this._schemaNormalized);
 
     // Returning the new document created
     return new Document(
@@ -239,39 +241,25 @@ class Model {
   }
 
   /**
-   * _normalizePayload(): Assign default values to the payload
-   * and check if the data type and format is accepted by the schema
-   * assigned to this model
+   * _validatePayloadFieldValues : Check if the data type and format is
+   * accepted by the schema assigned to this model and
+   * also pass all the validation
    *
    * @param {Object} payload
-   * @param {schema} schema
-   *
-   * returns {Object} doc
+   * @param {Schema} schema
    */
-  _normalizePayload(payload, schema) {
+  _validatePayloadFieldValues(payload, schema) {
     Object.keys(schema).forEach(key => {
-      // Default values
-      if (payload[key] === undefined && 'default' in schema[key]) {
-        const defaultValue = schema[key].default;
-        payload[key] =
-          typeof defaultValue === 'function' ? defaultValue() : defaultValue;
-        return;
-      }
-
       // No required values
       if (payload[key] === undefined && !schema[key].required) return;
 
       // Objects nested
       if (!schema[key].type && isObject(payload[key])) {
-        payload[key] = this._normalizePayload(payload[key], schema[key]);
-        return;
-      }
-
-      // Is required validation
-      if (schema[key].required && isEmptyValue(payload[key])) {
-        throw new Error(
-          'Key ' + key + ' is required' + ', but got ' + payload[key],
+        payload[key] = this._validatePayloadFieldValues(
+          payload[key],
+          schema[key],
         );
+        return;
       }
 
       // Validation type
@@ -302,6 +290,7 @@ class Model {
 
       // Enum validation
       if (!isInEnum(schema[key].enum, payload[key])) {
+        console.log(schema[key], payload);
         throw new Error(
           'Value assigned to ' +
             key +
@@ -336,6 +325,22 @@ class Model {
         );
       }
 
+      // Max lenght validation
+      if (
+        schema[key].maxlength &&
+        isString(payload[key]) &&
+        payload[key].length > schema[key].maxlength
+      ) {
+        throw new Error(
+          'Value assigned to ' +
+            key +
+            ' is bigger than ' +
+            schema[key].maxlength.toString() +
+            '. Value was ' +
+            payload[key].length,
+        );
+      }
+
       // Custom validation
       if (
         typeof schema[key].validate === 'function' &&
@@ -346,6 +351,43 @@ class Model {
             key +
             ' failed custom validator. Value was ' +
             payload[key],
+        );
+      }
+    });
+  }
+
+  /**
+   * _normalizePayload(): Assign default values to the payload
+   *
+   *
+   * @param {Object} payload
+   * @param {schema} schema
+   *
+   * returns {Object} doc
+   */
+  _normalizePayload(payload, schema) {
+    Object.keys(schema).forEach(key => {
+      // Default values
+      if (payload[key] === undefined && 'default' in schema[key]) {
+        const defaultValue = schema[key].default;
+        payload[key] =
+          typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+        return;
+      }
+
+      // No required values
+      if (payload[key] === undefined && !schema[key].required) return;
+
+      // Objects nested
+      if (!schema[key].type && isObject(payload[key])) {
+        payload[key] = this._normalizePayload(payload[key], schema[key]);
+        return;
+      }
+
+      // Is required validation
+      if (schema[key].required && isEmptyValue(payload[key])) {
+        throw new Error(
+          'Key ' + key + ' is required' + ', but got ' + payload[key],
         );
       }
     });

@@ -10,7 +10,7 @@ const testSchema = {
     type: String,
     required: true,
     unique: true,
-    maxlength: 100,
+    maxlength: 150,
   },
   password: {
     type: String,

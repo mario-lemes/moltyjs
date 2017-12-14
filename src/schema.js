@@ -33,14 +33,34 @@ class Schema {
    */
   _isValidFormatType(schema) {
     Object.keys(schema).forEach(key => {
-      if (schema[key].type) {
-        if (!isSupportedType(schema[key].type)) {
-          throw new Error('Unsupported type or bad variable: ' + key);
-        }
-      } else {
-        if (Object.keys(schema[key]).length <= 0) {
-          throw new Error('Unsupported type or bad variable: ' + key);
-        }
+      if (schema[key].type && !isSupportedType(schema[key].type)) {
+        throw new Error('Unsupported type or bad variable: ' + key);
+      }
+
+      // If the properties of the schema field are not allowed
+      if (schema[key].type && Object.keys(schema[key]).length > 1) {
+        const fieldOptions = [
+          'type',
+          'required',
+          'unique',
+          'default',
+          'match',
+          'enum',
+          'min',
+          'max',
+          'maxlength',
+          'validate',
+        ];
+        Object.keys(schema[key]).forEach(propertyKey => {
+          if (fieldOptions.indexOf(propertyKey) < 0) {
+            throw new Error('Unsupported propertie variable: ' + propertyKey);
+          }
+        });
+      }
+
+      // Objects nested
+      if (!schema[key].type && isObject(schema[key])) {
+        return this._isValidFormatType(schema[key]);
       }
     });
   }
