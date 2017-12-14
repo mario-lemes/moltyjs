@@ -24,7 +24,6 @@ class ConnectionManager {
               poolSize: 1,
               native_parser: true,
             }).then(client => {
-              console.log('Connection Manager initialized in: ' + uri);
               resolve(client);
             });
           }),
