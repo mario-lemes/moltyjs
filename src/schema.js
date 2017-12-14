@@ -10,28 +10,28 @@ class Schema {
    *
    * @returns {Schema}
    */
-  constructor(schema, options) {
+  constructor(schema, options = {}) {
     if (arguments.length < 1) throw new Error('Schema is missing');
 
-    this._isValidFormatType(schema);
+    this._checkFormatType(schema);
 
+    this._checkOptions(options);
+
+    this._options = options;
     this._schema = schema;
-
-    this._options = options || {};
 
     this._preHooks = [];
     this._postHooks = [];
-
     this.methods = {};
   }
 
   /**
-   * _isValidFormatType(): Check this._schema for a properly
+   * _checkFormatType(): Check this._schema for a properly
    * formatting
    *
    * @param {Object} schema
    */
-  _isValidFormatType(schema) {
+  _checkFormatType(schema) {
     Object.keys(schema).forEach(key => {
       if (schema[key].type && !isSupportedType(schema[key].type)) {
         throw new Error('Unsupported type or bad variable: ' + key);
@@ -39,20 +39,8 @@ class Schema {
 
       // If the properties of the schema field are not allowed
       if (schema[key].type && Object.keys(schema[key]).length > 1) {
-        const fieldOptions = [
-          'type',
-          'required',
-          'unique',
-          'default',
-          'match',
-          'enum',
-          'min',
-          'max',
-          'maxlength',
-          'validate',
-        ];
         Object.keys(schema[key]).forEach(propertyKey => {
-          if (fieldOptions.indexOf(propertyKey) < 0) {
+          if (!this._isValidProperty(propertyKey)) {
             throw new Error('Unsupported propertie variable: ' + propertyKey);
           }
         });
@@ -60,7 +48,30 @@ class Schema {
 
       // Objects nested
       if (!schema[key].type && isObject(schema[key])) {
-        return this._isValidFormatType(schema[key]);
+        return this._checkFormatType(schema[key]);
+      }
+    });
+  }
+
+  /**
+   * _checkOptionss(): Check this._options for a properly
+   * formatting
+   *
+   * @param {Object} options
+   */
+  _checkOptions(options) {
+    Object.keys(options).forEach(key => {
+      if (!this._isValidOption(key))
+        throw new Error('Unsupported schema option: ' + key);
+
+      // Objects inheritOptions
+      if (key == 'inheritOptions' && isObject(options[key])) {
+        Object.keys(options[key]).forEach(inheritOptionsKey => {
+          if (!this._isValidInheritOption(inheritOptionsKey, options[key]))
+            throw new Error(
+              'Unsupported schema inherit option: ' + inheritOptionsKey,
+            );
+        });
       }
     });
   }
@@ -103,6 +114,66 @@ class Schema {
   _isValidHook(hook) {
     const validHooks = ['validate', 'insert', 'update', 'delete'];
     return validHooks.indexOf(hook) > -1;
+  }
+
+  /**
+   * _isValidProperty(): Check is the property field is allowed or not
+   *
+   * @param {String} property Property name
+   *
+   * @returns {Boolean}
+   */
+  _isValidProperty(property) {
+    const fieldProperties = [
+      'type',
+      'required',
+      'unique',
+      'default',
+      'match',
+      'enum',
+      'min',
+      'max',
+      'maxlength',
+      'validate',
+    ];
+    return fieldProperties.indexOf(property) > -1;
+  }
+
+  /**
+   * _isValidOption(): Check is the option field is
+   * allowed or not
+   *
+   * @param {String} option Option name
+   *
+   * @returns {Boolean}
+   */
+  _isValidOption(option) {
+    const fieldOptions = ['timestamps', 'inheritOptions'];
+    return fieldOptions.indexOf(option) > -1;
+  }
+
+  /**
+   * _isValidInheritOption(): Check is the inherit
+   * options field is allowed or not
+   *
+   * @param {String} inheritOption Inherit Option name
+   * @param {String} value         Inherit Option value
+   *
+   * @returns {Boolean}
+   */
+  _isValidInheritOption(inheritOption, value) {
+    const fieldInheritOptions = ['discriminatorKey', 'merge'];
+    const mergeOptions = ['methods', 'preHooks', 'postHooks'];
+
+    if (fieldInheritOptions.indexOf(inheritOption) < 0) return false;
+
+    if (inheritOption === 'merge') {
+      for (let m of value.merge) {
+        if (mergeOptions.indexOf(m) < 0) return false;
+      }
+    }
+
+    return true;
   }
 }
 

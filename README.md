@@ -2,13 +2,13 @@
 
 A tiny ODM for MongoDB with multy tenancy support.
 
-# Install
+## Install
 
 ```shell
 $ npm install moltyjs --save
 ```
 
-# Usage
+## Usage
 
 ```javascript
 const { connect } = require('moltys');
@@ -17,7 +17,7 @@ const { connect } = require('moltys');
 import { connect } from ('moltyjs');
 ```
 
-# Connect to a DB
+## Connect to a DB
 
 To connect to a database use the "connect()" function passing trough 'options' payload all the settings required:
 
@@ -38,7 +38,7 @@ const connection = connect(options);
 
 **Note:** For the time being MoltyJS only support Mongo Databases.
 
-# Create a new Schema
+## Create a new Schema
 
 Molty Schema are based on Mongoose Schema structure with some changes on the declaration of the inherit schema options. I even keep some field options name to make the Molty integration as easier as posible in those project are currently running Mongoose.
 
