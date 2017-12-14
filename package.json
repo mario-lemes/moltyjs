@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "watch \"npm run build\" src",
     "build": "babel src -d lib",
-    "test": "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-core/register --require babel-polyfill --recursive --watch --reporter spec --timeout 5000",
+    "test:watch": "\"npm run test -- --watch\"",
+    "test":
+      "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-core/register --require babel-polyfill --recursive --reporter spec --timeout 5000",
     "prepublish": "npm run build",
     "release": "np"
   },
