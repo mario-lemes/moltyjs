@@ -38,6 +38,13 @@ const connection = connect(options);
 
 **Note:** For the time being MoltyJS only support Mongo Databases.
 
+## Drop a DB
+
+```javascript
+const res = await connection.dropDatabase('test');
+// true
+```
+
 ## Create a new Schema
 
 Molty Schema are based on Mongoose Schema structure with some changes on the declaration of the inherit schema options. I even keep some field options name to make the Molty integration as easier as posible in those project are currently running Mongoose.

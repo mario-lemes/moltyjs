@@ -16,9 +16,10 @@ before(async () => {
   };
 
   try {
-    const conn = await connect(options);
+    const conn = connect(options);
+    console.log(conn);
     const res = await conn.dropDatabase('test2');
-    expect(a).to.equal(true);
+    expect(res).to.equal(true);
   } catch (error) {
     return error;
   }
