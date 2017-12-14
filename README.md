@@ -99,6 +99,7 @@ _inheritOptions_: Optional
 
 # TODO
 
+* Improove documentation
 * Populate
 * find()
 * update()
