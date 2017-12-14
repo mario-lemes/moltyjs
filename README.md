@@ -42,6 +42,8 @@ const connection = connect(options);
 
 Molty Schema are based on Mongoose Schema structure with some changes on the declaration of the inherit schema options. I even keep some field options name to make the Molty integration as easier as posible in those project are currently running Mongoose.
 
+To create a new Schema use the "Schema()" constructor passing the schema and the options:
+
 ```javascript
 const { connect, Schema } = require('moltys');
 
@@ -74,6 +76,26 @@ const newSchema = Schema(
   },
 );
 ```
+
+The schema field properties alowed are:
+
+_type_: Mandatory [String, Number, Boolean, Buffer, Date, Array, Object]
+_required_: Optional {Boolean}
+_unique_: Optional {Boolean}
+_default_: Optional
+_match_: Optional
+_enum_: Optional
+_min_: Optional
+_max_: Optional
+_maxlength_: Optional
+_validate_: Optional
+
+And the schema options allowed are:
+
+_timestamps_: Optional
+_inheritOptions_: Optional
+--_discriminatorKey_: Required once "_inheritOptions_" is set
+--_merge_: Optional ['methods', 'preHooks', 'postHooks']
 
 # TODO
 
