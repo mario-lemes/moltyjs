@@ -8,7 +8,7 @@
     "build": "babel src -d lib",
     "test:watch": "\"npm run test -- --watch\"",
     "test":
-      "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-core/register --require babel-polyfill --recursive --reporter spec --timeout 5000",
+      "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-core/register --require babel-polyfill --recursive --reporter spec --timeout 5000 --exit",
     "prepublish": "npm run build",
     "release": "np"
   },
