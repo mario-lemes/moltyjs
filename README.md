@@ -1,5 +1,7 @@
 # What is moltyjs?
 
+A tiny ODM for MongoDB with multy tenancy support.
+
 # Install
 
 ```shell
@@ -12,7 +14,7 @@ $ npm install moltyjs --save
 const { connect } = require('moltys');
 
 // ES2015
-import { connect} from ('moltyjs');
+import { connect } from ('moltyjs');
 ```
 
 # TODO
@@ -21,5 +23,5 @@ import { connect} from ('moltyjs');
 * find()
 * update()
 * delete()
-* Add embedded documents and ref document support /\*\*
+* Add embedded documents and ref document support
 * The [mquery](https://github.com/aheckmann/mquery) query builder
