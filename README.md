@@ -161,12 +161,59 @@ Query middleware is supported for the following Model and Query functions. In qu
 
 update
 
+## Referencing Documents
+
+MoltyJS support referencing document that later on you wil be able to populate on find queries. To make a refference to another Model just add a new field on the Schema with the type ObjectId and the "ref" propertie with the Model name referenciated.
+
+```javascript
+const { Schema } = require('moltys');
+
+const referenceSchema = new Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      maxlength: 100,
+    },
+    password: {
+      type: String,
+      required: true,
+      unique: true,
+      maxlength: 150,
+      default: () => crypto.randomBytes(20).toString('hex'),
+    },
+    accountExpiration: {
+      type: Date,
+      default: () =>
+        moment()
+          .add(24, 'hours')
+          .utc()
+          .format(),
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: ['pending', 'accepted', 'error'],
+      default: 'pending',
+    },
+    model: {
+      type: Schema.types().ObjectId,
+      ref: 'TestModel',
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+```
+
+You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get the proper ObjectId type you must tu get it from the Schema.types() method object is returned.
+
 # TODO
 
 * Improove documentation
 * Populate
-* find()
-* update()
 * delete()
-* Add embedded documents and ref document support
+* Add embedded documents
 * The [mquery](https://github.com/aheckmann/mquery) query builder
