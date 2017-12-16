@@ -42,7 +42,8 @@ describe('# Discriminators', () => {
   });
 
   it('Creating a new model which inherit all the properties from another model', () => {
-    const { model } = conn._models['TestModel5'];
+    const model = conn.models['TestModel5'];
+
     expect(model).to.be.an.instanceof(Model);
     expect(model).to.have.property('_schemaNormalized');
     expect(model).to.have.property('_schemaOptions');

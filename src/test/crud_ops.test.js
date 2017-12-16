@@ -76,6 +76,8 @@ describe('# CRUD Operations', () => {
   it('findOne document', async () => {
     try {
       const res = await conn.insertOne('test2', newDiscriminatorDoc2);
+      expect(res.ops[0]).to.have.property('test');
+      expect(res.ops[0].test[0]).to.equal('YESSSSSSSSSSSSSSSSSSS');
       const res2 = await conn.findOne('test2', 'TestModel7Discriminator', {
         _id: newDiscriminatorDoc2._data._id,
       });
@@ -92,7 +94,6 @@ describe('# CRUD Operations', () => {
   it('updateOne document', async () => {
     try {
       const resRefDoc = await conn.insertOne('test2', refDoc);
-      //tenant, collection, filter, payload, options = {}
 
       const resUpdate = await conn.updateOne(
         'test2',

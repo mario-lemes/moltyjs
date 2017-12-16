@@ -15,9 +15,10 @@ const { to } = require('await-to-js');
 class MongoClient {
   constructor() {
     this._connectionManager = null;
-    this._models = {};
-    this._discriminatorModels = {};
-    this._tenants = {};
+    this.models = {};
+    //this.discriminatorModels = {};
+    this.tenants = {};
+    this._indexes = {};
   }
 
   /**
@@ -46,8 +47,11 @@ class MongoClient {
         'You must first connect to the DB before creating a model.',
       );
 
-    if (this._models[model._modelName] && !model._discriminator)
+    if (model._discriminator && this.models[model._discriminator]) {
       throw new Error('There is already a model with the same name');
+    } else if (!model._discriminator && this.models[model._modelName]) {
+      throw new Error('There is already a model with the same name');
+    }
 
     const schema = model._schemaNormalized;
     let indexes = [];
@@ -58,19 +62,12 @@ class MongoClient {
       }
     });
 
-    this._models[model._modelName] = {
-      ...this._models[model._modelName],
-      indexes,
-    };
+    this._indexes[model._modelName] = indexes;
 
     if (model._discriminator) {
-      this._discriminatorModels[model._discriminator] = {
-        model,
-        parent: model._modelName,
-        discriminatorKey: model._schemaOptions.inheritOptions.discriminatorKey,
-      };
+      this.models[model._discriminator] = model;
     } else {
-      this._models[model._modelName].model = model;
+      this.models[model._modelName] = model;
     }
   }
 
@@ -327,13 +324,13 @@ class MongoClient {
 
     // Ensure index are created
     if (
-      this._models[doc._modelName] &&
-      this._models[doc._modelName].indexes.length > 0
+      this._indexes[doc._modelName] &&
+      this._indexes[doc._modelName].length > 0
     ) {
       await this.createIndexes(
         tenant,
         doc._modelName,
-        this._models[doc._modelName].indexes,
+        this._indexes[doc._modelName],
       );
     }
 
@@ -396,21 +393,25 @@ class MongoClient {
       );
 
     // If we are looking for resources in a discriminator model
-    // we have to set the proper query and addres to the parent collection
+    // we have to set the proper filter and addres to the parent collection
     let model = {};
-    if (this._discriminatorModels[collection]) {
-      if (query[this._discriminatorModels[collection].discriminatorKey])
-        throw new Error(
-          'You can not include a specific value for the "discriminatorKey" on the query.',
-        );
+    if (this.models[collection]) {
+      const { _discriminator } = this.models[collection];
 
-      query[
-        this._discriminatorModels[collection].discriminatorKey
-      ] = collection;
-      model = this._discriminatorModels[collection].model;
-      collection = this._discriminatorModels[collection].parent;
-    } else if (this._models[collection]) {
-      model = this._models[collection].model;
+      if (_discriminator) {
+        const { discriminatorKey } = this.models[
+          collection
+        ]._schemaOptions.inheritOptions;
+
+        if (query[discriminatorKey])
+          throw new Error(
+            'You can not include a specific value for the "discriminatorKey" on the query.',
+          );
+
+        query[discriminatorKey] = collection;
+      }
+      model = this.models[collection];
+      collection = this.models[collection]._modelName;
     } else {
       throw new Error(
         'The collection ' +
@@ -420,15 +421,8 @@ class MongoClient {
     }
 
     // Ensure index are created
-    if (
-      this._models[collection] &&
-      this._models[collection].indexes.length > 0
-    ) {
-      await this.createIndexes(
-        tenant,
-        collection,
-        this._models[collection].indexes,
-      );
+    if (this._indexes[collection] && this._indexes[collection].length > 0) {
+      await this.createIndexes(tenant, collection, this._indexes[collection]);
     }
 
     // Acquiring db instance
@@ -531,22 +525,27 @@ class MongoClient {
     if (!payload && typeof payload != 'string')
       throw new Error('Should specify the payload object, got: ' + payload);
 
-    // If we are looking for resources in a discriminator model
+    // If we are updating a resources in a discriminator model
     // we have to set the proper filter and addres to the parent collection
     let model = {};
-    if (this._discriminatorModels[collection]) {
-      if (filter[this._discriminatorModels[collection].discriminatorKey])
-        throw new Error(
-          'You can not include a specific value for the "discriminatorKey" on the query.',
-        );
+    if (this.models[collection]) {
+      const { _discriminator } = this.models[collection];
 
-      filter[
-        this._discriminatorModels[collection].discriminatorKey
-      ] = collection;
-      model = this._discriminatorModels[collection].model;
-      collection = this._discriminatorModels[collection].parent;
-    } else if (this._models[collection]) {
-      model = this._models[collection].model;
+      if (_discriminator) {
+        const { discriminatorKey } = this.models[
+          collection
+        ]._schemaOptions.inheritOptions;
+
+        if (filter[discriminatorKey])
+          throw new Error(
+            'You can not include a specific value for the "discriminatorKey" on the query.',
+          );
+
+        filter[discriminatorKey] = collection;
+      }
+
+      model = this.models[collection];
+      collection = this.models[collection]._modelName;
     } else {
       throw new Error(
         'The collection ' +
@@ -562,15 +561,8 @@ class MongoClient {
     this._validatePayload(payload, model._schemaNormalized);
 
     // Ensure index are created
-    if (
-      this._models[collection] &&
-      this._models[collection].indexes.length > 0
-    ) {
-      await this.createIndexes(
-        tenant,
-        collection,
-        this._models[collection].indexes,
-      );
+    if (this._indexes[collection] && this._indexes[collection].length > 0) {
+      await this.createIndexes(tenant, collection, this._indexes[collection]);
     }
 
     // Apply hooks
@@ -588,7 +580,7 @@ class MongoClient {
         const [error, result] = await to(
           conn
             .db(tenant)
-            .collection(model._modelName)
+            .collection(collection)
             .update(filter, payload, options),
         );
 
@@ -630,7 +622,7 @@ class MongoClient {
       throw new Error('Should specify the field name (Array), got: ' + fields);
 
     // Checking if indexes are already set for this tenant and this collection
-    if (this._tenants[tenant] && this._tenants[tenant][collection]) return;
+    if (this.tenants[tenant] && this.tenants[tenant][collection]) return;
 
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
@@ -656,8 +648,8 @@ class MongoClient {
           return reject(error);
         } else {
           // Set Indexes for this tenant and this collection are already set
-          this._tenants[tenant] = {
-            ...this._tenants[tenant],
+          this.tenants[tenant] = {
+            ...this.tenants[tenant],
             [collection]: true,
           };
           return resolve(result);

@@ -20,15 +20,15 @@ describe('# Indexes', () => {
 
   it('Ensuring index on the DB collection', async () => {
     try {
-      expect(conn).to.have.property('_tenants');
-      expect(conn).to.have.property('_models');
-      expect(conn._models).to.be.an.instanceof(Object);
-      expect(conn._models).to.have.property('TestModel2');
-      expect(conn._models).to.have.property('TestModel3');
-      expect(conn._tenants).to.be.an.instanceof(Object);
-      expect(conn._tenants).to.have.property('test2');
-      expect(conn._tenants.test2).to.have.property('TestModel2', true);
-      expect(conn._tenants.test2).to.have.property('TestModel3', true);
+      expect(conn).to.have.property('tenants');
+      expect(conn).to.have.property('models');
+      expect(conn.models).to.be.an.instanceof(Object);
+      expect(conn.models).to.have.property('TestModel2');
+      expect(conn.models).to.have.property('TestModel3');
+      expect(conn.tenants).to.be.an.instanceof(Object);
+      expect(conn.tenants).to.have.property('test2');
+      expect(conn.tenants.test2).to.have.property('TestModel2', true);
+      expect(conn.tenants.test2).to.have.property('TestModel3', true);
     } catch (error) {
       throw error;
     }
