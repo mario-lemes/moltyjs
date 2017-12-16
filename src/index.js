@@ -24,7 +24,7 @@ class Molty {
    *  @returns {Promise}
    */
   connect(options) {
-    if (!this.connection) this.connection = mongoClient.connect(options);
+    this.connection = mongoClient.connect(options);
     return this.connection;
   }
 }

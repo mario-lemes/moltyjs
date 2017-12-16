@@ -16,7 +16,6 @@ class MongoClient {
   constructor() {
     this._connectionManager = null;
     this.models = {};
-    //this.discriminatorModels = {};
     this.tenants = {};
     this._indexes = {};
   }
@@ -29,8 +28,10 @@ class MongoClient {
    *  @returns {Promise}
    */
   connect(options) {
-    if (!this._connectionManager)
-      this._connectionManager = new ConnectionManager(options);
+    this.models = {};
+    this.tenants = {};
+    this._indexes = {};
+    this._connectionManager = new ConnectionManager(options);
     return this;
   }
 
@@ -48,9 +49,13 @@ class MongoClient {
       );
 
     if (model._discriminator && this.models[model._discriminator]) {
-      throw new Error('There is already a model with the same name');
+      throw new Error(
+        'There is already a model with the same name: ' + model._discriminator,
+      );
     } else if (!model._discriminator && this.models[model._modelName]) {
-      throw new Error('There is already a model with the same name');
+      throw new Error(
+        'There is already a model with the same name: ' + model._modelName,
+      );
     }
 
     const schema = model._schemaNormalized;
@@ -652,12 +657,13 @@ class MongoClient {
             ...this.tenants[tenant],
             [collection]: true,
           };
+
           return resolve(result);
         }
       } catch (error) {
         reject(error);
       } finally {
-        this._connectionManager.release(conn);
+        await this._connectionManager.release(conn);
       }
     });
   }

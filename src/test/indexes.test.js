@@ -2,20 +2,53 @@ const { expect } = require('chai');
 
 const Document = require('../document');
 const Molty = require('../index');
-const { Schema, connect, model } = Molty;
+const { Schema, connect, Model } = Molty;
 
 const Middleware = require('../middleware');
 
 const { testSchema, testOptions, s, m } = require('./mock');
 
 describe('# Indexes', () => {
-  before(() => {
+  before(async () => {
     const options = {
       engine: 'mongodb',
-      uri: 'mongodb://localhost:27017/test',
+      uri: 'mongodb://localhost:27017/test2',
     };
 
     conn = connect(options);
+    const m1 = new Model(s, 'TestModel2');
+    const m2 = new Model(s, 'TestModel3');
+
+    newDoc = m1.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: 'dasdsadsad@dsfdffds.com',
+      firstName: 'sdfasdf',
+      lastName: 'sdfsadfsadf',
+      password: '1321321',
+      birthdate: Date.now(),
+      gender: 'Male',
+      emergencyContactInfo: {
+        location: 'Las Palmas',
+        relation: 'Brother',
+      },
+    });
+
+    newDoc2 = m2.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: 'dasdsadsasdasdad@dsfdffds.com',
+      firstName: 'sdfasdf',
+      lastName: 'sdfsadfsadf',
+      password: '1321321',
+      birthdate: Date.now(),
+      gender: 'Male',
+      emergencyContactInfo: {
+        location: 'Las Palmas',
+        relation: 'Brother',
+      },
+    });
+
+    const res = await conn.insertOne('test2', newDoc);
+    const res2 = await conn.insertOne('test2', newDoc2);
   });
 
   it('Ensuring index on the DB collection', async () => {

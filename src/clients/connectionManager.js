@@ -43,13 +43,17 @@ class ConnectionManager {
    *
    * @returns {Promise}
    */
-  acquire() {
+  async acquire() {
     if (!this._pool)
       throw new Error(
         'You must first connect to the DB before loading/saving documents.',
       );
 
-    return this._pool.acquire();
+    try {
+      return await this._pool.acquire();
+    } catch (error) {
+      return error;
+    }
   }
 
   /**
@@ -57,12 +61,16 @@ class ConnectionManager {
    *
    * @returns {Promise}
    */
-  release(conn) {
+  async release(conn) {
     if (!this._pool)
       throw new Error(
         'You must first connect to the DB before loading/saving documents.',
       );
-    return this._pool.release(conn);
+    try {
+      return await this._pool.release(conn);
+    } catch (error) {
+      return error;
+    }
   }
 
   /**
@@ -70,10 +78,14 @@ class ConnectionManager {
    *
    * @returns {Promise}
    */
-  close() {
+  async close() {
     if (!this._pool)
       throw new Error('There is no connection currently active.');
-    return this._pool.drain();
+    try {
+      return await this._pool.drain();
+    } catch (error) {
+      return error;
+    }
   }
 }
 

@@ -226,6 +226,20 @@ const referenceSchema = new Schema(
 
 You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get the proper ObjectId type you must tu get it from the Schema.types() method object is returned.
 
+## Saving a document
+
+There are several operations to save a document into the database:
+
+* insertOne
+
+### insertOne()
+
+## Recovering a document
+
+There are several operations to recover a document from the database:
+
+* findOne
+
 # TODO
 
 * Improove documentation
