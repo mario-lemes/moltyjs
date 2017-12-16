@@ -316,27 +316,41 @@ class MongoClient {
     if (!(doc instanceof Document))
       throw new Error('The document should be a proper Document instance');
 
-    // If is a a document that belong to inherit model set
-    // the discriminator key
-    if (
-      doc._options.inheritOptions &&
-      doc._options.inheritOptions.discriminatorKey
-    ) {
-      doc._data[
-        doc._options.inheritOptions.discriminatorKey
-      ] = doc._discriminator ? doc._discriminator : doc._modelName;
+    // If we are inserting a resources in a discriminator model
+    // we have to set the proper filter and addres to the parent collection
+    let model = {},
+      collection = doc._discriminator ? doc._discriminator : doc._modelName;
+    if (this.models[collection]) {
+      const { _discriminator } = this.models[collection];
+      const discriminatorKey = doc._options.inheritOptions
+        ? doc._options.inheritOptions.discriminatorKey
+        : null;
+
+      if (_discriminator || discriminatorKey) {
+        const { discriminatorKey } = this.models[
+          collection
+        ]._schemaOptions.inheritOptions;
+
+        if (doc._data[discriminatorKey])
+          throw new Error(
+            'You can not include a specific value for the "discriminatorKey" on the doc.',
+          );
+
+        doc._data[discriminatorKey] = collection;
+      }
+      model = this.models[collection];
+      collection = this.models[collection]._modelName;
+    } else {
+      throw new Error(
+        'The collection ' +
+          collection +
+          'does not exist and is not registered.',
+      );
     }
 
     // Ensure index are created
-    if (
-      this._indexes[doc._modelName] &&
-      this._indexes[doc._modelName].length > 0
-    ) {
-      await this.createIndexes(
-        tenant,
-        doc._modelName,
-        this._indexes[doc._modelName],
-      );
+    if (this._indexes[collection] && this._indexes[collection].length > 0) {
+      await this.createIndexes(tenant, collection, this._indexes[collection]);
     }
 
     // Apply hooks
@@ -357,7 +371,7 @@ class MongoClient {
         const [error, result] = await to(
           conn
             .db(tenant)
-            .collection(doc._modelName)
+            .collection(collection)
             .insert(doc._data, { forceServerObjectId: true }),
         );
 
@@ -367,7 +381,24 @@ class MongoClient {
           // Running post insert hooks
           await _postHooksAux.insert.exec();
 
-          return resolve(result);
+          if (result) {
+            // Binding model properties to the document
+            const Document = require('../document');
+
+            const docInserted = new Document(
+              result.ops[0],
+              model._preHooks,
+              model._postHooks,
+              model._methods,
+              model._schemaOptions,
+              model._modelName,
+              model._discriminator,
+            );
+
+            return resolve(docInserted);
+          } else {
+            return resolve(result);
+          }
         }
       } catch (error) {
         reject(error);

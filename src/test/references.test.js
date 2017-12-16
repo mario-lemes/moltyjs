@@ -51,13 +51,10 @@ describe('# References', () => {
   it('Creating a Schema with a reference to another collection', async () => {
     try {
       const res = await conn.insertOne('test2', refDoc);
-      expect(res).to.have.property('result');
-      expect(res).to.have.property('ops');
-      expect(res).to.have.property('insertedCount', 1);
-      expect(res).to.have.property('insertedIds');
-      expect(res.insertedIds[0]).to.equal(refDoc._data._id);
-      expect(res.ops[0]).to.deep.equal(refDoc._data);
-      expect(res.ops[0]).to.have.property('tenantId', null);
+      expect(res).to.have.property('_data');
+      expect(res._data._id).to.equal(refDoc._data._id);
+      expect(res._data).to.deep.equal(refDoc._data);
+      expect(res._data).to.have.property('tenantId', null);
     } catch (error) {
       throw error;
     }

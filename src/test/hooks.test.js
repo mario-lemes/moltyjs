@@ -60,12 +60,9 @@ describe('# Hooks', () => {
       expect(newDoc._data.password).to.equal(password);
       expect(newDoc._data.lastName).to.equal(lastName);
       const res = await conn.insertOne('test2', newDoc);
-      expect(res).to.have.property('result');
-      expect(res).to.have.property('ops');
-      expect(res).to.have.property('insertedCount', 1);
-      expect(res).to.have.property('insertedIds');
-      expect(res.insertedIds[0]).to.equal(newDoc._data._id);
-      expect(res.ops[0]).to.deep.equal(newDoc._data);
+      expect(res).to.have.property('_data');
+      expect(res._data._id).to.equal(newDoc._data._id);
+      expect(res._data).to.deep.equal(newDoc._data);
     } catch (error) {
       throw error;
     }
@@ -78,12 +75,9 @@ describe('# Hooks', () => {
       expect(newDoc2._data.test).to.equal(test);
       const res = await conn.insertOne('test2', newDoc2);
 
-      expect(res).to.have.property('result');
-      expect(res).to.have.property('ops');
-      expect(res).to.have.property('insertedCount', 1);
-      expect(res).to.have.property('insertedIds');
-      expect(res.insertedIds[0]).to.equal(newDoc2._data._id);
-      expect(res.ops[0]).to.deep.equal(newDoc2._data);
+      expect(res).to.have.property('_data');
+      expect(res._data._id).to.equal(newDoc2._data._id);
+      expect(res._data).to.deep.equal(newDoc2._data);
     } catch (error) {
       throw error;
     }
