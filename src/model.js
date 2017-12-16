@@ -20,7 +20,7 @@ class Model {
    *
    * @returns {Model}
    */
-  constructor(schema, modelName, discriminator) {
+  constructor(schema, modelName, discriminator = null) {
     if (arguments.length < 1) throw new Error('Schema is missing');
 
     this._schemaNormalized = schema._schema;
@@ -38,7 +38,7 @@ class Model {
 
     this._methods = schema.methods;
 
-    this._discriminator = discriminator ? discriminator : null;
+    this._discriminator = discriminator;
 
     mongoClient.addModel(this);
   }

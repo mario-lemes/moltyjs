@@ -23,8 +23,8 @@ describe('# Hooks', () => {
       uri: 'mongodb://localhost:27017/test',
     };
     conn = connect(options);
-    const m2 = Model(s2, 'TestModel2');
-    const m3 = Model(s3, 'TestModel3');
+    const m2 = new Model(s2, 'TestModel2');
+    const m3 = new Model(s3, 'TestModel3');
 
     newDoc = m2.new({
       test: ['OOOKK', 'YEEEES'],

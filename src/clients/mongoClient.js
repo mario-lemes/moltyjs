@@ -41,6 +41,14 @@ class MongoClient {
    * @param {Model} model
    */
   addModel(model) {
+    if (this._connectionManager === null)
+      throw new Error(
+        'You must first connect to the DB before creating a model.',
+      );
+
+    if (this._models[model._modelName] && !model._discriminator)
+      throw new Error('There is already a model with the same name');
+
     const schema = model._schemaNormalized;
     let indexes = [];
     Object.keys(schema).forEach(key => {
@@ -51,7 +59,8 @@ class MongoClient {
     });
 
     this._models[model._modelName] = {
-      indexes: indexes,
+      ...this._models[model._modelName],
+      indexes,
     };
 
     if (model._discriminator) {

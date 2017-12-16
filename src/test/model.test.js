@@ -22,7 +22,7 @@ describe('# Model', () => {
     };
 
     conn = connect(options);
-    const m = Model(s, 'TestModel');
+    const m = new Model(s, 'TestModel');
 
     newDoc = m.new({
       test: ['OOOKK', 'YEEEES'],
@@ -38,7 +38,7 @@ describe('# Model', () => {
       },
     });
 
-    const Test2 = Model(testSchema2, 'Schema2');
+    const Test2 = new Model(testSchema2, 'Schema2');
   });
 
   it('Creating a new document from Model with schema (s)', () => {

@@ -108,7 +108,7 @@ _inheritOptions_: Optional
 Once we have created our schema we need to register as a model so we can start to create, find, updete and delete documents. To do this you must provide the a proper schema and a model name. The model name will be the collection name on the DB so use the criteria you want since Molty does not make any accomodation on them like auto plurilize.
 
 ```javascript
-const { Model } = require('moltys');
+const { model } = require('moltys');
 
 const TestModel = model(newSchema, 'TestModel');
 ```
@@ -150,6 +150,16 @@ The **merge** option must be an array with the element you want to merge from th
 methods: which corresponds to the static methods.
 preHooks: which corresponds to the hooks that are executed **before** performing actions on the DB
 postHooks: which corresponds to the hooks that are executed **after** performing actions on the DB
+
+## Create a new document
+
+Once we have already set up the Schema an registered the Model with it we can start creating document from that Model as follow:
+
+```javascript
+const { model } = require('moltys');
+
+const TestModel = model(newSchema, 'TestModel');
+```
 
 ## Hooks middleware (Work in progress)
 

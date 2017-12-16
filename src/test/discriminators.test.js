@@ -24,7 +24,7 @@ describe('# Discriminators', () => {
 
     conn = connect(options);
 
-    const m = Model(s2, 'TestModel5');
+    const m = new Model(s2, 'TestModel5');
     mDiscriminator = m.discriminator(sDiscriminator, 'TestModel5Discriminator');
 
     newDiscriminatorDoc = mDiscriminator.new({
@@ -41,9 +41,8 @@ describe('# Discriminators', () => {
     });
   });
 
-  it('Creating a new model which inherit all the properties from nother model', () => {
-    const Model = require('../model');
-    const model = Molty.models['TestModel5'];
+  it('Creating a new model which inherit all the properties from another model', () => {
+    const { model } = conn._models['TestModel5'];
     expect(model).to.be.an.instanceof(Model);
     expect(model).to.have.property('_schemaNormalized');
     expect(model).to.have.property('_schemaOptions');

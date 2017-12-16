@@ -30,7 +30,7 @@ describe('# CRUD Operations', () => {
     };
 
     conn = connect(options);
-    const m = Model(s, 'TestModel6');
+    const m = new Model(s, 'TestModel6');
 
     newDoc = m.new({
       test: ['OOOKK', 'YEEEES'],
@@ -46,13 +46,13 @@ describe('# CRUD Operations', () => {
       },
     });
 
-    const TestSchema2 = Model(testSchema2, 'TestSchema2');
+    const TestSchema2 = new Model(testSchema2, 'TestSchema2');
 
     refDoc = TestSchema2.new({
       email,
     });
 
-    const m2 = Model(s2, 'TestModel7');
+    const m2 = new Model(s2, 'TestModel7');
     mDiscriminator = m2.discriminator(
       sDiscriminator,
       'TestModel7Discriminator',

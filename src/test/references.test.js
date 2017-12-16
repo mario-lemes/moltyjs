@@ -32,9 +32,12 @@ describe('# References', () => {
     };
     conn = connect(options);
 
-    const TestSchema8 = Model(testSchema2, 'TestSchema8');
+    const TestSchema8 = new Model(testSchema2, 'TestSchema8');
 
-    const TestSchemaRefArray = Model(testSchemaRefArray, 'TestSchemaRefArray');
+    const TestSchemaRefArray = new Model(
+      testSchemaRefArray,
+      'TestSchemaRefArray',
+    );
 
     refDoc = TestSchema8.new({
       email,

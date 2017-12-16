@@ -8,35 +8,12 @@ const Model = require('./model');
 class Molty {
   constructor() {
     this.Schema = Schema;
+    this.Model = Model;
 
-    this.models = {};
     this.connection = null;
 
     // Binding methods
-    this.Model = this.Model.bind(this);
     this.connect = this.connect.bind(this);
-  }
-
-  /**
-   * Model(): Create a new model associated to a schema with an specifyc name.
-   * Used as a model contructor of the Model class.
-   * @param {Schema} schema
-   * @param {String} modelName
-   *
-   * @returns {Model}
-   */
-  Model(schema, modelName) {
-    if (this.connection === null)
-      throw new Error(
-        'You must first connect to the DB before creating a model.',
-      );
-
-    if (this.models[modelName])
-      throw new Error('There is already a model with the same name');
-
-    this.models[modelName] = new Model(schema, modelName);
-
-    return this.models[modelName];
   }
 
   /**
