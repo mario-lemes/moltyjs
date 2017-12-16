@@ -63,16 +63,15 @@ const newSchema = Schema(
       maxlength: 100,
     },
     password: {
-      type: String,
+      type: Number,
       required: true,
     },
-    firstName: {
+    name: {
       type: String,
       default: '',
     },
-    lastName: {
-      type: String,
-      default: 'LEMES',
+    age: {
+      type: Number,
     },
   },
   {
@@ -113,6 +112,54 @@ const { Model } = require('moltys');
 
 const TestModel = model(newSchema, 'TestModel');
 ```
+
+## Create a Model discriminator
+
+You can also create models which inherits from other models and you can decide in which fashion you wan to do it. You have to make sure that the discriminator key of the child models are the same than the parents and also set what you want to merge from the parent model.
+
+```javascript
+const { Schema } = require('moltys');
+
+const newSchemaDiscriminator = Schema(
+  {
+    job: {
+      type: String,
+      default: '',
+    },
+    position: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+    inheritOptions: {
+      discriminatorKey: '__kind',
+      merge: ['methods', 'preHooks', 'postHooks'],
+    },
+  },
+);
+
+TestModelDiscriminator = TestModel.discriminator(
+  newSchemaDiscriminator,
+  'TestModelDiscriminator',
+);
+```
+
+The **merge** option must be an array with the element you want to merge from the parent model, teh options are:
+
+methods: which corresponds to the static methods.
+preHooks: which corresponds to the hooks that are executed **before** performing actions on the DB
+postHooks: which corresponds to the hooks that are executed **after** performing actions on the DB
+
+## Hooks middleware (Work in progress)
+
+Document middleware is supported for the following document functions. In document middleware functions, **this** refers to the document.
+
+save
+
+Query middleware is supported for the following Model and Query functions. In query middleware functions, this refers to the query.
+
+update
 
 # TODO
 

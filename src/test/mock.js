@@ -1,6 +1,64 @@
+const crypto = require('crypto');
+const moment = require('moment');
+
 const Molty = require('../index');
 
 const { Schema, model } = Molty;
+
+const testSchema2 = new Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      maxlength: 100,
+    },
+    activationToken: {
+      type: String,
+      required: true,
+      unique: true,
+      maxlength: 150,
+      default: () => crypto.randomBytes(20).toString('hex'),
+    },
+    activationTokenExpires: {
+      type: Date,
+      default: () =>
+        moment()
+          .add(24, 'hours')
+          .utc()
+          .format(),
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: ['pending', 'accepted', 'error'],
+      default: 'pending',
+    },
+    tenantId: {
+      type: Schema.types().ObjectId,
+      ref: 'ModelRef',
+    },
+    companyData: {},
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const testSchemaRefArray = new Schema(
+  {
+    email: {
+      type: String,
+    },
+    tenantId: {
+      type: [Schema.types().ObjectId],
+      ref: 'ModelRef',
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 const testSchema = {
   test: {
@@ -182,4 +240,13 @@ sDiscriminator.methods.newDiscriminatorMethod1 = function() {
   return 'Static method 1!';
 };
 
-module.exports = { testSchema, testOptions, s, s2, s3, sDiscriminator };
+module.exports = {
+  testSchema,
+  testSchema2,
+  testSchemaRefArray,
+  testOptions,
+  s,
+  s2,
+  s3,
+  sDiscriminator,
+};

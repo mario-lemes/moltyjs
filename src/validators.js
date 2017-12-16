@@ -1,5 +1,5 @@
+const { ObjectID, ObjectId } = require('mongodb');
 const _ = require('lodash');
-const DB = {}; //require('./clients').getClient;
 
 const isString = function(s) {
   return _.isString(s);
@@ -29,20 +29,13 @@ const isArray = function(a) {
   return _.isArray(a);
 };
 
-const isDocument = function(m) {
-  return m && m.documentClass && m.documentClass() === 'document';
-};
-
-const isEmbeddedDocument = function(e) {
-  return e && e.documentClass && e.documentClass() === 'embedded';
-};
-
-const isReferenceable = function(r) {
-  return isDocument(r) || isNativeId(r);
-};
-
-const isNativeId = function(n) {
-  return DB().isNativeId(n);
+/**
+ * isObjectId(): Checks if a value is a valid bson ObjectId
+ *
+ * @returns {Boolean}
+ */
+const isObjectId = function(id) {
+  return ObjectID.isValid(id);
 };
 
 const isSupportedType = function(t) {
@@ -55,7 +48,7 @@ const isSupportedType = function(t) {
     t === Array ||
     isArray(t) ||
     t === Object ||
-    t instanceof Object
+    t === ObjectId
   );
 };
 
@@ -74,6 +67,8 @@ const isType = function(value, type) {
     return isArray(value);
   } else if (type === Object) {
     return isObject(value);
+  } else if (type === ObjectId) {
+    return isObjectId(value) && isObject(value);
   } else {
     throw new Error('Unsupported type: ' + type);
   }
@@ -87,11 +82,6 @@ const isValidType = function(value, type) {
   // TODO: For now, null is okay for all types. May
   // want to specify in schema using 'nullable'?
   if (value === null) return true;
-
-  // Issue #9: To avoid all model members being stored
-  // in DB, allow undefined to be assigned. If you want
-  // unassigned members in DB, use null.
-  if (value === undefined) return true;
 
   // Arrays take a bit more work
   if (type === Array || isArray(type)) {
@@ -149,12 +139,9 @@ exports.isDate = isDate;
 exports.isBuffer = isBuffer;
 exports.isObject = isObject;
 exports.isArray = isArray;
-exports.isDocument = isDocument;
-exports.isEmbeddedDocument = isEmbeddedDocument;
-exports.isReferenceable = isReferenceable;
-exports.isNativeId = isNativeId;
 exports.isSupportedType = isSupportedType;
 exports.isType = isType;
 exports.isValidType = isValidType;
 exports.isInEnum = isInEnum;
 exports.isEmptyValue = isEmptyValue;
+exports.isObjectId = isObjectId;

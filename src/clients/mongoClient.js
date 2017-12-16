@@ -1,5 +1,14 @@
+const Middleware = require('../middleware');
 const ConnectionManager = require('./connectionManager');
 const ObjectID = require('mongodb').ObjectID;
+const {
+  isValidType,
+  isObject,
+  isEmptyValue,
+  isString,
+  isInEnum,
+  isNumber,
+} = require('../validators');
 
 const { to } = require('await-to-js');
 
@@ -86,14 +95,197 @@ class MongoClient {
   }
 
   /**
-   * isValidObjectId(): Checks if a value is a valid bson ObjectId
+   * _applyHooks(): Promisify and binding document or query to the hooks
+   *
+   * @param [{Object}] hooksList
+   * @param {Object} objectBinded
+   *
+   * @returns [{Object}]
+   */
+  _applyHooks(hooksList, objectBinded) {
+    let insertHooks = new Middleware();
+    let updateHooks = new Middleware();
+    let deleteHooks = new Middleware();
+
+    hooksList.forEach(key => {
+      switch (key.hook) {
+        case 'insert':
+          insertHooks.use(key.fn.bind(objectBinded));
+          break;
+        case 'update':
+          updateHooks.use(key.fn.bind(objectBinded));
+          break;
+        case 'delete':
+          deleteHooks.use(key.fn.bind(objectBinded));
+          break;
+        default:
+          throw new Error('Hook "' + key.hook + '" is not allowed.');
+          break;
+      }
+    });
+
+    return { insert: insertHooks, update: updateHooks, delete: deleteHooks };
+  }
+
+  /**
+   * _validateUpdateOperators(): Check if the update operators are correct
+   *
+   * @param {Object} payload
+   */
+  _validateUpdateOperators(payload) {
+    // https://docs.mongodb.com/v3.4/reference/operator/update/
+    const validUpdateOperators = [
+      // Fields
+      '$currentDate',
+      '$inc',
+      '$min',
+      '$max',
+      '$mul',
+      '$rename',
+      '$set',
+      '$setOnInsert',
+      '$unset',
+      // Array
+      '$',
+      '$addToSet',
+      '$pop',
+      '$pull',
+      '$pushAll',
+      '$push',
+      '$pullAll',
+      // Modifiers
+      '$each',
+      '$position',
+      '$slice',
+      '$sort',
+      // Bitwise
+      '$bit',
+      '$isolated',
+    ];
+    Object.keys(payload).forEach(operator => {
+      if (validUpdateOperators.indexOf(operator) < 0) {
+        throw new Error('The update operator is not allowed, got: ' + operator);
+      }
+      return;
+    });
+  }
+
+  /**
+   * _validatePayload(): Check if the payload is valid based on the model schema
+   *
+   * @params {Object} payload
+   * @params {Object} schema
    *
    * @returns {Boolean}
    */
-  isValidObjectId(id) {
-    return ObjectID.isValid(id);
-  }
+  _validatePayload(payload, schema) {
+    Object.keys(payload).forEach(operator => {
+      Object.keys(payload[operator]).forEach(key => {
+        let value = payload[operator][key];
 
+        if (schema[key] === undefined) {
+          throw new Error(
+            'Field name ' +
+              key +
+              ' does not correspond to any field name on the schema',
+          );
+        }
+
+        // Objects nested
+        if (!schema[key].type && isObject(value)) {
+          return this._validatePayload(value, schema[key]);
+        }
+
+        // Validation type
+        if (!isValidType(value, schema[key].type)) {
+          throw new Error(
+            'Unsuported value (' + value + ') for type ' + schema[key].type,
+          );
+        }
+
+        // Reg exp validation
+        if (
+          schema[key].match &&
+          isString(value) &&
+          !schema[key].match.test(value)
+        ) {
+          throw new Error(
+            'Value assigned to ' +
+              key +
+              ' does not match the regex/string ' +
+              schema[key].match.toString() +
+              '. Value was ' +
+              value,
+          );
+        }
+
+        // Enum validation
+        if (!isInEnum(schema[key].enum, value)) {
+          throw new Error(
+            'Value assigned to ' +
+              key +
+              ' should be in enum [' +
+              schema[key].enum.join(', ') +
+              '], got ' +
+              value,
+          );
+        }
+
+        // Min value validation
+        if (isNumber(schema[key].min) && value < schema[key].min) {
+          throw new Error(
+            'Value assigned to ' +
+              key +
+              ' is less than min, ' +
+              schema[key].min +
+              ', got ' +
+              value,
+          );
+        }
+
+        // Max value validation
+        if (isNumber(schema[key].max) && value > schema[key].max) {
+          throw new Error(
+            'Value assigned to ' +
+              key +
+              ' is less than max, ' +
+              schema[key].max +
+              ', got ' +
+              value,
+          );
+        }
+
+        // Max lenght validation
+        if (
+          schema[key].maxlength &&
+          isString(value) &&
+          value.length > schema[key].maxlength
+        ) {
+          throw new Error(
+            'Value assigned to ' +
+              key +
+              ' is bigger than ' +
+              schema[key].maxlength.toString() +
+              '. Value was ' +
+              value.length,
+          );
+        }
+
+        // Custom validation
+        if (
+          typeof schema[key].validate === 'function' &&
+          !schema[key].validate(value)
+        ) {
+          throw new Error(
+            'Value assigned to ' +
+              key +
+              ' failed custom validator. Value was ' +
+              value,
+          );
+        }
+      });
+    });
+  }
   /**
    * insertOne(): Insert one document into the collection and the
    * tenant specifyed. "forceServerObjectId" is set to true in order
@@ -115,21 +307,33 @@ class MongoClient {
 
     // If is a a document that belong to inherit model set
     // the discriminator key
-    if (doc._options.inheritOptions.discriminatorKey) {
+    if (
+      doc._options.inheritOptions &&
+      doc._options.inheritOptions.discriminatorKey
+    ) {
       doc._data[
         doc._options.inheritOptions.discriminatorKey
       ] = doc._discriminator ? doc._discriminator : doc._modelName;
     }
 
     // Ensure index are created
-    await this.createIndexes(
-      tenant,
-      doc._modelName,
-      this._models[doc._modelName].indexes,
-    );
+    if (
+      this._models[doc._modelName] &&
+      this._models[doc._modelName].indexes.length > 0
+    ) {
+      await this.createIndexes(
+        tenant,
+        doc._modelName,
+        this._models[doc._modelName].indexes,
+      );
+    }
+
+    // Apply hooks
+    const _preHooksAux = this._applyHooks(doc._preHooks, doc);
+    const _postHooksAux = this._applyHooks(doc._postHooks, doc);
 
     // Running pre insert hooks
-    await doc._preHooks.insert.exec();
+    await _preHooksAux.insert.exec();
 
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
@@ -150,7 +354,7 @@ class MongoClient {
           return reject(error);
         } else {
           // Running post insert hooks
-          await doc._postHooks.insert.exec();
+          await _postHooksAux.insert.exec();
 
           return resolve(result);
         }
@@ -196,28 +400,33 @@ class MongoClient {
       ] = collection;
       model = this._discriminatorModels[collection].model;
       collection = this._discriminatorModels[collection].parent;
-    } else {
+    } else if (this._models[collection]) {
       model = this._models[collection].model;
+    } else {
+      throw new Error(
+        'The collection ' +
+          collection +
+          'does not exist and is not registered.',
+      );
     }
 
     // Ensure index are created
-    await this.createIndexes(
-      tenant,
-      collection,
-      this._models[collection].indexes,
-    );
-
-    // Running pre insert hooks
-    //await doc._preHooks.insert.exec();
+    if (
+      this._models[collection] &&
+      this._models[collection].indexes.length > 0
+    ) {
+      await this.createIndexes(
+        tenant,
+        collection,
+        this._models[collection].indexes,
+      );
+    }
 
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
 
     return new Promise(async (resolve, reject) => {
       try {
-        // Check and apply document options before saving
-        //doc = this._applyDocumentOptions(doc, 'insert');
-
         const [error, result] = await to(
           conn
             .db(tenant)
@@ -228,22 +437,23 @@ class MongoClient {
         if (error) {
           return reject(error);
         } else {
-          // Running post insert hooks
-          //await doc._postHooks.insert.exec();
+          if (result) {
+            // Binding model properties to the document
+            const Document = require('../document');
+            const doc = new Document(
+              result,
+              model._preHooks,
+              model._postHooks,
+              model._methods,
+              model._schemaOptions,
+              model._modelName,
+              model._discriminator,
+            );
 
-          // Binding model properties to the document
-          const Document = require('../document');
-          const doc = new Document(
-            result,
-            model._preHooks,
-            model._postHooks,
-            model._methods,
-            model._schemaOptions,
-            model._modelName,
-            model._discriminator,
-          );
-
-          return resolve(doc);
+            return resolve(doc);
+          } else {
+            return resolve(result);
+          }
         }
       } catch (error) {
         reject(error);
@@ -285,6 +495,108 @@ class MongoClient {
         ConnectionMgr.release(mongo)
       }*/
     throw new Error('Sorry, "find()" method is not supported yet');
+  }
+
+  /**
+   * updateOne(): Update a single document on MongoDB.
+   *
+   * @param {String} tenant
+   * @param {String} collection
+   * @param {Object} filter  The Filter used to select the document to update
+   * @param {Object} payload The update operations to be applied to the document
+   * @param {Object} options Optional settings.
+   *
+   * @returns {Promise}
+   */
+  async updateOne(tenant, collection, filter, payload, options = {}) {
+    if (!tenant && typeof tenant != 'string')
+      throw new Error(
+        'Should specify the tenant name (String), got: ' + tenant,
+      );
+    if (!collection && typeof collection != 'string')
+      throw new Error(
+        'Should specify the collection name (String), got: ' + collection,
+      );
+    if (!filter && typeof filter != 'object')
+      throw new Error('Should specify the filter options, got: ' + filter);
+    if (!payload && typeof payload != 'string')
+      throw new Error('Should specify the payload object, got: ' + payload);
+
+    // If we are looking for resources in a discriminator model
+    // we have to set the proper filter and addres to the parent collection
+    let model = {};
+    if (this._discriminatorModels[collection]) {
+      if (filter[this._discriminatorModels[collection].discriminatorKey])
+        throw new Error(
+          'You can not include a specific value for the "discriminatorKey" on the query.',
+        );
+
+      filter[
+        this._discriminatorModels[collection].discriminatorKey
+      ] = collection;
+      model = this._discriminatorModels[collection].model;
+      collection = this._discriminatorModels[collection].parent;
+    } else if (this._models[collection]) {
+      model = this._models[collection].model;
+    } else {
+      throw new Error(
+        'The collection ' +
+          collection +
+          'does not exist and is not registered.',
+      );
+    }
+
+    // Check update operators
+    this._validateUpdateOperators(payload);
+
+    // Validate the payload
+    this._validatePayload(payload, model._schemaNormalized);
+
+    // Ensure index are created
+    if (
+      this._models[collection] &&
+      this._models[collection].indexes.length > 0
+    ) {
+      await this.createIndexes(
+        tenant,
+        collection,
+        this._models[collection].indexes,
+      );
+    }
+
+    // Apply hooks
+    const _preHooksAux = this._applyHooks(model._preHooks, payload);
+    const _postHooksAux = this._applyHooks(model._postHooks, payload);
+
+    // Running pre update hooks
+    await _preHooksAux.update.exec();
+
+    // Acquiring db instance
+    const conn = await this._connectionManager.acquire();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const [error, result] = await to(
+          conn
+            .db(tenant)
+            .collection(model._modelName)
+            .update(filter, payload, options),
+        );
+
+        if (error) {
+          return reject(error);
+        } else {
+          // Running post update hooks
+          await _postHooksAux.update.exec();
+
+          return resolve(result.result);
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        this._connectionManager.release(conn);
+      }
+    });
   }
 
   /**

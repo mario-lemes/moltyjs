@@ -1,10 +1,16 @@
-const utils = require('./utils');
-const { isSupportedType, isArray, isObject } = require('./validators');
+const { ObjectId } = require('mongodb');
+
+const {
+  isSupportedType,
+  isArray,
+  isObject,
+  isEmptyValue,
+} = require('./validators');
 
 class Schema {
   /**
    * Schema(): Schema constructor
-   *
+   *s
    * @param {Object} schema
    * @param {Object} options
    *
@@ -26,6 +32,25 @@ class Schema {
   }
 
   /**
+   * types(): Static method to return all the types supportes
+   * by a schema
+   *
+   * @returns {Object}
+   */
+  static types() {
+    return {
+      ObjectId: ObjectId,
+      String,
+      Number,
+      Boolean,
+      Buffer,
+      Date,
+      Array,
+      Object,
+    };
+  }
+
+  /**
    * _checkFormatType(): Check this._schema for a properly
    * formatting
    *
@@ -33,8 +58,25 @@ class Schema {
    */
   _checkFormatType(schema) {
     Object.keys(schema).forEach(key => {
+      if (
+        schema[key].ref &&
+        (schema[key].type !== ObjectId &&
+          (isArray(schema[key].type) && schema[key].type[0] !== ObjectId))
+      ) {
+        throw new Error(
+          'Ref fields should be ObjectId type, got: ' + schema[key].type,
+        );
+      }
+
       if (schema[key].type && !isSupportedType(schema[key].type)) {
         throw new Error('Unsupported type or bad variable: ' + key);
+      }
+
+      if (schema[key].type === ObjectId && isEmptyValue(schema[key].ref)) {
+        throw new Error(
+          'Unsupported type or bad variable, ref property is missing: ',
+          key,
+        );
       }
 
       // If the properties of the schema field are not allowed
@@ -135,6 +177,7 @@ class Schema {
       'max',
       'maxlength',
       'validate',
+      'ref',
     ];
     return fieldProperties.indexOf(property) > -1;
   }

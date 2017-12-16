@@ -1,6 +1,5 @@
-const Middleware = require('./middleware');
-
 const mongoClient = require('./clients/mongoClient');
+const { isObjectId } = require('./validators');
 
 class Document {
   constructor(
@@ -21,7 +20,7 @@ class Document {
     // Assigning a proper ObjectId
     if (!this._data['_id']) {
       this._data['_id'] = mongoClient.ObjectId();
-    } else if (!mongoClient.isValidObjectId(this._data['_id'])) {
+    } else if (!isObjectId(this._data['_id'])) {
       throw new Error('Document _id is not a proper Mongo Object Id');
     }
 
@@ -30,43 +29,8 @@ class Document {
       this[key] = methods[key].bind(this._data);
     });
 
-    // Bind hooks to the document recently created
-    this._preHooks = this._applyHooks(preHooks, methods);
-    this._postHooks = this._applyHooks(postHooks, methods);
-  }
-
-  /**
-   * _applyHooks(): Promisify and binding document and static
-   * methods to the hooks
-   *
-   * @param [{Object}] hooksList
-   * @param {Object} methods
-   *
-   * @returns [{Object}]
-   */
-  _applyHooks(hooksList, methods) {
-    let insertHooks = new Middleware();
-    let updateHooks = new Middleware();
-    let deleteHooks = new Middleware();
-
-    hooksList.forEach(key => {
-      switch (key.hook) {
-        case 'insert':
-          insertHooks.use(key.fn.bind(this));
-          break;
-        case 'update':
-          updateHooks.use(key.fn.bind(this));
-          break;
-        case 'delete':
-          deleteHooks.use(key.fn.bind(this));
-          break;
-        default:
-          throw new Error('Hook "' + key.hook + '" is not allowed.');
-          break;
-      }
-    });
-
-    return { insert: insertHooks, update: updateHooks, delete: deleteHooks };
+    this._preHooks = preHooks;
+    this._postHooks = postHooks;
   }
 }
 

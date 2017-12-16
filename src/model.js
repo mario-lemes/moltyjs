@@ -4,6 +4,7 @@ const Document = require('./document');
 const {
   isValidType,
   isObject,
+  isArray,
   isEmptyValue,
   isString,
   isInEnum,
@@ -372,6 +373,12 @@ class Model {
         payload[key] =
           typeof defaultValue === 'function' ? defaultValue() : defaultValue;
         return;
+      }
+
+      // If we don't have the ref Id on the payload let set as null or empty []
+      // to keep record of it in the database
+      if (schema[key].ref && isEmptyValue(payload[key])) {
+        payload[key] = isArray(schema[key].type) ? [] : null;
       }
 
       // No required values

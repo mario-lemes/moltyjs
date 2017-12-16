@@ -6,7 +6,7 @@ const { Schema, connect, Model } = Molty;
 
 const Middleware = require('../middleware');
 
-const { testSchema, testOptions, s } = require('./mock');
+const { testSchema, testSchema2, testOptions, s } = require('./mock');
 
 describe('# Model', () => {
   let newDoc, conn;
@@ -37,6 +37,8 @@ describe('# Model', () => {
         relation: 'Brother',
       },
     });
+
+    const Test2 = Model(testSchema2, 'Schema2');
   });
 
   it('Creating a new document from Model with schema (s)', () => {
