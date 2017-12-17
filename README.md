@@ -85,23 +85,23 @@ const newSchema = Schema(
 
 The schema field properties alowed are:
 
-_type_: Mandatory [String, Number, Boolean, Buffer, Date, Array, Object]
-_required_: Optional {Boolean}
-_unique_: Optional {Boolean}
-_default_: Optional
-_match_: Optional
-_enum_: Optional
-_min_: Optional
-_max_: Optional
-_maxlength_: Optional
-_validate_: Optional
+* _type_: Mandatory [String, Number, Boolean, Buffer, Date, Array, Object]
+* _required_: Optional {Boolean}
+* _unique_: Optional {Boolean}
+* _default_: Optional
+* _match_: Optional
+* _enum_: Optional
+* _min_: Optional
+* _max_: Optional
+* _maxlength_: Optional
+* _validate_: Optional
 
 And the schema options allowed are:
 
-_timestamps_: Optional
-_inheritOptions_: Optional
---_discriminatorKey_: Required once "_inheritOptions_" is set
---_merge_: Optional ['methods', 'preHooks', 'postHooks']
+* _timestamps_: Optional
+* _inheritOptions_: Optional
+  ** --_discriminatorKey_: Required once "_inheritOptions_" is set
+  ** --_merge_: Optional ['methods', 'preHooks', 'postHooks']
 
 ## Create a new Model
 
@@ -147,9 +147,9 @@ TestModelDiscriminator = TestModel.discriminator(
 
 The **merge** option must be an array with the element you want to merge from the parent model, teh options are:
 
-methods: which corresponds to the static methods.
-preHooks: which corresponds to the hooks that are executed **before** performing actions on the DB
-postHooks: which corresponds to the hooks that are executed **after** performing actions on the DB
+* methods: which corresponds to the static methods.
+* preHooks: which corresponds to the hooks that are executed **before** performing actions on the DB
+* postHooks: which corresponds to the hooks that are executed **after** performing actions on the DB
 
 ## Create a new document
 
@@ -169,13 +169,17 @@ newDoc = TestModel.new({
 
 ## Hooks middleware (Work in progress)
 
-Document middleware is supported for the following document functions. In document middleware functions, **this** refers to the document.
+Document middleware is supported for the following document functions.
 
-save
+* save
 
-Query middleware is supported for the following Model and Query functions. In query middleware functions, this refers to the query.
+In document middleware functions, **this** refers to the document.
 
-update
+Query middleware is supported for the following Model and Query functions.
+
+* update
+
+In query middleware functions, this refers to the query.
 
 ## Referencing Documents
 
@@ -230,15 +234,47 @@ You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get 
 
 There are several operations to save a document into the database:
 
-* insertOne
+### `insertOne(tenant, doc)`
 
-### insertOne()
+```javascript
+const res = await connection.insertOne('tenant_test', newDoc);
+// Document || Error
+```
 
 ## Recovering a document
 
 There are several operations to recover a document from the database:
 
-* findOne
+### `findOne(tenant, collection, query = {}, options = {})`
+
+```javascript
+const resFind = await connection.findOne('tenant_test', 'TestModel', {
+  name: 'Mario Lemes',
+});
+// Document || Error
+```
+
+## Updating a document
+
+There are several operations to recover a document from the database:
+
+### `updateOne(tenant, collection, filter, payload, options = {})`
+
+```javascript
+const resUpdate = await connection.updateOne(
+  'tenant_test',
+  'TestModel',
+  { name: 'Mario Lemes' },
+  {
+    $set: {
+      name: 'Some other name',
+    },
+  },
+);
+// Document || Error
+```
+
+Updating a document support all the [update operators](https://docs.mongodb.com/v3.4/reference/operator/update/) from MongoDB
 
 # TODO
 
