@@ -114,8 +114,8 @@ And the schema options allowed are:
 
 * _timestamps_: Optional
 * _inheritOptions_: Optional
-  ** --_discriminatorKey_: Required once "_inheritOptions_" is set
-  ** --_merge_: Optional ['methods', 'preHooks', 'postHooks']
+  * _discriminatorKey_: Required once "_inheritOptions_" is set
+  * _merge_: Optional ['methods', 'preHooks', 'postHooks']
 
 ## Create a new Model
 
@@ -199,7 +199,7 @@ Query middleware is supported for the following Model and Query functions.
 
 * update
 
-In query middleware functions, this refers to the query.
+In query middleware functions, **this** refers to the query.
 
 ## Referencing Documents
 

@@ -134,8 +134,6 @@
 * findOne() method.
 * Document inheritence support.
 
-## Comparing changes
-
 [0.1.6]: https://github.com/Yonirt/moltyjs/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/Yonirt/moltyjs/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/Yonirt/moltyjs/compare/v0.1.3...v0.1.4
@@ -160,4 +158,4 @@
 * **Fixed** for any bug fixes.
 * **Security** in case of vulnerabilities.
 
-_This CHANGELOG is following a better changelog convention from [keepachangelog.com (Olivier Lacan)](http://keepachangelog.com/en/1.0.0/) project_
+_This CHANGELOG is following a better changelog convention from [keepachangelog.com (Olivier Lacan)](http://keepachangelog.com/en/1.0.0/) project._
