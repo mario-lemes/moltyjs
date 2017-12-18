@@ -17,8 +17,13 @@ describe('# Model', () => {
 
   before(() => {
     const options = {
-      engine: 'mongodb',
-      uri: 'mongodb://localhost:27017/test',
+      connection: {
+        engine: 'mongodb',
+        uri: 'mongodb://localhost:27017/test',
+      },
+      tenants: {
+        noListener: true,
+      },
     };
 
     conn = connect(options);

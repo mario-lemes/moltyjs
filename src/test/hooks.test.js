@@ -19,8 +19,13 @@ describe('# Hooks', () => {
   const test = ['OOOKK', 'YEEEES'];
   before(() => {
     const options = {
-      engine: 'mongodb',
-      uri: 'mongodb://localhost:27017/test',
+      connection: {
+        engine: 'mongodb',
+        uri: 'mongodb://localhost:27017/test',
+      },
+      tenants: {
+        noListener: true,
+      },
     };
     conn = connect(options);
     const m2 = new Model(s2, 'TestModel2');

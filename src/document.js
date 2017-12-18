@@ -26,7 +26,7 @@ class Document {
 
     // Applying static methods to the document
     Object.keys(methods).forEach(key => {
-      this[key] = methods[key].bind(this._data);
+      this[key] = methods[key].bind(this);
     });
 
     this._preHooks = preHooks;

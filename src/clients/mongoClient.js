@@ -12,12 +12,18 @@ const {
 
 const { to } = require('await-to-js');
 
+const defaultTenantsOptions = {
+  noListener: false,
+  returnNonCachedInstance: false,
+};
+
 class MongoClient {
   constructor() {
     this._connectionManager = null;
     this.models = {};
     this.tenants = {};
     this._indexes = {};
+    this._tenantsOptions = {};
   }
 
   /**
@@ -31,7 +37,13 @@ class MongoClient {
     this.models = {};
     this.tenants = {};
     this._indexes = {};
-    this._connectionManager = new ConnectionManager(options);
+    this._tenantsOptions = Object.assign(
+      {},
+      defaultTenantsOptions,
+      options.tenants,
+    );
+
+    this._connectionManager = new ConnectionManager(options.connection);
     return this;
   }
 
@@ -370,13 +382,13 @@ class MongoClient {
 
         const [error, result] = await to(
           conn
-            .db(tenant)
+            .db(tenant, this._tenantsOptions)
             .collection(collection)
             .insert(doc._data, { forceServerObjectId: true }),
         );
 
         if (error) {
-          return reject(error);
+          reject(error);
         } else {
           // Running post insert hooks
           await _postHooksAux.insert.exec();
@@ -395,15 +407,15 @@ class MongoClient {
               model._discriminator,
             );
 
-            return resolve(docInserted);
+            resolve(docInserted);
           } else {
-            return resolve(result);
+            resolve(result);
           }
         }
       } catch (error) {
         reject(error);
       } finally {
-        this._connectionManager.release(conn);
+        return await this._connectionManager.release(conn);
       }
     });
   }
@@ -468,13 +480,13 @@ class MongoClient {
       try {
         const [error, result] = await to(
           conn
-            .db(tenant)
+            .db(tenant, this._tenantsOptions)
             .collection(collection)
             .findOne(query, options),
         );
 
         if (error) {
-          return reject(error);
+          reject(error);
         } else {
           if (result) {
             // Binding model properties to the document
@@ -489,15 +501,15 @@ class MongoClient {
               model._discriminator,
             );
 
-            return resolve(doc);
+            resolve(doc);
           } else {
-            return resolve(result);
+            resolve(result);
           }
         }
       } catch (error) {
         reject(error);
       } finally {
-        this._connectionManager.release(conn);
+        return await this._connectionManager.release(conn);
       }
     });
   }
@@ -615,23 +627,23 @@ class MongoClient {
       try {
         const [error, result] = await to(
           conn
-            .db(tenant)
+            .db(tenant, this._tenantsOptions)
             .collection(collection)
             .update(filter, payload, options),
         );
 
         if (error) {
-          return reject(error);
+          reject(error);
         } else {
           // Running post update hooks
           await _postHooksAux.update.exec();
 
-          return resolve(result.result);
+          resolve(result.result);
         }
       } catch (error) {
         reject(error);
       } finally {
-        this._connectionManager.release(conn);
+        return await this._connectionManager.release(conn);
       }
     });
   }
@@ -668,20 +680,20 @@ class MongoClient {
         // Ensure there are no indexes yet
         await to(
           conn
-            .db(tenant)
+            .db(tenant, this._tenantsOptions)
             .collection(collection)
             .dropIndexes(),
         );
 
         const [error, result] = await to(
           conn
-            .db(tenant)
+            .db(tenant, this._tenantsOptions)
             .collection(collection)
             .createIndexes(fields),
         );
 
         if (error) {
-          return reject(error);
+          reject(error);
         } else {
           // Set Indexes for this tenant and this collection are already set
           this.tenants[tenant] = {
@@ -689,12 +701,12 @@ class MongoClient {
             [collection]: true,
           };
 
-          return resolve(result);
+          resolve(result);
         }
       } catch (error) {
         reject(error);
       } finally {
-        await this._connectionManager.release(conn);
+        return await this._connectionManager.release(conn);
       }
     });
   }
@@ -719,17 +731,19 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(conn.db(tenant).dropDatabase());
+        const [error, result] = await to(
+          conn.db(tenant, this._tenantsOptions).dropDatabase(),
+        );
 
         if (error) {
-          return reject(error);
+          reject(error);
         } else {
-          return resolve(result);
+          resolve(result);
         }
       } catch (error) {
         reject(error);
       } finally {
-        this._connectionManager.release(conn);
+        return await this._connectionManager.release(conn);
       }
     });
   }

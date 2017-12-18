@@ -2,6 +2,8 @@
 
 A tiny ODM for MongoDB with multy tenancy support.
 
+**NOTE: THIS LIBRARY IS NOT SUITABLE FOR A PRODUCTION ENVIRONMENT, IS STILL UNDER CONSTRUCCTIONS AND MIGTH BE BREAKING CHANGES FROM ONE COMMIT TO ANOTHER. PLEASE, USE IT CAREFULLY AND CHECK THE DOCUMENTATION IN EACH VERSION RELEASE AND THE CHANGELOG. THANK YOU!**
+
 ## Install
 
 ```shell
@@ -21,14 +23,22 @@ import { connect } from ('moltyjs');
 
 To connect to a database use the "connect()" function passing trough 'options' payload all the settings required:
 
+### `Molty.connect(options)`
+
 ```javascript
 const { connect } = require('moltys');
 
 const options = {
-  engine: 'mongodb', // By default
-  uri: 'mongodb://localhost:27017/test',
-  max: 100, // By default
-  min: 1, // By default
+  connection: {
+    engine: 'mongodb', // By default
+    uri: 'mongodb://localhost:27017/test',
+    max: 100, // By default
+    min: 1, // By default
+  },
+  tenants: {
+    noListener: false, // By default
+    returnNonCachedInstance: false, // By default
+  },
 };
 
 const connection = connect(options);
@@ -40,6 +50,8 @@ const connection = connect(options);
 
 ## Drop a DB
 
+### `.dropDatabase(database)`
+
 ```javascript
 const res = await connection.dropDatabase('test');
 // true
@@ -50,6 +62,8 @@ const res = await connection.dropDatabase('test');
 Molty Schema are based on Mongoose Schema structure with some changes on the declaration of the inherit schema options. I even keep some field options name to make the Molty integration as easier as posible in those project are currently running Mongoose.
 
 To create a new Schema use the "Schema()" constructor passing the schema and the options:
+
+### `new Schema(schema, options)`
 
 ```javascript
 const { Schema } = require('moltys');
@@ -107,6 +121,8 @@ And the schema options allowed are:
 
 Once we have created our schema we need to register as a model so we can start to create, find, updete and delete documents. To do this you must provide the a proper schema and a model name. The model name will be the collection name on the DB so use the criteria you want since Molty does not make any accomodation on them like auto plurilize.
 
+### `new Model(schema, discriminatorName)`
+
 ```javascript
 const { Model } = require('moltys');
 
@@ -116,6 +132,8 @@ const TestModel = new Model(newSchema, 'TestModel');
 ## Create a Model discriminator
 
 You can also create models which inherits from other models and you can decide in which fashion you wan to do it. You have to make sure that the discriminator key of the child models are the same than the parents and also set what you want to merge from the parent model.
+
+### `.discriminator(schema, discriminatorName)`
 
 ```javascript
 const { Schema } = require('moltys');
@@ -154,6 +172,8 @@ The **merge** option must be an array with the element you want to merge from th
 ## Create a new document
 
 Once we have already set up the Schema and registered the Model with it we can start creating document from that Model as follow:
+
+### `.new(payload)`
 
 ```javascript
 const { Model } = require('moltys');
@@ -248,7 +268,8 @@ There are several operations to recover a document from the database:
 ### `findOne(tenant, collection, query = {}, options = {})`
 
 ```javascript
-const resFind = await connection.findOne('tenant_test', 'TestModel', {
+const resFind = await connection.findOne('tenant_test', 'TestModel',
+{
   name: 'Mario Lemes',
 });
 // Document || Error
@@ -275,11 +296,3 @@ const resUpdate = await connection.updateOne(
 ```
 
 Updating a document support all the [update operators](https://docs.mongodb.com/v3.4/reference/operator/update/) from MongoDB
-
-# TODO
-
-* Improove documentation
-* Populate
-* delete()
-* Add embedded documents
-* The [mquery](https://github.com/aheckmann/mquery) query builder

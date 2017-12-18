@@ -11,8 +11,13 @@ const { testSchema, testOptions, s, m } = require('./mock');
 
 before(async () => {
   const options = {
-    engine: 'mongodb',
-    uri: 'mongodb://localhost:27017/test',
+    connection: {
+      engine: 'mongodb',
+      uri: 'mongodb://localhost:27017/test',
+    },
+    tenants: {
+      noListener: true,
+    },
   };
 
   try {

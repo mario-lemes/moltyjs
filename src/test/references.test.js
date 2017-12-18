@@ -27,8 +27,13 @@ describe('# References', () => {
   const test = ['OOOKK', 'YEEEES'];
   before(() => {
     const options = {
-      engine: 'mongodb',
-      uri: 'mongodb://localhost:27017/test2',
+      connection: {
+        engine: 'mongodb',
+        uri: 'mongodb://localhost:27017/test2',
+      },
+      tenants: {
+        noListener: true,
+      },
     };
     conn = connect(options);
 
