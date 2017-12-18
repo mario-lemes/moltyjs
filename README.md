@@ -183,7 +183,7 @@ const TestModel = new Model(newSchema, 'TestModel');
 newDoc = TestModel.new({
   email: 'test@moltyjs.com',
   password: '1321321',
-  name: 'Mario Lemes',
+  name: 'Michael Scott',
 });
 ```
 
@@ -270,7 +270,7 @@ There are several operations to recover a document from the database:
 ```javascript
 const resFind = await connection.findOne('tenant_test', 'TestModel',
 {
-  name: 'Mario Lemes',
+  name: 'Michael Scott',
 });
 // Document || Error
 ```
@@ -285,7 +285,7 @@ There are several operations to recover a document from the database:
 const resUpdate = await connection.updateOne(
   'tenant_test',
   'TestModel',
-  { name: 'Mario Lemes' },
+  { name: 'Michael Scott' },
   {
     $set: {
       name: 'Some other name',
