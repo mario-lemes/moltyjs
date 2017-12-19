@@ -16,7 +16,13 @@ const {
 } = require('./mock');
 
 describe('# CRUD Operations', () => {
-  let newDoc, refDoc, conn, mDiscriminator, newDiscriminatorDoc2;
+  let newDoc,
+    refDoc,
+    conn,
+    mDiscriminator,
+    newDiscriminatorDoc2,
+    newDiscriminatorDoc3,
+    newDiscriminatorDoc4;
   const email = 'asdfasdf@gmail.com';
   const email2 = 'awdasdasdfasdf@gmail.com';
   const firstName = 'Mario';
@@ -70,6 +76,20 @@ describe('# CRUD Operations', () => {
       jobTitle: 'Plumber',
     });
 
+    newDiscriminatorDoc3 = mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: 'asdfsassssssd@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Developer',
+    });
+
+    newDiscriminatorDoc4 = mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: 'a444sssssd@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Designer',
+    });
+
     newDiscriminatorDoc = mDiscriminator.new({
       test: ['OOOKK', 'YEEEES'],
       email: email2,
@@ -78,20 +98,25 @@ describe('# CRUD Operations', () => {
     });
   });
 
-  it('findOne document', async () => {
+  it('find one document', async () => {
     try {
       const res = await conn.insertOne('test2', newDiscriminatorDoc2);
 
       expect(res._data).to.have.property('test');
       // expect(res._data.test[0]).to.equal('YESSSSSSSSSSSSSSSSSSS');
-      const res2 = await conn.findOne('test2', 'TestModel7Discriminator', {
-        _id: newDiscriminatorDoc2._data._id,
-      });
-      expect(res2._data._id).to.eql(newDiscriminatorDoc2._data._id);
-      expect(res2).to.be.instanceOf(Document);
-      expect(res2).to.have.property('newDiscriminatorMethod1');
-      expect(res2._discriminator).to.equal('TestModel7Discriminator');
-      expect(res2._modelName).to.equal('TestModel7');
+      const res2 = await conn.find(
+        'test2',
+        'TestModel7Discriminator',
+        {
+          _id: newDiscriminatorDoc2._data._id,
+        },
+        { limit: 1 },
+      );
+      expect(res2[0]._data._id).to.eql(newDiscriminatorDoc2._data._id);
+      expect(res2[0]).to.be.instanceOf(Document);
+      expect(res2[0]).to.have.property('newDiscriminatorMethod1');
+      expect(res2[0]._discriminator).to.equal('TestModel7Discriminator');
+      expect(res2[0]._modelName).to.equal('TestModel7');
     } catch (error) {
       throw error;
     }
@@ -112,16 +137,21 @@ describe('# CRUD Operations', () => {
         },
       );
 
-      const resFind = await conn.findOne('test2', 'TestSchema2', {
-        _id: refDoc._data._id,
-      });
+      const resFind = await conn.find(
+        'test2',
+        'TestSchema2',
+        {
+          _id: refDoc._data._id,
+        },
+        { limit: 1 },
+      );
 
       expect(resUpdate).to.have.property('n', 1);
       expect(resUpdate).to.have.property('nModified', 1);
       expect(resUpdate).to.have.property('ok', 1);
 
-      expect(resFind._data._id).to.eql(refDoc._data._id);
-      expect(resFind._data.tenantId).to.eql(
+      expect(resFind[0]._data._id).to.eql(refDoc._data._id);
+      expect(resFind[0]._data.tenantId).to.eql(
         Schema.types().ObjectId('5a3411ed14ee497f1c2bcb58'),
       );
     } catch (error) {
@@ -142,13 +172,40 @@ describe('# CRUD Operations', () => {
           },
         },
       );
-      const resFind = await conn.findOne('test2', 'TestModel7Discriminator', {
-        _id: newDiscriminatorDoc._data._id,
-      });
+      const resFind = await conn.find(
+        'test2',
+        'TestModel7Discriminator',
+        {
+          _id: newDiscriminatorDoc._data._id,
+        },
+        { limit: 1 },
+      );
 
-      expect(resFind._data).to.have.property('jobTitle', 'CAMIONERO');
-      expect(resFind._data).to.have.property('_id');
-      expect(resFind._data._id).to.eql(newDiscriminatorDoc._data._id);
+      expect(resFind[0]._data).to.have.property('jobTitle', 'CAMIONERO');
+      expect(resFind[0]._data).to.have.property('_id');
+      expect(resFind[0]._data._id).to.eql(newDiscriminatorDoc._data._id);
+    } catch (error) {
+      throw error;
+    }
+  });
+
+  it('find all documents', async () => {
+    try {
+      await conn.insertOne('test2', newDiscriminatorDoc3);
+      await conn.insertOne('test2', newDiscriminatorDoc4);
+
+      let res2 = await conn.find(
+        'test2',
+        'TestModel7Discriminator',
+        {},
+        { binded: true },
+      );
+
+      expect(res2).to.have.lengthOf(4);
+
+      expect(res2[0]).to.have.property('newDiscriminatorMethod1');
+      expect(res2[0]._discriminator).to.equal('TestModel7Discriminator');
+      expect(res2[0]._modelName).to.equal('TestModel7');
     } catch (error) {
       throw error;
     }

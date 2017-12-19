@@ -5,6 +5,50 @@
 * Add deleteOne() document
 * Add embedded documents features
 * Add query operations ([mquery](https://github.com/aheckmann/mquery) query builder))
+* Add cursor options ([MongoDB Doc](https://docs.mongodb.com/manual/reference/method/js-cursor/)).
+  * .project({a:1}) // Create a projection of field a
+  * .skip(1) // Skip 1
+  * .limit(10) // Limit 10
+  * .batchSize(5) // Set batchSize on cursor to 5
+  * .filter({a:1}) // Set query on the cursor
+  * .comment('add a comment') // Add a comment to the query, allowing to correlate queries
+  * .addCursorFlag('tailable', true) // Set cursor as tailable
+  * .addCursorFlag('oplogReplay', true) // Set cursor as oplogReplay
+  * .addCursorFlag('noCursorTimeout', true) // Set cursor as noCursorTimeout
+  * .addCursorFlag('awaitData', true) // Set cursor as awaitData
+  * .addCursorFlag('exhaust', true) // Set cursor as exhaust
+  * .addCursorFlag('partial', true) // Set cursor as partial
+  * .addQueryModifier('$orderby', {a:1}) // Set $orderby {a:1}
+  * .max(10) // Set the cursor maxScan
+  * .maxScan(10) // Set the cursor maxScan
+  * .maxTimeMS(1000) // Set the cursor maxTimeMS
+  * .min(100) // Set the cursor min
+  * .returnKey(10) // Set the cursor returnKey
+  * .setReadPreference(ReadPreference.PRIMARY) // Set the cursor readPreference
+  * .setCursorOption(field, value) // Set a node.js specific cursor option
+  * .showRecordId(true) // Set the cursor showRecordId
+  * .snapshot(true) // Set the cursor snapshot
+  * .sort([['a', 1]]) // Sets the sort order of the cursor query
+  * .stream(options) // Return a modified Readable stream including a possible transform method.
+  * .hint('a_1') // Set the cursor hint
+
+## [0.1.7] - 2017-12-18
+
+### Added
+
+* Options 'limit' to limit the results with the find() function
+* Options 'moltyClass' to wrap the result on Molty Document class instead of MongoDB Document class
+* Info abot the find() function and its options
+
+### Changed
+
+* findOne() by find(). findOne() is already deprecated on MongoDB Native Driver
+* Added Cursor support options to 'limit' on find()
+* Unit test suites
+
+### Fixed
+
+* Fix documentation style glitches
 
 ## [0.1.6] - 2017-12-18
 
@@ -127,13 +171,14 @@
 
 * regeneratorRuntime transpiling error (babel).
 
-## [0.0.2] - 2017-12-14
+## 0.0.2 - 2017-12-14
 
 ### Added
 
 * findOne() method.
 * Document inheritence support.
 
+[0.1.7]: https://github.com/Yonirt/moltyjs/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/Yonirt/moltyjs/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/Yonirt/moltyjs/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/Yonirt/moltyjs/compare/v0.1.3...v0.1.4

@@ -252,8 +252,6 @@ You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get 
 
 ## Saving a document
 
-There are several operations to save a document into the database:
-
 ### `insertOne(tenant, doc)`
 
 ```javascript
@@ -263,21 +261,28 @@ const res = await connection.insertOne('tenant_test', newDoc);
 
 ## Recovering a document
 
-There are several operations to recover a document from the database:
+### `find(tenant, collection, query = {}, options = {})`
 
-### `findOne(tenant, collection, query = {}, options = {})`
+* {String} `tanant` Tenant name
+* {String} `collection` Collection name
+* {Object} `query` Query object
+* {Object} `options` Optional settings
+  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
+    instead of MongoDB Document
+  * {Number} `limit` (0 by default: no limit) Limit the results to the amount specified
 
 ```javascript
-const resFind = await connection.findOne('tenant_test', 'TestModel',
+const resFind = await connection.find('tenant_test', 'TestModel',
 {
   name: 'Michael Scott',
+},
+{
+  limit: 1
 });
-// Document || Error
+// [Document] || Error
 ```
 
 ## Updating a document
-
-There are several operations to recover a document from the database:
 
 ### `updateOne(tenant, collection, filter, payload, options = {})`
 
@@ -292,7 +297,7 @@ const resUpdate = await connection.updateOne(
     },
   },
 );
-// Document || Error
+// {UpdateResult} || Error
 ```
 
 Updating a document support all the [update operators](https://docs.mongodb.com/v3.4/reference/operator/update/) from MongoDB

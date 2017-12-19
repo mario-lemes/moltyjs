@@ -17,6 +17,11 @@ const defaultTenantsOptions = {
   returnNonCachedInstance: false,
 };
 
+const defaultFindOptions = {
+  moltyClass: true,
+  limit: 0,
+};
+
 class MongoClient {
   constructor() {
     this._connectionManager = null;
@@ -421,7 +426,7 @@ class MongoClient {
   }
 
   /**
-   * findOne(): Fetches the first document that matches the query
+   * find(): Fetches the first document that matches the query
    * into the collection and the tenant specifyed. "
    *
    * @param {String} tenant
@@ -430,7 +435,7 @@ class MongoClient {
    *
    * @returns {Promise}
    */
-  async findOne(tenant, collection, query = {}, options = {}) {
+  async find(tenant, collection, query = {}, options = {}) {
     if (!tenant && typeof tenant != 'string')
       throw new Error(
         'Should specify the tenant name (String), got: ' + tenant,
@@ -439,6 +444,9 @@ class MongoClient {
       throw new Error(
         'Should specify the collection name (String), got: ' + collection,
       );
+
+    // Assign default options to perform the find query
+    const findOptions = Object.assign({}, defaultFindOptions, options);
 
     // If we are looking for resources in a discriminator model
     // we have to set the proper filter and addres to the parent collection
@@ -478,30 +486,41 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
+        // Get the Cursor
+        const cursor = conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .find(query);
+
+        // Run the cursor
         const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .findOne(query, options),
+          cursor.limit(findOptions.limit).toArray(),
         );
 
         if (error) {
           reject(error);
         } else {
           if (result) {
-            // Binding model properties to the document
-            const Document = require('../document');
-            const doc = new Document(
-              result,
-              model._preHooks,
-              model._postHooks,
-              model._methods,
-              model._schemaOptions,
-              model._modelName,
-              model._discriminator,
-            );
-
-            resolve(doc);
+            if (findOptions.moltyClass) {
+              const Document = require('../document');
+              let docs = [];
+              result.forEach(doc => {
+                docs.push(
+                  new Document(
+                    doc,
+                    model._preHooks,
+                    model._postHooks,
+                    model._methods,
+                    model._schemaOptions,
+                    model._modelName,
+                    model._discriminator,
+                  ),
+                );
+              });
+              resolve(docs);
+            } else {
+              resolve(result);
+            }
           } else {
             resolve(result);
           }
@@ -512,40 +531,6 @@ class MongoClient {
         return await this._connectionManager.release(conn);
       }
     });
-  }
-
-  async find() {
-    // When the connection is available, use it
-    /*conn.then(async (mongo) => {
-      limit = limit || 10
-      page = page || 1
-      query = query || {}
-      const skip = page > 0 ? ((page - 1) * limit) : 0
-      try {
-        const collection = mongo.db(tenant).collection(coll)
-        const [error, result] = await to(collection.find(query)
-                                .sort({_id: -1})
-                                .skip(skip)
-                                .limit(limit)
-                                .toArray())
-        if (error) {
-          return reject(error)
-        } else {
-          return resolve({
-            cursor: {
-              currentPage: page,
-              perPage: limit
-            },
-            data: result
-          })
-        }
-      } catch (error) {
-        reject(error)
-      } finally {
-        // Release the connection after  us
-        ConnectionMgr.release(mongo)
-      }*/
-    throw new Error('Sorry, "find()" method is not supported yet');
   }
 
   /**
