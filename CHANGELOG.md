@@ -32,7 +32,7 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
-## [0.1.7] - 2017-12-18
+## [0.2.0] - 2017-12-18
 
 ### Added
 
@@ -178,7 +178,7 @@
 * findOne() method.
 * Document inheritence support.
 
-[0.1.7]: https://github.com/Yonirt/moltyjs/compare/v0.1.6...v0.1.7
+[0.2.0]: https://github.com/Yonirt/moltyjs/compare/v0.1.6...v0.2.0
 [0.1.6]: https://github.com/Yonirt/moltyjs/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/Yonirt/moltyjs/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/Yonirt/moltyjs/compare/v0.1.3...v0.1.4
