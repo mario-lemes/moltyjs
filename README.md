@@ -278,7 +278,8 @@ const resFind = await connection.find('tenant_test', 'TestModel',
   name: 'Michael Scott',
 },
 {
-  limit: 1
+  limit: 1,
+  projection: { name: 0 }
 });
 // [Document] || Error
 ```
