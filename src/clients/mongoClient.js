@@ -20,6 +20,7 @@ const defaultTenantsOptions = {
 const defaultFindOptions = {
   moltyClass: true,
   limit: 0,
+  projection: null,
 };
 
 class MongoClient {
@@ -494,7 +495,10 @@ class MongoClient {
 
         // Run the cursor
         const [error, result] = await to(
-          cursor.limit(findOptions.limit).toArray(),
+          cursor
+            .limit(findOptions.limit)
+            .project(findOptions.projection)
+            .toArray(),
         );
 
         if (error) {

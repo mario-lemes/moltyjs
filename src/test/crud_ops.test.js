@@ -198,11 +198,11 @@ describe('# CRUD Operations', () => {
         'test2',
         'TestModel7Discriminator',
         {},
-        { binded: true },
+        { moltyClass: true },
       );
 
       expect(res2).to.have.lengthOf(4);
-
+      expect(res2[0]).to.have.property('_data');
       expect(res2[0]).to.have.property('newDiscriminatorMethod1');
       expect(res2[0]._discriminator).to.equal('TestModel7Discriminator');
       expect(res2[0]._modelName).to.equal('TestModel7');

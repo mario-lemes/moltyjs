@@ -270,6 +270,7 @@ const res = await connection.insertOne('tenant_test', newDoc);
   * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
     instead of MongoDB Document
   * {Number} `limit` (0 by default: no limit) Limit the results to the amount specified
+  * {Object} `projection` (null by default) Create a projection of a field, the projection document limits the fields to return for all matching documents
 
 ```javascript
 const resFind = await connection.find('tenant_test', 'TestModel',
