@@ -6,7 +6,6 @@
 * Add embedded documents features
 * Add query operations ([mquery](https://github.com/aheckmann/mquery) query builder))
 * Add cursor options ([MongoDB Doc](https://docs.mongodb.com/manual/reference/method/js-cursor/)).
-  * .project({a:1}) // Create a projection of field a
   * .skip(1) // Skip 1
   * .limit(10) // Limit 10
   * .batchSize(5) // Set batchSize on cursor to 5
@@ -31,6 +30,16 @@
   * .sort([['a', 1]]) // Sets the sort order of the cursor query
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
+
+## [0.2.1] - 2017-12-20
+
+### Added
+
+* Options 'projection' to just exclude or include specific field in the documents results
+
+### Changed
+
+* Documentation about find() method
 
 ## [0.2.0] - 2017-12-18
 
@@ -178,6 +187,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.2.1]: https://github.com/Yonirt/moltyjs/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Yonirt/moltyjs/compare/v0.1.6...v0.2.0
 [0.1.6]: https://github.com/Yonirt/moltyjs/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/Yonirt/moltyjs/compare/v0.1.4...v0.1.5
