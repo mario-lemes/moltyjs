@@ -31,6 +31,24 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.3.1] - 2017-12-21
+
+### Added
+
+* New method insertMany()
+* New hook for insert many ('insertMany') where this is refered to the Documents Array
+* Option parameter to inserOne() and to insertMany()
+* 'moltyClass' option to findOne()
+* Documentation about changes on insertOne(), insertMany() and hooks.
+
+### Removed
+
+* Hooks from Document instances and keep it just in Model instances
+
+### Changed
+
+* 'insert' hook is now called 'inserOne'
+
 ## [0.2.1] - 2017-12-20
 
 ### Added

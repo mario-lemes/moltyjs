@@ -22,7 +22,13 @@ describe('# CRUD Operations', () => {
     mDiscriminator,
     newDiscriminatorDoc2,
     newDiscriminatorDoc3,
-    newDiscriminatorDoc4;
+    newDiscriminatorDoc4,
+    newDiscriminatorDoc5,
+    newDiscriminatorDoc6,
+    newDiscriminatorDoc7,
+    newDiscriminatorDoc8,
+    newDiscriminatorDoc9,
+    newDiscriminatorDoc10;
   const email = 'asdfasdf@gmail.com';
   const email2 = 'awdasdasdfasdf@gmail.com';
   const firstName = 'Mario';
@@ -69,6 +75,13 @@ describe('# CRUD Operations', () => {
       'TestModel7Discriminator',
     );
 
+    newDiscriminatorDoc = mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: email2,
+      password: 'asdasdasdasd',
+      jobTitle: 'Teacher',
+    });
+
     newDiscriminatorDoc2 = mDiscriminator.new({
       test: ['OOOKK', 'YEEEES'],
       email: 'asdfsadfsdfsfd@dsfdfadsfsdf.es',
@@ -89,12 +102,49 @@ describe('# CRUD Operations', () => {
       password: '1234567890',
       jobTitle: 'Designer',
     });
+    // --------------------------------------
 
-    newDiscriminatorDoc = mDiscriminator.new({
+    newDiscriminatorDoc5 = mDiscriminator.new({
       test: ['OOOKK', 'YEEEES'],
-      email: email2,
-      password: 'asdasdasdasd',
-      jobTitle: 'Teacher',
+      email: '5@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Web Designer',
+    });
+
+    newDiscriminatorDoc6 = mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: '6@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Coach',
+    });
+
+    newDiscriminatorDoc7 = mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: '7@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Engineer',
+    });
+
+    newDiscriminatorDoc8 = mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: '8@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Architect',
+    });
+
+    //----------------------------------------
+    newDiscriminatorDoc9 = mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: '7@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Engineer',
+    });
+
+    newDiscriminatorDoc10 = mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: '8@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Architect',
     });
   });
 
@@ -208,6 +258,52 @@ describe('# CRUD Operations', () => {
       expect(res2[0]._modelName).to.equal('TestModel7');
     } catch (error) {
       throw error;
+    }
+  });
+
+  it('insertMany documents', async () => {
+    try {
+      await conn.insertMany('test2', [
+        newDiscriminatorDoc5,
+        newDiscriminatorDoc6,
+        newDiscriminatorDoc7,
+        newDiscriminatorDoc8,
+      ]);
+
+      let res2 = await conn.find(
+        'test2',
+        'TestModel7Discriminator',
+        {},
+        { moltyClass: true },
+      );
+
+      expect(res2).to.have.lengthOf(8);
+      expect(res2[0]).to.have.property('_data');
+      expect(res2[0]).to.have.property('newDiscriminatorMethod1');
+      expect(res2[0]._discriminator).to.equal('TestModel7Discriminator');
+      expect(res2[0]._modelName).to.equal('TestModel7');
+    } catch (error) {
+      throw error;
+    }
+  });
+
+  it('should not insertMany documents becaure are duplicated', async () => {
+    try {
+      await conn.insertMany('test2', [
+        newDiscriminatorDoc9,
+        newDiscriminatorDoc10,
+      ]);
+
+      let res2 = await conn.find(
+        'test2',
+        'TestModel7Discriminator',
+        {},
+        { moltyClass: true },
+      );
+      throw new Error('Unexpected');
+    } catch (error) {
+      // Duplicated
+      expect(error).to.have.property('code', 11000);
     }
   });
 });

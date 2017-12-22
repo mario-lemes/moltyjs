@@ -98,7 +98,7 @@ describe('# CRUD Operations', () => {
     });
   });
 
-  it.only('find all documents with projection fields (test: 1)', async () => {
+  it('find all documents with projection fields (test: 1)', async () => {
     try {
       await conn.insertOne('test2', newDiscriminatorDoc3);
       await conn.insertOne('test2', newDiscriminatorDoc4);

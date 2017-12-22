@@ -128,12 +128,12 @@ const s2 = new Schema(testSchema, testOptions);
 const s3 = new Schema(testSchema, testOptions);
 
 // Pre hooks
-s2.pre('insert', function(next) {
+s2.pre('insertOne', function(next) {
   this._data.password = 'ENCRYPTED';
   console.log('PRE: Insert World 1!');
   return next();
 });
-s2.pre('insert', function(next) {
+s2.pre('insertOne', function(next) {
   this._data.lastName = 'CHANGEEEED';
   console.log('PRE: Insert World 2!');
   return next();
@@ -149,7 +149,7 @@ s2.pre('delete', next => {
 });
 
 // Post hooks
-s3.post('insert', function(next) {
+s3.post('insertOne', function(next) {
   const r = this.newMethod1();
   console.log(r);
   console.log('POST: Insert World!');
@@ -220,17 +220,30 @@ const discriminatorOptions = {
 const sDiscriminator = new Schema(discriminatorSchema, discriminatorOptions);
 
 // Pre hooks
-sDiscriminator.pre('insert', function(next) {
+sDiscriminator.pre('insertOne', function(next) {
   this._data.password = 'ENCRYPTED';
   console.log('PRE DISCRIMINATOR: Insert World 1!');
   return next();
 });
 
 // Post hooks
-sDiscriminator.post('insert', function(next) {
+sDiscriminator.post('insertOne', function(next) {
   const r = this.newDiscriminatorMethod1();
   console.log(r);
   console.log('POST DISCRIMINATOR: Insert World!');
+  return next();
+});
+
+// Pre hooks
+sDiscriminator.pre('insertMany', function(next) {
+  this[0]._data.lastName = '2PAC2FURIUS';
+  console.log('PRE DISCRIMINATOR: Insert Many World 1!');
+  return next();
+});
+
+// Post hooks
+sDiscriminator.post('insertMany', function(next) {
+  console.log('POST DISCRIMINATOR: Insert Many World!');
   return next();
 });
 

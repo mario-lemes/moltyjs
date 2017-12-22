@@ -23,6 +23,17 @@ const defaultFindOptions = {
   projection: null,
 };
 
+const defaultInsertOneOptions = {
+  moltyClass: true,
+  forceServerObjectId: true,
+};
+
+const defaultInsertManyOptions = {
+  moltyClass: true,
+  ordered: false,
+  forceServerObjectId: true,
+};
+
 class MongoClient {
   constructor() {
     this._connectionManager = null;
@@ -133,13 +144,17 @@ class MongoClient {
    */
   _applyHooks(hooksList, objectBinded) {
     let insertHooks = new Middleware();
+    let insertManyHooks = new Middleware();
     let updateHooks = new Middleware();
     let deleteHooks = new Middleware();
 
     hooksList.forEach(key => {
       switch (key.hook) {
-        case 'insert':
+        case 'insertOne':
           insertHooks.use(key.fn.bind(objectBinded));
+          break;
+        case 'insertMany':
+          insertManyHooks.use(key.fn.bind(objectBinded));
           break;
         case 'update':
           updateHooks.use(key.fn.bind(objectBinded));
@@ -153,7 +168,12 @@ class MongoClient {
       }
     });
 
-    return { insert: insertHooks, update: updateHooks, delete: deleteHooks };
+    return {
+      insertOne: insertHooks,
+      insertMany: insertManyHooks,
+      update: updateHooks,
+      delete: deleteHooks,
+    };
   }
 
   /**
@@ -315,6 +335,55 @@ class MongoClient {
       });
     });
   }
+
+  /**
+   * _getModelCollectionAndDiscriminator(): Form a document it returns
+   * model, collection, discriminatorKey and the discriminator
+   * @param {Document} doc
+   */
+  _getModelCollectionAndDiscriminator(doc) {
+    let model = {},
+      collection = null,
+      discriminatorKey = null,
+      discriminator = null;
+
+    if (doc._discriminator) {
+      // If the documents we are inserting are from a discriminator model
+      if (!this.models[doc._discriminator])
+        throw new Error(
+          'The collection ' +
+            collection +
+            'does not exist and is not registered.',
+        );
+      model = this.models[doc._discriminator];
+      discriminatorKey = doc._options.inheritOptions.discriminatorKey;
+      discriminator = doc._discriminator;
+    } else if (
+      this.models[doc._modelName] &&
+      Object.keys(this.models[doc._modelName]._childsModels).length > 0
+    ) {
+      // Else, if the documents are from parent model but has discriminators
+      // models
+      model = this.models[doc._modelName];
+      discriminatorKey = doc._options.inheritOptions.discriminatorKey;
+      discriminator = doc._modelName;
+    } else {
+      // If the docs are not discriminator docs and do not came from a model
+      // which has discriminators model
+      if (!this.models[doc._modelName])
+        throw new Error(
+          'The collection ' +
+            collection +
+            'does not exist and is not registered.',
+        );
+      model = this.models[doc._modelName];
+    }
+
+    collection = doc._modelName;
+
+    return [model, collection, discriminatorKey, discriminator];
+  }
+
   /**
    * insertOne(): Insert one document into the collection and the
    * tenant specifyed. "forceServerObjectId" is set to true in order
@@ -325,7 +394,7 @@ class MongoClient {
    *
    * @returns {Promise}
    */
-  async insertOne(tenant, doc) {
+  async insertOne(tenant, doc, options = {}) {
     if (!tenant && typeof tenant != 'string')
       throw new Error(
         'Should specify the tenant name (String), got: ' + tenant,
@@ -334,36 +403,175 @@ class MongoClient {
     if (!(doc instanceof Document))
       throw new Error('The document should be a proper Document instance');
 
+    // Assign default options to perform the inserOne query
+    const insertOneOptions = Object.assign(
+      {},
+      defaultInsertOneOptions,
+      options,
+    );
+
     // If we are inserting a resources in a discriminator model
-    // we have to set the proper filter and addres to the parent collection
-    let model = {},
-      collection = doc._discriminator ? doc._discriminator : doc._modelName;
-    if (this.models[collection]) {
-      const { _discriminator } = this.models[collection];
-      const discriminatorKey = doc._options.inheritOptions
-        ? doc._options.inheritOptions.discriminatorKey
-        : null;
+    // we have to set the proper params and address to the parent collection
+    const [
+      model,
+      collection,
+      discriminatorKey,
+      discriminator,
+    ] = this._getModelCollectionAndDiscriminator(doc);
 
-      if (_discriminator || discriminatorKey) {
-        const { discriminatorKey } = this.models[
-          collection
-        ]._schemaOptions.inheritOptions;
+    // If they have discriminator
+    if (discriminator && discriminatorKey) {
+      if (doc._data[discriminatorKey])
+        throw new Error(
+          'You can not include a specific value for the "discriminatorKey" on the doc.',
+        );
 
-        if (doc._data[discriminatorKey])
+      doc._data[discriminatorKey] = discriminator;
+    }
+
+    const docAux = this._applyDocumentOptions(doc, 'insert');
+
+    // Ensure index are created
+    if (this._indexes[collection] && this._indexes[collection].length > 0) {
+      await this.createIndexes(tenant, collection, this._indexes[collection]);
+    }
+
+    // Apply hooks
+    const _preHooksAux = this._applyHooks(model._preHooks, doc);
+    const _postHooksAux = this._applyHooks(model._postHooks, doc);
+
+    // Running pre insert hooks
+    await _preHooksAux.insertOne.exec();
+
+    // Acquiring db instance
+    const conn = await this._connectionManager.acquire();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const [error, result] = await to(
+          conn
+            .db(tenant, this._tenantsOptions)
+            .collection(collection)
+            .insert(doc._data, insertOneOptions),
+        );
+
+        if (error) {
+          reject(error);
+        } else {
+          // Running post insert hooks
+          await _postHooksAux.insertOne.exec();
+          if (result) {
+            if (insertOneOptions.moltyClass) {
+              // Binding model properties to the document
+              const Document = require('../document');
+
+              const docInserted = new Document(
+                result.ops[0],
+                model._preHooks,
+                model._postHooks,
+                model._methods,
+                model._schemaOptions,
+                model._modelName,
+                model._discriminator,
+              );
+
+              resolve(docInserted);
+            } else {
+              resolve(result);
+            }
+          } else {
+            resolve(result);
+          }
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        return await this._connectionManager.release(conn);
+      }
+    });
+  }
+
+  /**
+   * insertMany(): Inserts an array of documents into MongoDB.
+   * If documents passed in do not contain the _id field,
+   * one will be added to each of the documents missing it by
+   * the driver, mutating the document. This behavior
+   * can be overridden by setting the forceServerObjectId flag.
+   *
+   * @param {String} tenant
+   * @param [{Document}] docs
+   *
+   * @returns {Promise}
+   */
+  async insertMany(tenant, docs, options = {}) {
+    if (!tenant && typeof tenant != 'string')
+      throw new Error(
+        'Should specify the tenant name (String), got: ' + tenant,
+      );
+    if (!(docs instanceof Array))
+      throw new Error(
+        'The documents should be a proper Array instance with documents',
+      );
+    if (docs.length <= 0)
+      throw new Error('The documents Array should not be empty');
+    const Document = require('../document');
+    if (!(docs[0] instanceof Document))
+      throw new Error('Elements of the Array should be Document instances');
+
+    // Assign default options to perform the inserMany query
+    const insertManyOptions = Object.assign(
+      {},
+      defaultInsertManyOptions,
+      options,
+    );
+
+    // If we are inserting a resources in a discriminator model
+    // we have to set the proper params and address to the parent collection
+    const [
+      model,
+      collection,
+      discriminatorKey,
+      discriminator,
+    ] = this._getModelCollectionAndDiscriminator(docs[0]);
+
+    let arrayDocsData = [];
+
+    // If they have discriminator
+    if (discriminator && discriminatorKey) {
+      // Loop over each document in the Array
+      for (let i = 0; i < docs.length; i++) {
+        if (docs[i]._discriminator !== discriminator)
+          throw new Error(
+            'There are documents in the Array that belongs to different collections.',
+          );
+
+        if (docs[i]._data[discriminatorKey])
           throw new Error(
             'You can not include a specific value for the "discriminatorKey" on the doc.',
           );
 
-        doc._data[discriminatorKey] = collection;
+        docs[i]._data[discriminatorKey] = discriminator;
+
+        // Check and apply document options before saving
+        const docAux = this._applyDocumentOptions(docs[i], 'insert');
+
+        // Preparing the doc
+        arrayDocsData.push(docAux._data);
       }
-      model = this.models[collection];
-      collection = this.models[collection]._modelName;
     } else {
-      throw new Error(
-        'The collection ' +
-          collection +
-          'does not exist and is not registered.',
-      );
+      // Loop over each document in the Array
+      for (let i = 0; i < docs.length; i++) {
+        if (docs[i]._modelName !== model._modelName)
+          throw new Error(
+            'There are documents in the Array that belongs to different collections.',
+          );
+
+        // Check and apply document options before saving
+        const docAux = this._applyDocumentOptions(docs[i], 'insert');
+
+        // Preparing the doc
+        arrayDocsData.push(docAux._data);
+      }
     }
 
     // Ensure index are created
@@ -372,48 +580,54 @@ class MongoClient {
     }
 
     // Apply hooks
-    const _preHooksAux = this._applyHooks(doc._preHooks, doc);
-    const _postHooksAux = this._applyHooks(doc._postHooks, doc);
+    const _preHooksAux = this._applyHooks(model._preHooks, docs);
+    const _postHooksAux = this._applyHooks(model._postHooks, docs);
 
     // Running pre insert hooks
-    await _preHooksAux.insert.exec();
+    await _preHooksAux.insertMany.exec();
 
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
 
     return new Promise(async (resolve, reject) => {
       try {
-        // Check and apply document options before saving
-        doc = this._applyDocumentOptions(doc, 'insert');
-
         const [error, result] = await to(
           conn
             .db(tenant, this._tenantsOptions)
             .collection(collection)
-            .insert(doc._data, { forceServerObjectId: true }),
+            .insertMany(arrayDocsData, insertManyOptions),
         );
 
         if (error) {
           reject(error);
         } else {
           // Running post insert hooks
-          await _postHooksAux.insert.exec();
+          await _postHooksAux.insertMany.exec();
 
           if (result) {
-            // Binding model properties to the document
-            const Document = require('../document');
+            if (insertManyOptions.moltyClass) {
+              let docInserted = [];
+              for (let i = 0; i < result.ops.length; i++) {
+                // Binding model properties to the document
+                const Document = require('../document');
 
-            const docInserted = new Document(
-              result.ops[0],
-              model._preHooks,
-              model._postHooks,
-              model._methods,
-              model._schemaOptions,
-              model._modelName,
-              model._discriminator,
-            );
+                docInserted.push(
+                  new Document(
+                    result.ops[i],
+                    model._preHooks,
+                    model._postHooks,
+                    model._methods,
+                    model._schemaOptions,
+                    model._modelName,
+                    model._discriminator,
+                  ),
+                );
+              }
 
-            resolve(docInserted);
+              resolve(docInserted);
+            } else {
+              resolve(result);
+            }
           } else {
             resolve(result);
           }

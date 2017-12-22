@@ -28,9 +28,6 @@ class Document {
     Object.keys(methods).forEach(key => {
       this[key] = methods[key].bind(this);
     });
-
-    this._preHooks = preHooks;
-    this._postHooks = postHooks;
   }
 }
 

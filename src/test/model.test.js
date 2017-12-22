@@ -49,8 +49,6 @@ describe('# Model', () => {
   it('Creating a new document from Model with schema (s)', () => {
     expect(newDoc).to.be.an.instanceof(Document);
     expect(newDoc).to.have.property('_data');
-    expect(newDoc).to.have.property('_preHooks');
-    expect(newDoc).to.have.property('_postHooks');
     expect(newDoc._data).to.have.property('email', email);
     expect(newDoc._data).to.have.property('firstName', firstName);
     expect(newDoc._data).to.have.property('lastName', lastName);

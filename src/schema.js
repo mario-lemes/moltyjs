@@ -121,7 +121,7 @@ class Schema {
   /**
    * pre(): Bind pre hook functions to the Schema
    *
-   * @param {String} hook=['validate', 'save', 'update', 'delete']
+   * @param {String} hook
    * @param {Function} cb hook function
    */
   pre(hook, fn) {
@@ -135,7 +135,7 @@ class Schema {
   /**
    * post(): Bind post hook functions to the Schema
    *
-   * @param {String} hook=['validate', 'save', 'update', 'delete']
+   * @param {String} hook
    * @param {Function} fn hook function
    */
   post(hook, fn) {
@@ -154,7 +154,7 @@ class Schema {
    * @returns {Boolean}
    */
   _isValidHook(hook) {
-    const validHooks = ['validate', 'insert', 'update', 'delete'];
+    const validHooks = ['insertOne', 'insertMany', 'update', 'delete'];
     return validHooks.indexOf(hook) > -1;
   }
 

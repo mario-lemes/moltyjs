@@ -191,9 +191,10 @@ newDoc = TestModel.new({
 
 Document middleware is supported for the following document functions.
 
-* save
+* insertOne
+* insertMany
 
-In document middleware functions, **this** refers to the document.
+In document middleware functions, **this** refers to the document or to the array of documents.
 
 Query middleware is supported for the following Model and Query functions.
 
@@ -252,10 +253,31 @@ You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get 
 
 ## Saving a document
 
-### `insertOne(tenant, doc)`
+### `insertOne(tenant, doc, options = {})`
+
+* {String} `tanant` Tenant name
+* {Document} `doc` Document instance object
+* {Object} `options` Optional settings
+  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
+    instead of MongoDB Document
+  * {Boolean} `forceServerObjectId` (false by default: no limit) Force server to create \_id fields instead of client.
 
 ```javascript
 const res = await connection.insertOne('tenant_test', newDoc);
+// Document || Error
+```
+
+### `insertMany(tenant, docs, options = {})`
+
+* {String} `tanant` Tenant name
+* [{Document}] `docs` Array of Document instances
+* {Object} `options` Optional settings
+  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
+    instead of MongoDB Document
+  * {Boolean} `forceServerObjectId` (false by default: no limit) Force server to create \_id fields instead of client.
+
+```javascript
+const res = await connection.insertMany('tenant_test', newDoc, {moltyClass: false});
 // Document || Error
 ```
 
