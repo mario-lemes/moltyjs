@@ -277,7 +277,13 @@ const res = await connection.insertOne('tenant_test', newDoc);
   * {Boolean} `forceServerObjectId` (false by default: no limit) Force server to create \_id fields instead of client.
 
 ```javascript
-const res = await connection.insertMany('tenant_test', newDoc, {moltyClass: false});
+newDoc2 = TestModel.new({
+  email: 'test2@moltyjs.com',
+  password: '1321321',
+  name: 'Dwight Schrute',
+});
+
+const res = await connection.insertMany('tenant_test', [newDoc, newDoc2], {moltyClass: false});
 // Document || Error
 ```
 

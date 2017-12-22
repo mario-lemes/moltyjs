@@ -31,6 +31,12 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+##
+
+### Fixed
+
+* Example insertMany in the documentation
+
 ## [0.3.0] - 2017-12-21
 
 ### Added
