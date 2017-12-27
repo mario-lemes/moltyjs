@@ -256,7 +256,7 @@ class Model {
    * @param {String} tenant
    */
   _validatePayloadFieldValues(payload, schema, tenant = null) {
-    Object.keys(schema).forEach(key => {
+    Object.keys(schema).forEach(async key => {
       // No required values
       if (payload[key] === undefined && !schema[key].required) return;
 
@@ -348,16 +348,20 @@ class Model {
       }
 
       // Custom validation
-      if (
-        typeof schema[key].validate === 'function' &&
-        !schema[key].validate(mongoClient, tenant, payload[key])
-      ) {
-        throw new Error(
-          'Value assigned to ' +
-            key +
-            ' failed custom validator. Value was ' +
-            payload[key],
+      if (typeof schema[key].validate === 'function') {
+        const isValid = await schema[key].validate(
+          mongoClient,
+          tenant,
+          payload[key],
         );
+        if (!isValid) {
+          throw new Error(
+            'Value assigned to ' +
+              key +
+              ' failed custom validator. Value was ' +
+              payload[key],
+          );
+        }
       }
     });
   }
