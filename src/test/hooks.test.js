@@ -17,7 +17,7 @@ describe('# Hooks', () => {
   const gender = 'Male';
   const password = '1321321';
   const test = ['OOOKK', 'YEEEES'];
-  before(() => {
+  before(async () => {
     const options = {
       connection: {
         engine: 'mongodb',
@@ -31,7 +31,7 @@ describe('# Hooks', () => {
     const m2 = new Model(s2, 'TestModel2');
     const m3 = new Model(s3, 'TestModel3');
 
-    newDoc = m2.new(
+    newDoc = await m2.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: email2,
@@ -48,7 +48,7 @@ describe('# Hooks', () => {
       'test2',
     );
 
-    newDoc2 = m3.new(
+    newDoc2 = await m3.new(
       {
         test,
         email: email3,
@@ -98,7 +98,7 @@ describe('# Hooks', () => {
 
   it('Creating a new Doc and using the method associated to it', async () => {
     try {
-      const newDoc3 = m4.new(
+      const newDoc3 = await m4.new(
         {
           email: 'test@test.com',
           tenantId: Schema.types().ObjectId(),

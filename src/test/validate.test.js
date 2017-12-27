@@ -23,14 +23,15 @@ describe('# Validate', () => {
     m = new Model(veryNewSchema, 'VeryNewModel');
   });
 
-  it('Creating a new document and testing validation', () => {
-    newDoc = m.new(
+  it('Creating a new document and testing validation', async () => {
+    newDoc = await m.new(
       {
         email: 'test@test.com',
         tenantId: Schema.types().ObjectId(),
       },
       'test',
     );
+
     expect(newDoc).to.have.a.property('_data');
     expect(newDoc).to.have.a.property('_tenant', 'test');
   });

@@ -25,7 +25,7 @@ describe('# References', () => {
   const gender = 'Male';
   const password = '1321321';
   const test = ['OOOKK', 'YEEEES'];
-  before(() => {
+  before(async () => {
     const options = {
       connection: {
         engine: 'mongodb',
@@ -44,7 +44,7 @@ describe('# References', () => {
       'TestSchemaRefArray',
     );
 
-    refDoc = TestSchema8.new(
+    refDoc = await TestSchema8.new(
       {
         email,
         tenantId: Schema.types().ObjectId(),
@@ -52,7 +52,7 @@ describe('# References', () => {
       'test2',
     );
 
-    refArrayDoc = TestSchemaRefArray.new(
+    refArrayDoc = await TestSchemaRefArray.new(
       {
         email: 'sakjdfhasjdfh@3312123.com',
       },

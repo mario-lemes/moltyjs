@@ -16,7 +16,7 @@ describe('# Discriminators', () => {
   const lastName = 'Lemes';
   const gender = 'Male';
 
-  before(() => {
+  before(async () => {
     const options = {
       connection: {
         engine: 'mongodb',
@@ -32,7 +32,7 @@ describe('# Discriminators', () => {
     const m = new Model(s2, 'TestModel5');
     mDiscriminator = m.discriminator(sDiscriminator, 'TestModel5Discriminator');
 
-    newDiscriminatorDoc = mDiscriminator.new(
+    newDiscriminatorDoc = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email,
@@ -42,7 +42,7 @@ describe('# Discriminators', () => {
       'test2',
     );
 
-    newDoc = m.new(
+    newDoc = await m.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: 'hello@gmail.com',

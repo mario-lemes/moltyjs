@@ -111,7 +111,7 @@ The schema field properties alowed are:
 * _min_: Optional, minimum number allowed.
 * _max_: Optional, maximum number allowed.
 * _maxlength_: Optional, maximum length of a **String**
-* _validate_: Optional, function to perform a custom validation. Value of the field, connection instance and tenant name is passing through the function args:
+* _validate_: Optional, function to perform a custom validation. Payload of the document, connection instance and tenant name is passing through the function args:
 
 ```javascript
 const { Schema } = require('moltys');
@@ -119,13 +119,14 @@ const { Schema } = require('moltys');
 const otherSchema = Schema({
   job: {
     type: String,
-    validate: async (connection, tenant, value) => {
+    validate: async (connection, tenant, payload) => {
       const exists = await connection.find(tenant, 'TestModel', {
-        job: value,
+        job: payload.job,
       });
 
       // If the document already exists we
-      // propagate an error returning false
+      // propagate an error with error.code = 'VALIDATION_FAILED'
+      // by returning false
       if (exists) return false;
 
       return true;
@@ -303,21 +304,21 @@ The **merge** option must be an array with the element you want to merge from th
 
 Once we have already set up the Schema and registered the Model with it we can start creating document from that Model as follow:
 
-### `.new(payload, tenant)`
+### `.new(payload, tenant) {Promise}`
 
 ```javascript
 const { Model } = require('moltys');
 
 const TestModel = new Model(newSchema, 'TestModel');
 
-newDoc = TestModel.new(
+newDoc = await TestModel.new(
   {
     email: 'test@moltyjs.com',
     password: '1321321',
     name: 'Michael Scott',
   },
   'test',
-);
+); // Document // Error
 ```
 
 **Note**: The tenant name is required to allow performing actions against the DB in the validate schema fields function, in the static methods and also in the hooks. This librarie was built to cover a lack of mongo multytenancy libraries support, if you are only working with a single tenant you can just pass the same value as a constant.
@@ -373,7 +374,7 @@ You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get 
 
 ## Saving a document
 
-### `insertOne(doc, options = {})`
+### `insertOne(doc, options = {}) {Promise}`
 
 * {Document} `doc` Document instance object
 * {Object} `options` Optional settings
@@ -386,7 +387,7 @@ const res = await connection.insertOne(newDoc);
 // Document || Error
 ```
 
-### `insertMany(docs, options = {})`
+### `insertMany(docs, options = {}) {Promise}`
 
 * [{Document}] `docs` Array of Document instances of the same model and for the same tenant
 * {Object} `options` Optional settings
@@ -407,7 +408,7 @@ const res = await connection.insertMany([newDoc, newDoc2], {moltyClass: false});
 
 ## Recovering a document
 
-### `find(tenant, collection, query = {}, options = {})`
+### `find(tenant, collection, query = {}, options = {}) {Promise}`
 
 * {String} `tanant` Tenant name
 * {String} `collection` Collection name
@@ -432,7 +433,7 @@ const resFind = await connection.find('tenant_test', 'TestModel',
 
 ## Updating a document
 
-### `updateOne(tenant, collection, filter, payload, options = {})`
+### `updateOne(tenant, collection, filter, payload, options = {}) {Promise}`
 
 ```javascript
 const resUpdate = await connection.updateOne(

@@ -1,6 +1,6 @@
 const mongoClient = require('./clients/mongoClient');
 const Document = require('./document');
-
+const { to } = require('await-to-js');
 const {
   isValidType,
   isObject,
@@ -39,6 +39,8 @@ class Model {
     this._methods = schema.methods;
 
     this._discriminator = discriminator;
+
+    this._normalizedPayload = null;
 
     mongoClient.addModel(this);
   }
@@ -102,28 +104,41 @@ class Model {
    *
    * @returns {Onject} doc
    */
-  new(payload, tenant) {
+  async new(payload, tenant) {
     if (!tenant) throw new Error('Tenant name is required, got ' + tenant);
 
     // Check if paylaod field names are correct
     this._validatePayloadFieldNames(payload, this._schemaNormalized);
     // Normalize the payload with the model schema
-    let data = this._normalizePayload(payload, this._schemaNormalized);
-
-    // Validate all the values
-    this._validatePayloadFieldValues(data, this._schemaNormalized, tenant);
-
-    // Returning the new document created
-    return new Document(
-      data,
-      this._preHooks,
-      this._postHooks,
-      this._methods,
-      this._schemaOptions,
-      this._modelName,
-      this._discriminator,
-      tenant,
+    this._normalizedPayload = this._normalizePayload(
+      payload,
+      this._schemaNormalized,
     );
+
+    try {
+      // Validate all the values
+      await this._validatePayloadFieldValues(
+        this._normalizedPayload,
+        this._schemaNormalized,
+        tenant,
+      );
+
+      // Returning the new document created
+      return new Document(
+        this._normalizedPayload,
+        this._preHooks,
+        this._postHooks,
+        this._methods,
+        this._schemaOptions,
+        this._modelName,
+        this._discriminator,
+        tenant,
+      );
+    } catch (err) {
+      throw err;
+    } finally {
+      this._normalizedPayload = null;
+    }
   }
 
   /**
@@ -256,9 +271,9 @@ class Model {
    * @param {String} tenant
    */
   async _validatePayloadFieldValues(payload, schema, tenant = null) {
-    Object.keys(schema).forEach(async key => {
+    for (const key of Object.keys(schema)) {
       // No required values
-      if (payload[key] === undefined && !schema[key].required) return;
+      if (payload[key] === undefined && !schema[key].required) continue;
 
       // Objects nested
       if (!schema[key].type && isObject(payload[key])) {
@@ -266,7 +281,7 @@ class Model {
           payload[key],
           schema[key],
         );
-        return;
+        continue;
       }
 
       // Validation type
@@ -349,26 +364,31 @@ class Model {
 
       // Custom validation
       if (typeof schema[key].validate === 'function') {
-        try {
-          const isValid = await schema[key].validate(
+        let error, isValid;
+        if (schema[key].validate.constructor.name === 'AsyncFunction') {
+          [error, isValid] = await to(
+            schema[key].validate(mongoClient, tenant, this._normalizedPayload),
+          );
+        } else {
+          isValid = schema[key].validate(
             mongoClient,
             tenant,
-            payload[key],
+            this._normalizedPayload,
           );
+        }
 
-          if (!isValid) {
-            throw new Error(
-              'Value assigned to ' +
-                key +
-                ' failed custom validator. Value was ' +
-                payload[key],
-            );
-          }
-        } catch (error) {
-          throw error;
+        if (!isValid || error) {
+          let err = new Error(
+            'Value assigned to ' +
+              key +
+              ' failed custom validator. Value was ' +
+              payload[key],
+          );
+          err.code = 'VALIDATION_FAILED';
+          throw err;
         }
       }
-    });
+    }
   }
 
   /**

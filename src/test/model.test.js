@@ -15,7 +15,7 @@ describe('# Model', () => {
   const lastName = 'Lemes';
   const gender = 'Male';
 
-  before(() => {
+  before(async () => {
     const options = {
       connection: {
         engine: 'mongodb',
@@ -29,7 +29,7 @@ describe('# Model', () => {
     conn = connect(options);
     const m = new Model(s, 'TestModel');
 
-    newDoc = m.new(
+    newDoc = await m.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email,

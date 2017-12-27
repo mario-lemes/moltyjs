@@ -29,7 +29,7 @@ describe('# find() Operations', () => {
   const lastName = 'Lemes';
   const gender = 'Male';
 
-  before(() => {
+  before(async () => {
     const options = {
       connection: {
         engine: 'mongodb',
@@ -43,7 +43,7 @@ describe('# find() Operations', () => {
     conn = connect(options);
     const m = new Model(s, 'TestModel8');
 
-    newDoc = m.new(
+    newDoc = await m.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email,
@@ -62,7 +62,7 @@ describe('# find() Operations', () => {
 
     const TestSchema2 = new Model(testSchema2, 'TestSchema2');
 
-    refDoc = TestSchema2.new(
+    refDoc = await TestSchema2.new(
       {
         email,
       },
@@ -75,7 +75,7 @@ describe('# find() Operations', () => {
       'TestModel7Discriminator',
     );
 
-    newDiscriminatorDoc2 = mDiscriminator.new(
+    newDiscriminatorDoc2 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: 'asdfsadfsdfsfd@dsfdfadsfsdf.es',
@@ -85,7 +85,7 @@ describe('# find() Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc3 = mDiscriminator.new(
+    newDiscriminatorDoc3 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: 'asdfsassssssd@dsfdfadsfsdf.es',
@@ -95,7 +95,7 @@ describe('# find() Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc4 = mDiscriminator.new(
+    newDiscriminatorDoc4 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: 'a444sssssd@dsfdfadsfsdf.es',
@@ -105,7 +105,7 @@ describe('# find() Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc = mDiscriminator.new(
+    newDiscriminatorDoc = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: email2,

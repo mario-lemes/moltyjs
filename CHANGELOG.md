@@ -32,6 +32,17 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.5.0] - 2017-12-27
+
+### Changed
+
+* Document constructor now return a Promise due the validation function on the Schema fields which can be async functions. The validation checking is done at the moment you create the Document.
+* Passed the entire data payload normalized to the validate function instead of the value of the field is validating. In case further checking are neccesary.
+* Documentaion about:
+  * Create a new Document
+  * Schema option fields
+  * Promise functions
+
 ## [0.4.3] - 2017-12-27
 
 ### Fixed
@@ -244,6 +255,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.5.0]: https://github.com/Yonirt/moltyjs/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/Yonirt/moltyjs/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/Yonirt/moltyjs/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/Yonirt/moltyjs/compare/v0.4.0...v0.4.1

@@ -262,7 +262,7 @@ const veryNewSchema = new Schema(
     tenantId: {
       type: Schema.types().ObjectId,
       ref: 'ModelRef',
-      validate: (dbClient, tenant, value) => {
+      validate: (dbClient, tenant, payload) => {
         if (!tenant || !dbClient) return false;
         return true;
       },

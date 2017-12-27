@@ -35,7 +35,7 @@ describe('# CRUD Operations', () => {
   const lastName = 'Lemes';
   const gender = 'Male';
 
-  before(() => {
+  before(async () => {
     const options = {
       connection: {
         engine: 'mongodb',
@@ -49,7 +49,7 @@ describe('# CRUD Operations', () => {
     conn = connect(options);
     const m = new Model(s, 'TestModel6');
 
-    newDoc = m.new(
+    newDoc = await m.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email,
@@ -68,7 +68,7 @@ describe('# CRUD Operations', () => {
 
     const TestSchema2 = new Model(testSchema2, 'TestSchema2');
 
-    refDoc = TestSchema2.new(
+    refDoc = await TestSchema2.new(
       {
         email,
       },
@@ -81,7 +81,7 @@ describe('# CRUD Operations', () => {
       'TestModel7Discriminator',
     );
 
-    newDiscriminatorDoc = mDiscriminator.new(
+    newDiscriminatorDoc = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: email2,
@@ -91,7 +91,7 @@ describe('# CRUD Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc2 = mDiscriminator.new(
+    newDiscriminatorDoc2 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: 'asdfsadfsdfsfd@dsfdfadsfsdf.es',
@@ -101,7 +101,7 @@ describe('# CRUD Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc3 = mDiscriminator.new(
+    newDiscriminatorDoc3 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: 'asdfsassssssd@dsfdfadsfsdf.es',
@@ -111,7 +111,7 @@ describe('# CRUD Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc4 = mDiscriminator.new(
+    newDiscriminatorDoc4 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: 'a444sssssd@dsfdfadsfsdf.es',
@@ -122,7 +122,7 @@ describe('# CRUD Operations', () => {
     );
     // --------------------------------------
 
-    newDiscriminatorDoc5 = mDiscriminator.new(
+    newDiscriminatorDoc5 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: '5@dsfdfadsfsdf.es',
@@ -132,7 +132,7 @@ describe('# CRUD Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc6 = mDiscriminator.new(
+    newDiscriminatorDoc6 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: '6@dsfdfadsfsdf.es',
@@ -142,7 +142,7 @@ describe('# CRUD Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc7 = mDiscriminator.new(
+    newDiscriminatorDoc7 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: '7@dsfdfadsfsdf.es',
@@ -152,7 +152,7 @@ describe('# CRUD Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc8 = mDiscriminator.new(
+    newDiscriminatorDoc8 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: '8@dsfdfadsfsdf.es',
@@ -163,7 +163,7 @@ describe('# CRUD Operations', () => {
     );
 
     //----------------------------------------
-    newDiscriminatorDoc9 = mDiscriminator.new(
+    newDiscriminatorDoc9 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: '7@dsfdfadsfsdf.es',
@@ -173,7 +173,7 @@ describe('# CRUD Operations', () => {
       'test2',
     );
 
-    newDiscriminatorDoc10 = mDiscriminator.new(
+    newDiscriminatorDoc10 = await mDiscriminator.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: '8@dsfdfadsfsdf.es',

@@ -8,7 +8,7 @@ const Middleware = require('../middleware');
 
 const { testSchema, testOptions, s, m } = require('./mock');
 
-describe('# Indexes', () => {
+describe('# Indexes', async () => {
   before(async () => {
     const options = {
       connection: {
@@ -24,7 +24,7 @@ describe('# Indexes', () => {
     const m1 = new Model(s, 'TestModel2');
     const m2 = new Model(s, 'TestModel3');
 
-    newDoc = m1.new(
+    newDoc = await m1.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: 'dasdsadsad@dsfdffds.com',
@@ -41,7 +41,7 @@ describe('# Indexes', () => {
       'test2',
     );
 
-    newDoc2 = m2.new(
+    newDoc2 = await m2.new(
       {
         test: ['OOOKK', 'YEEEES'],
         email: 'dasdsadsasdasdad@dsfdffds.com',
