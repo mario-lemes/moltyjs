@@ -128,38 +128,38 @@ const s2 = new Schema(testSchema, testOptions);
 const s3 = new Schema(testSchema, testOptions);
 
 // Pre hooks
-s2.pre('insertOne', function(next) {
+s2.pre('insertOne', function(dbClient, tenant, next) {
   this._data.password = 'ENCRYPTED';
   console.log('PRE: Insert World 1!');
   return next();
 });
-s2.pre('insertOne', function(next) {
+s2.pre('insertOne', function(dbClient, tenant, next) {
   this._data.lastName = 'CHANGEEEED';
   console.log('PRE: Insert World 2!');
   return next();
 });
 
-s2.pre('update', next => {
+s2.pre('update', (dbClient, tenant, next) => {
   console.log('PRE: Update World!');
   return next();
 });
-s2.pre('delete', next => {
+s2.pre('delete', (dbClient, tenant, next) => {
   console.log('PRE: Delete World!');
   return next();
 });
 
 // Post hooks
-s3.post('insertOne', function(next) {
+s3.post('insertOne', function(dbClient, tenant, next) {
   const r = this.newMethod1();
   console.log(r);
   console.log('POST: Insert World!');
   return next();
 });
-s2.post('update', next => {
+s2.post('update', (dbClient, tenant, next) => {
   console.log('POST: Update World!');
   return next();
 });
-s2.post('delete', next => {
+s2.post('delete', (dbClient, tenant, next) => {
   console.log('POST: Delete World!');
   return next();
 });
@@ -220,14 +220,14 @@ const discriminatorOptions = {
 const sDiscriminator = new Schema(discriminatorSchema, discriminatorOptions);
 
 // Pre hooks
-sDiscriminator.pre('insertOne', function(next) {
+sDiscriminator.pre('insertOne', function(dbClient, tenant, next) {
   this._data.password = 'ENCRYPTED';
   console.log('PRE DISCRIMINATOR: Insert World 1!');
   return next();
 });
 
 // Post hooks
-sDiscriminator.post('insertOne', function(next) {
+sDiscriminator.post('insertOne', function(dbClient, tenant, next) {
   const r = this.newDiscriminatorMethod1();
   console.log(r);
   console.log('POST DISCRIMINATOR: Insert World!');
@@ -235,14 +235,14 @@ sDiscriminator.post('insertOne', function(next) {
 });
 
 // Pre hooks
-sDiscriminator.pre('insertMany', function(next) {
+sDiscriminator.pre('insertMany', function(dbClient, tenant, next) {
   this[0]._data.lastName = '2PAC2FURIUS';
   console.log('PRE DISCRIMINATOR: Insert Many World 1!');
   return next();
 });
 
 // Post hooks
-sDiscriminator.post('insertMany', function(next) {
+sDiscriminator.post('insertMany', function(dbClient, tenant, next) {
   console.log('POST DISCRIMINATOR: Insert Many World!');
   return next();
 });
@@ -253,9 +253,36 @@ sDiscriminator.methods.newDiscriminatorMethod1 = function() {
   return 'Static method 1!';
 };
 
+const veryNewSchema = new Schema(
+  {
+    email: {
+      type: String,
+      maxlength: 100,
+    },
+    tenantId: {
+      type: Schema.types().ObjectId,
+      ref: 'ModelRef',
+      validate: (value, tenant, dbClient) => {
+        if (!tenant || !dbClient) return false;
+        return true;
+      },
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+veryNewSchema.methods.newMethod = function(dbClient, tenant, testArg) {
+  if (dbClient.models && tenant === 'test' && testArg === 'NEW VAR')
+    return true;
+  return false;
+};
+
 module.exports = {
   testSchema,
   testSchema2,
+  veryNewSchema,
   testSchemaRefArray,
   testOptions,
   s,

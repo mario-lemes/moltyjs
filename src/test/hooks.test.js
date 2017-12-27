@@ -6,10 +6,10 @@ const { Schema, connect, Model } = Molty;
 
 const Middleware = require('../middleware');
 
-const { testSchema, testOptions, s, s2, s3 } = require('./mock');
+const { testSchema, testOptions, veryNewSchema, s, s2, s3 } = require('./mock');
 
 describe('# Hooks', () => {
-  let newDoc, conn;
+  let newDoc, newDoc2, conn, m4;
   const email2 = 'mariolemes2@gmail.com';
   const email3 = 'mariolemes3@gmail.com';
   const firstName = 'Mario';
@@ -31,33 +31,41 @@ describe('# Hooks', () => {
     const m2 = new Model(s2, 'TestModel2');
     const m3 = new Model(s3, 'TestModel3');
 
-    newDoc = m2.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: email2,
-      firstName,
-      lastName,
-      password,
-      birthdate: Date.now(),
-      gender,
-      emergencyContactInfo: {
-        location: 'Las Palmas',
-        relation: 'Brother',
+    newDoc = m2.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: email2,
+        firstName,
+        lastName,
+        password,
+        birthdate: Date.now(),
+        gender,
+        emergencyContactInfo: {
+          location: 'Las Palmas',
+          relation: 'Brother',
+        },
       },
-    });
+      'test',
+    );
 
-    newDoc2 = m3.new({
-      test,
-      email: email3,
-      firstName,
-      lastName,
-      password,
-      birthdate: Date.now(),
-      gender,
-      emergencyContactInfo: {
-        location: 'Las Palmas',
-        relation: 'Brother',
+    newDoc2 = m3.new(
+      {
+        test,
+        email: email3,
+        firstName,
+        lastName,
+        password,
+        birthdate: Date.now(),
+        gender,
+        emergencyContactInfo: {
+          location: 'Las Palmas',
+          relation: 'Brother',
+        },
       },
-    });
+      'test',
+    );
+
+    m4 = new Model(veryNewSchema, 'VeryNewModel2');
   });
 
   it('Saving the new doc into the DB but modifying its password with prehook', async () => {
@@ -83,6 +91,23 @@ describe('# Hooks', () => {
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDoc2._data._id);
       expect(res._data).to.deep.equal(newDoc2._data);
+    } catch (error) {
+      throw error;
+    }
+  });
+
+  it('Creating a new Doc and using the method associated to it', async () => {
+    try {
+      const newDoc3 = m4.new(
+        {
+          email: 'test@test.com',
+          tenantId: Schema.types().ObjectId(),
+        },
+        'test',
+      );
+      const val = newDoc3.newMethod('NEW VAR');
+
+      expect(val).to.equal(true);
     } catch (error) {
       throw error;
     }

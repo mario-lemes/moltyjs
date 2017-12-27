@@ -32,18 +32,24 @@ describe('# Discriminators', () => {
     const m = new Model(s2, 'TestModel5');
     mDiscriminator = m.discriminator(sDiscriminator, 'TestModel5Discriminator');
 
-    newDiscriminatorDoc = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email,
-      password,
-      jobTitle: 'Teacher',
-    });
+    newDiscriminatorDoc = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email,
+        password,
+        jobTitle: 'Teacher',
+      },
+      'test',
+    );
 
-    newDoc = m.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: 'hello@gmail.com',
-      password,
-    });
+    newDoc = m.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: 'hello@gmail.com',
+        password,
+      },
+      'test',
+    );
   });
 
   it('Creating a new model which inherit all the properties from another model', () => {

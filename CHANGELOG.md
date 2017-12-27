@@ -1,5 +1,6 @@
 ## [Unreleased]
 
+* Wrap results docs in moltyClass but not remove the metadata provided by MongoDB
 * Fix english misspelling in the documentation.
 * Populate documents with references to other documments.
 * Add deleteOne() document
@@ -31,7 +32,20 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
-##
+## [0.4.0] - 2017-12-27
+
+### Added
+
+* Binded tenant and mongo client to the validate function in the Schema class, static methods and hooks in order to being able to perform querys directly to the DB from there.
+* Added documentation about:
+  * Document creation
+  * Hooks
+  * Static Method
+  * Schema field validation
+
+### Changed
+
+* Documentation about Schema field properties
 
 ### Fixed
 
@@ -211,6 +225,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.4.0]: https://github.com/Yonirt/moltyjs/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Yonirt/moltyjs/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/Yonirt/moltyjs/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Yonirt/moltyjs/compare/v0.1.6...v0.2.0

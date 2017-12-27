@@ -99,23 +99,144 @@ const newSchema = Schema(
 
 The schema field properties alowed are:
 
-* _type_: Mandatory [String, Number, Boolean, Buffer, Date, Array, Object]
-* _required_: Optional {Boolean}
-* _unique_: Optional {Boolean}
-* _default_: Optional
-* _match_: Optional
-* _enum_: Optional
-* _min_: Optional
-* _max_: Optional
-* _maxlength_: Optional
-* _validate_: Optional
+* _type_: Is the only one which is mandatory and could be a **String, Number, Boolean, Buffer, Date, Array, Object, ObjectId** or an array **[]** of any of them.
+* _ref_: Optional and should be the Model name associated to the collection you want to refeer. The _type_ of areference field must be **ObjectId** or **[ObjectId]**.
+* _required_: Optional and only allow **Boolean** values.
+* _unique_: Optional and only allow **Boolean** values.
+* _default_: Optional, only allows values of the same type which is set on the _type_ property. You also can assigna a function to it which return a value with the correct type.
+* _match_: Optional, allows either RegExp or **String** to validate the value of the field.
+* _enum_: Optional, and must be an array of values of the same type is set on _type_.
+* _min_: Optional, minimum number allowed.
+* _max_: Optional, maximum number allowed.
+* _maxlength_: Optional, maximum length of a **String**
+* _validate_: Optional, function to perform a custom validation. Value of the field, connection instance and tenant name is passing through the function args:
+
+```javascript
+const { Schema } = require('moltys');
+
+const otherSchema = Schema({
+  job: {
+    type: String,
+    validate: async (value, tenant, connection) => {
+      const exists = await connection.find(tenant, 'TestModel', {
+        job: value,
+      });
+
+      // If the document already exists we
+      // propagate an error returning false
+      if (exists) return false;
+
+      return true;
+    },
+  },
+});
+```
 
 And the schema options allowed are:
 
-* _timestamps_: Optional
-* _inheritOptions_: Optional
+* _timestamps_: Optional, set automatically in the documents saved or updated in the DB the fields: `createdAt` and `updatedAt`
+* _inheritOptions_: Optional, used for inherit from a parent Schema
   * _discriminatorKey_: Required once "_inheritOptions_" is set
-  * _merge_: Optional ['methods', 'preHooks', 'postHooks']
+  * _merge_: Optional, must be an array with a combination of these three values ['methods', 'preHooks', 'postHooks'], depending of what you want to merge from the parent Schema.
+
+## Static methods
+
+You can extend the functionality of Document class adding static method to work with the documents instances:
+
+```javascript
+newSchema.methods.comparePassword = async function(candidatePassword) {
+  const user = this._data;
+  return candidatePassword === user.password;
+};
+
+// Later on, after creating a model associated to the schema and then a new document from that model
+
+const TestModel = new Model(newSchema, 'TestModel');
+
+newDoc = TestModel.new({
+  email: 'test@moltyjs.com',
+  password: '1321321',
+  name: 'Michael Scott',
+});
+
+// You can call static methods from the document itself
+newDoc.comparePassword('000000'); // false
+```
+
+## Hooks middleware
+
+All hooks have binded the connection instance and the tenant name beside the document or the query depending of the hook.
+
+#### Document middleware is supported for the following document functions.
+
+* insertOne
+* insertMany
+
+In document middleware functions, **this** refers to the document or to the array of documents.
+
+## Examples:
+
+```javascript
+// Pre hooks on insertOne
+newSchema.pre('insertOne', function(connection, tenant, next) {
+  // this refers to the document
+  console.log(this);
+  return next();
+});
+
+// Post hooks on insertOne
+newSchema.post('insertOne', function(connection, tenant, next) {
+  // From any pre or post hook of Document middleware
+  // you can call to any of the static methos associated
+  // to the docuemnt
+  this.staticMethod();
+  return next();
+});
+
+// Pre hooks on insertMany
+newSchema.pre('insertMany', function(connection, tenant, next) {
+  // this refers to the array os documents since the method that
+  // trigger this hook is 'insertMany'
+  console.log(this); // [{Document}, {Document}]
+  return next();
+});
+
+// Post hooks on insertMany
+newSchema.post('insertMany', async function(connection, tenant, next) {
+  // We can perform any action against the DB with the
+  // connection instance and the tenant name
+  const newDoc = TestModel.new({
+    email: 'test@moltyjs.com',
+    password: 'ababababa',
+    name: 'Pam Beesley',
+  });
+  const res = await connection.insertOne('tenant_test', newDoc);
+  return next();
+});
+```
+
+#### Query middleware is supported for the following Model and Query functions.
+
+* update
+
+## Examples:
+
+```javascript
+// Pre hooks on update
+newSchema.pre('update', function(connection, tenant, next) {
+  // this refers to the update query
+  console.log(this); // Ex. { $set: {jobTitle: 'Test' }}
+  return next();
+});
+
+// Post hooks on update
+newSchema.post('update', async function(connection, tenant, next) {
+  //...
+  return next();
+});
+```
+
+In query middleware functions, **this** refers to the query.
 
 ## Create a new Model
 
@@ -173,7 +294,7 @@ The **merge** option must be an array with the element you want to merge from th
 
 Once we have already set up the Schema and registered the Model with it we can start creating document from that Model as follow:
 
-### `.new(payload)`
+### `.new(payload, tenant)`
 
 ```javascript
 const { Model } = require('moltys');
@@ -187,20 +308,7 @@ newDoc = TestModel.new({
 });
 ```
 
-## Hooks middleware (Work in progress)
-
-Document middleware is supported for the following document functions.
-
-* insertOne
-* insertMany
-
-In document middleware functions, **this** refers to the document or to the array of documents.
-
-Query middleware is supported for the following Model and Query functions.
-
-* update
-
-In query middleware functions, **this** refers to the query.
+**Note**: The tenant name is required to allow performing actions against the DB in the validate schema fields function, in the static methods and also in the hooks. This librarie was built to cover a lack of mongo multytenancy libraries support, if you are only working with a single tenant you can just pass the same value as a constant.
 
 ## Referencing Documents
 

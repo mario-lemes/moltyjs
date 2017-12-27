@@ -49,25 +49,31 @@ describe('# CRUD Operations', () => {
     conn = connect(options);
     const m = new Model(s, 'TestModel6');
 
-    newDoc = m.new({
-      test: ['OOOKK', 'YEEEES'],
-      email,
-      firstName,
-      lastName,
-      password: '1321321',
-      birthdate: Date.now(),
-      gender,
-      emergencyContactInfo: {
-        location: 'Las Palmas',
-        relation: 'Brother',
+    newDoc = m.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email,
+        firstName,
+        lastName,
+        password: '1321321',
+        birthdate: Date.now(),
+        gender,
+        emergencyContactInfo: {
+          location: 'Las Palmas',
+          relation: 'Brother',
+        },
       },
-    });
+      'test',
+    );
 
     const TestSchema2 = new Model(testSchema2, 'TestSchema2');
 
-    refDoc = TestSchema2.new({
-      email,
-    });
+    refDoc = TestSchema2.new(
+      {
+        email,
+      },
+      'test',
+    );
 
     const m2 = new Model(s2, 'TestModel7');
     mDiscriminator = m2.discriminator(
@@ -75,77 +81,107 @@ describe('# CRUD Operations', () => {
       'TestModel7Discriminator',
     );
 
-    newDiscriminatorDoc = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: email2,
-      password: 'asdasdasdasd',
-      jobTitle: 'Teacher',
-    });
+    newDiscriminatorDoc = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: email2,
+        password: 'asdasdasdasd',
+        jobTitle: 'Teacher',
+      },
+      'test',
+    );
 
-    newDiscriminatorDoc2 = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: 'asdfsadfsdfsfd@dsfdfadsfsdf.es',
-      password: '1234567890',
-      jobTitle: 'Plumber',
-    });
+    newDiscriminatorDoc2 = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: 'asdfsadfsdfsfd@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Plumber',
+      },
+      'test',
+    );
 
-    newDiscriminatorDoc3 = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: 'asdfsassssssd@dsfdfadsfsdf.es',
-      password: '1234567890',
-      jobTitle: 'Developer',
-    });
+    newDiscriminatorDoc3 = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: 'asdfsassssssd@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Developer',
+      },
+      'test',
+    );
 
-    newDiscriminatorDoc4 = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: 'a444sssssd@dsfdfadsfsdf.es',
-      password: '1234567890',
-      jobTitle: 'Designer',
-    });
+    newDiscriminatorDoc4 = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: 'a444sssssd@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Designer',
+      },
+      'test',
+    );
     // --------------------------------------
 
-    newDiscriminatorDoc5 = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: '5@dsfdfadsfsdf.es',
-      password: '1234567890',
-      jobTitle: 'Web Designer',
-    });
+    newDiscriminatorDoc5 = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: '5@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Web Designer',
+      },
+      'test',
+    );
 
-    newDiscriminatorDoc6 = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: '6@dsfdfadsfsdf.es',
-      password: '1234567890',
-      jobTitle: 'Coach',
-    });
+    newDiscriminatorDoc6 = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: '6@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Coach',
+      },
+      'test',
+    );
 
-    newDiscriminatorDoc7 = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: '7@dsfdfadsfsdf.es',
-      password: '1234567890',
-      jobTitle: 'Engineer',
-    });
+    newDiscriminatorDoc7 = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: '7@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Engineer',
+      },
+      'test',
+    );
 
-    newDiscriminatorDoc8 = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: '8@dsfdfadsfsdf.es',
-      password: '1234567890',
-      jobTitle: 'Architect',
-    });
+    newDiscriminatorDoc8 = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: '8@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Architect',
+      },
+      'test',
+    );
 
     //----------------------------------------
-    newDiscriminatorDoc9 = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: '7@dsfdfadsfsdf.es',
-      password: '1234567890',
-      jobTitle: 'Engineer',
-    });
+    newDiscriminatorDoc9 = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: '7@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Engineer',
+      },
+      'test',
+    );
 
-    newDiscriminatorDoc10 = mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
-      email: '8@dsfdfadsfsdf.es',
-      password: '1234567890',
-      jobTitle: 'Architect',
-    });
+    newDiscriminatorDoc10 = mDiscriminator.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email: '8@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Architect',
+      },
+      'test',
+    );
   });
 
   it('find one document', async () => {

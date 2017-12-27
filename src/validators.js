@@ -1,4 +1,4 @@
-const { ObjectID, ObjectId } = require('mongodb');
+const { ObjectId } = require('mongodb');
 const _ = require('lodash');
 
 const isString = function(s) {
@@ -35,7 +35,7 @@ const isArray = function(a) {
  * @returns {Boolean}
  */
 const isObjectId = function(id) {
-  return ObjectID.isValid(id);
+  return ObjectId.isValid(id);
 };
 
 const isSupportedType = function(t) {
@@ -68,7 +68,7 @@ const isType = function(value, type) {
   } else if (type === Object) {
     return isObject(value);
   } else if (type === ObjectId) {
-    return isObjectId(value) && isObject(value);
+    return isObjectId(value);
   } else {
     throw new Error('Unsupported type: ' + type);
   }

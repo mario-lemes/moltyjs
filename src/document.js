@@ -10,12 +10,14 @@ class Document {
     schemaOptions,
     modelName,
     discriminator,
+    tenant,
   ) {
     this._data = data;
     //this._methods = methods;
     this._modelName = modelName;
     this._options = schemaOptions;
     this._discriminator = discriminator ? discriminator : null;
+    this._tenant = tenant;
 
     // Assigning a proper ObjectId
     if (!this._data['_id']) {
@@ -26,7 +28,7 @@ class Document {
 
     // Applying static methods to the document
     Object.keys(methods).forEach(key => {
-      this[key] = methods[key].bind(this);
+      this[key] = methods[key].bind(this, mongoClient, tenant);
     });
   }
 }

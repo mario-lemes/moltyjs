@@ -98,16 +98,20 @@ class Model {
    * new(): Create a new document based on this model
    *
    * @param {Object} payload
+   * @param {String} tenant
    *
    * @returns {Onject} doc
    */
-  new(payload) {
+  new(payload, tenant) {
+    if (!tenant) throw new Error('Tenant name is required, got ' + tenant);
+
     // Check if paylaod field names are correct
     this._validatePayloadFieldNames(payload, this._schemaNormalized);
     // Normalize the payload with the model schema
     let data = this._normalizePayload(payload, this._schemaNormalized);
+
     // Validate all the values
-    this._validatePayloadFieldValues(data, this._schemaNormalized);
+    this._validatePayloadFieldValues(data, this._schemaNormalized, tenant);
 
     // Returning the new document created
     return new Document(
@@ -118,6 +122,7 @@ class Model {
       this._schemaOptions,
       this._modelName,
       this._discriminator,
+      tenant,
     );
   }
 
@@ -248,8 +253,9 @@ class Model {
    *
    * @param {Object} payload
    * @param {Schema} schema
+   * @param {String} tenant
    */
-  _validatePayloadFieldValues(payload, schema) {
+  _validatePayloadFieldValues(payload, schema, tenant = null) {
     Object.keys(schema).forEach(key => {
       // No required values
       if (payload[key] === undefined && !schema[key].required) return;
@@ -344,7 +350,7 @@ class Model {
       // Custom validation
       if (
         typeof schema[key].validate === 'function' &&
-        !schema[key].validate(payload[key])
+        !schema[key].validate(payload[key], tenant, mongoClient)
       ) {
         throw new Error(
           'Value assigned to ' +

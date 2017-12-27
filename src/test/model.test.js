@@ -29,19 +29,22 @@ describe('# Model', () => {
     conn = connect(options);
     const m = new Model(s, 'TestModel');
 
-    newDoc = m.new({
-      test: ['OOOKK', 'YEEEES'],
-      email,
-      firstName,
-      lastName,
-      password: '1321321',
-      birthdate: Date.now(),
-      gender,
-      emergencyContactInfo: {
-        location: 'Las Palmas',
-        relation: 'Brother',
+    newDoc = m.new(
+      {
+        test: ['OOOKK', 'YEEEES'],
+        email,
+        firstName,
+        lastName,
+        password: '1321321',
+        birthdate: Date.now(),
+        gender,
+        emergencyContactInfo: {
+          location: 'Las Palmas',
+          relation: 'Brother',
+        },
       },
-    });
+      'test',
+    );
 
     const Test2 = new Model(testSchema2, 'Schema2');
   });

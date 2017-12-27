@@ -44,28 +44,35 @@ describe('# References', () => {
       'TestSchemaRefArray',
     );
 
-    refDoc = TestSchema8.new({
-      email,
-    });
+    refDoc = TestSchema8.new(
+      {
+        email,
+        tenantId: Schema.types().ObjectId(),
+      },
+      'test2',
+    );
 
-    refArrayDoc = TestSchemaRefArray.new({
-      email: 'sakjdfhasjdfh@3312123.com',
-    });
+    refArrayDoc = TestSchemaRefArray.new(
+      {
+        email: 'sakjdfhasjdfh@3312123.com',
+      },
+      'test2',
+    );
   });
 
-  it('Creating a Schema with a reference to another collection', async () => {
+  it('Updating a document with a reference to another collection', async () => {
     try {
       const res = await conn.insertOne('test2', refDoc);
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(refDoc._data._id);
       expect(res._data).to.deep.equal(refDoc._data);
-      expect(res._data).to.have.property('tenantId', null);
+      expect(res._data).to.have.property('tenantId');
     } catch (error) {
       throw error;
     }
   });
 
-  it('Creating a Schema with an array of references to another collection', async () => {
+  it('Updating a document with an array of references to another collection', async () => {
     try {
       const res = await conn.insertOne('test2', refArrayDoc);
       const resUpdate = await conn.updateOne(
