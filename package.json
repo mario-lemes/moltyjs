@@ -1,6 +1,6 @@
 {
   "name": "moltyjs",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A tiny ODM for MongoDB with multy tenancy support.",
   "main": "lib/index.js",
   "scripts": {
