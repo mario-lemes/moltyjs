@@ -62,7 +62,7 @@ describe('# References', () => {
 
   it('Updating a document with a reference to another collection', async () => {
     try {
-      const res = await conn.insertOne('test2', refDoc);
+      const res = await conn.insertOne(refDoc);
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(refDoc._data._id);
       expect(res._data).to.deep.equal(refDoc._data);
@@ -74,7 +74,7 @@ describe('# References', () => {
 
   it('Updating a document with an array of references to another collection', async () => {
     try {
-      const res = await conn.insertOne('test2', refArrayDoc);
+      const res = await conn.insertOne(refArrayDoc);
       const resUpdate = await conn.updateOne(
         'test2',
         'TestSchemaRefArray',

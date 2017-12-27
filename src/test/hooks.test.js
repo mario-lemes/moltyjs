@@ -21,7 +21,7 @@ describe('# Hooks', () => {
     const options = {
       connection: {
         engine: 'mongodb',
-        uri: 'mongodb://localhost:27017/test',
+        uri: 'mongodb://localhost:27017/test2',
       },
       tenants: {
         noListener: true,
@@ -45,7 +45,7 @@ describe('# Hooks', () => {
           relation: 'Brother',
         },
       },
-      'test',
+      'test2',
     );
 
     newDoc2 = m3.new(
@@ -62,7 +62,7 @@ describe('# Hooks', () => {
           relation: 'Brother',
         },
       },
-      'test',
+      'test2',
     );
 
     m4 = new Model(veryNewSchema, 'VeryNewModel2');
@@ -72,7 +72,7 @@ describe('# Hooks', () => {
     try {
       expect(newDoc._data.password).to.equal(password);
       expect(newDoc._data.lastName).to.equal(lastName);
-      const res = await conn.insertOne('test2', newDoc);
+      const res = await conn.insertOne(newDoc);
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDoc._data._id);
       expect(res._data).to.deep.equal(newDoc._data);
@@ -86,7 +86,7 @@ describe('# Hooks', () => {
       expect(newDoc2._data.password).to.equal(password);
       expect(newDoc2._data.lastName).to.equal(lastName);
       expect(newDoc2._data.test).to.equal(test);
-      const res = await conn.insertOne('test2', newDoc2);
+      const res = await conn.insertOne(newDoc2);
 
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDoc2._data._id);

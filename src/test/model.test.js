@@ -19,7 +19,7 @@ describe('# Model', () => {
     const options = {
       connection: {
         engine: 'mongodb',
-        uri: 'mongodb://localhost:27017/test',
+        uri: 'mongodb://localhost:27017/test2',
       },
       tenants: {
         noListener: true,
@@ -43,7 +43,7 @@ describe('# Model', () => {
           relation: 'Brother',
         },
       },
-      'test',
+      'test2',
     );
 
     const Test2 = new Model(testSchema2, 'Schema2');
@@ -61,7 +61,7 @@ describe('# Model', () => {
 
   it('Saving the new doc into the DB', async () => {
     try {
-      const res = await conn.insertOne('test2', newDoc);
+      const res = await conn.insertOne(newDoc);
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDoc._data._id);
       expect(res._data).to.deep.equal(newDoc._data);

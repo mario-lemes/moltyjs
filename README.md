@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/moltyjs.svg)](https://badge.fury.io/js/moltyjs)
+
 # What is moltyjs?
 
 A tiny ODM for MongoDB with multy tenancy support.
@@ -153,11 +155,14 @@ newSchema.methods.comparePassword = async function(candidatePassword) {
 
 const TestModel = new Model(newSchema, 'TestModel');
 
-newDoc = TestModel.new({
-  email: 'test@moltyjs.com',
-  password: '1321321',
-  name: 'Michael Scott',
-});
+newDoc = TestModel.new(
+  {
+    email: 'test@moltyjs.com',
+    password: '1321321',
+    name: 'Michael Scott',
+  },
+  'test',
+);
 
 // You can call static methods from the document itself
 newDoc.comparePassword('000000'); // false
@@ -174,7 +179,7 @@ All hooks have binded the connection instance and the tenant name beside the doc
 
 In document middleware functions, **this** refers to the document or to the array of documents.
 
-## Examples:
+Examples:
 
 ```javascript
 // Pre hooks on insertOne
@@ -219,7 +224,7 @@ newSchema.post('insertMany', async function(connection, tenant, next) {
 
 * update
 
-## Examples:
+Examples:
 
 ```javascript
 // Pre hooks on update
@@ -301,11 +306,14 @@ const { Model } = require('moltys');
 
 const TestModel = new Model(newSchema, 'TestModel');
 
-newDoc = TestModel.new({
-  email: 'test@moltyjs.com',
-  password: '1321321',
-  name: 'Michael Scott',
-});
+newDoc = TestModel.new(
+  {
+    email: 'test@moltyjs.com',
+    password: '1321321',
+    name: 'Michael Scott',
+  },
+  'test',
+);
 ```
 
 **Note**: The tenant name is required to allow performing actions against the DB in the validate schema fields function, in the static methods and also in the hooks. This librarie was built to cover a lack of mongo multytenancy libraries support, if you are only working with a single tenant you can just pass the same value as a constant.
@@ -361,9 +369,8 @@ You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get 
 
 ## Saving a document
 
-### `insertOne(tenant, doc, options = {})`
+### `insertOne(doc, options = {})`
 
-* {String} `tanant` Tenant name
 * {Document} `doc` Document instance object
 * {Object} `options` Optional settings
   * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
@@ -371,14 +378,13 @@ You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get 
   * {Boolean} `forceServerObjectId` (false by default: no limit) Force server to create \_id fields instead of client.
 
 ```javascript
-const res = await connection.insertOne('tenant_test', newDoc);
+const res = await connection.insertOne(newDoc);
 // Document || Error
 ```
 
-### `insertMany(tenant, docs, options = {})`
+### `insertMany(docs, options = {})`
 
-* {String} `tanant` Tenant name
-* [{Document}] `docs` Array of Document instances
+* [{Document}] `docs` Array of Document instances of the same model and for the same tenant
 * {Object} `options` Optional settings
   * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
     instead of MongoDB Document
@@ -389,9 +395,9 @@ newDoc2 = TestModel.new({
   email: 'test2@moltyjs.com',
   password: '1321321',
   name: 'Dwight Schrute',
-});
+}, 'test');
 
-const res = await connection.insertMany('tenant_test', [newDoc, newDoc2], {moltyClass: false});
+const res = await connection.insertMany([newDoc, newDoc2], {moltyClass: false});
 // Document || Error
 ```
 

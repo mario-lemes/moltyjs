@@ -20,7 +20,7 @@ describe('# Discriminators', () => {
     const options = {
       connection: {
         engine: 'mongodb',
-        uri: 'mongodb://localhost:27017/test',
+        uri: 'mongodb://localhost:27017/test2',
       },
       tenants: {
         noListener: true,
@@ -39,7 +39,7 @@ describe('# Discriminators', () => {
         password,
         jobTitle: 'Teacher',
       },
-      'test',
+      'test2',
     );
 
     newDoc = m.new(
@@ -48,7 +48,7 @@ describe('# Discriminators', () => {
         email: 'hello@gmail.com',
         password,
       },
-      'test',
+      'test2',
     );
   });
 
@@ -79,7 +79,7 @@ describe('# Discriminators', () => {
 
   it('Testing hooks in inherited models', async () => {
     try {
-      const res = await conn.insertOne('test2', newDiscriminatorDoc);
+      const res = await conn.insertOne(newDiscriminatorDoc);
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDiscriminatorDoc._data._id);
       expect(res._data).to.deep.equal(newDiscriminatorDoc._data);
@@ -94,7 +94,7 @@ describe('# Discriminators', () => {
 
   it('Insert one doc from a parent doc', async () => {
     try {
-      const res = await conn.insertOne('test2', newDoc);
+      const res = await conn.insertOne(newDoc);
 
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDoc._data._id);

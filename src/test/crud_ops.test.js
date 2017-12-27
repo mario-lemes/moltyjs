@@ -63,7 +63,7 @@ describe('# CRUD Operations', () => {
           relation: 'Brother',
         },
       },
-      'test',
+      'test2',
     );
 
     const TestSchema2 = new Model(testSchema2, 'TestSchema2');
@@ -72,7 +72,7 @@ describe('# CRUD Operations', () => {
       {
         email,
       },
-      'test',
+      'test2',
     );
 
     const m2 = new Model(s2, 'TestModel7');
@@ -88,7 +88,7 @@ describe('# CRUD Operations', () => {
         password: 'asdasdasdasd',
         jobTitle: 'Teacher',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc2 = mDiscriminator.new(
@@ -98,7 +98,7 @@ describe('# CRUD Operations', () => {
         password: '1234567890',
         jobTitle: 'Plumber',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc3 = mDiscriminator.new(
@@ -108,7 +108,7 @@ describe('# CRUD Operations', () => {
         password: '1234567890',
         jobTitle: 'Developer',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc4 = mDiscriminator.new(
@@ -118,7 +118,7 @@ describe('# CRUD Operations', () => {
         password: '1234567890',
         jobTitle: 'Designer',
       },
-      'test',
+      'test2',
     );
     // --------------------------------------
 
@@ -129,7 +129,7 @@ describe('# CRUD Operations', () => {
         password: '1234567890',
         jobTitle: 'Web Designer',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc6 = mDiscriminator.new(
@@ -139,7 +139,7 @@ describe('# CRUD Operations', () => {
         password: '1234567890',
         jobTitle: 'Coach',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc7 = mDiscriminator.new(
@@ -149,7 +149,7 @@ describe('# CRUD Operations', () => {
         password: '1234567890',
         jobTitle: 'Engineer',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc8 = mDiscriminator.new(
@@ -159,7 +159,7 @@ describe('# CRUD Operations', () => {
         password: '1234567890',
         jobTitle: 'Architect',
       },
-      'test',
+      'test2',
     );
 
     //----------------------------------------
@@ -170,7 +170,7 @@ describe('# CRUD Operations', () => {
         password: '1234567890',
         jobTitle: 'Engineer',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc10 = mDiscriminator.new(
@@ -180,13 +180,13 @@ describe('# CRUD Operations', () => {
         password: '1234567890',
         jobTitle: 'Architect',
       },
-      'test',
+      'test2',
     );
   });
 
   it('find one document', async () => {
     try {
-      const res = await conn.insertOne('test2', newDiscriminatorDoc2);
+      const res = await conn.insertOne(newDiscriminatorDoc2);
 
       expect(res._data).to.have.property('test');
       // expect(res._data.test[0]).to.equal('YESSSSSSSSSSSSSSSSSSS');
@@ -210,7 +210,7 @@ describe('# CRUD Operations', () => {
 
   it('updateOne document', async () => {
     try {
-      const resRefDoc = await conn.insertOne('test2', refDoc);
+      const resRefDoc = await conn.insertOne(refDoc);
 
       const resUpdate = await conn.updateOne(
         'test2',
@@ -247,7 +247,7 @@ describe('# CRUD Operations', () => {
 
   it('updateOne discriminator document', async () => {
     try {
-      const res = await conn.insertOne('test2', newDiscriminatorDoc);
+      const res = await conn.insertOne(newDiscriminatorDoc);
       const resUpdate = await conn.updateOne(
         'test2',
         'TestModel7Discriminator',
@@ -277,8 +277,8 @@ describe('# CRUD Operations', () => {
 
   it('find all documents', async () => {
     try {
-      await conn.insertOne('test2', newDiscriminatorDoc3);
-      await conn.insertOne('test2', newDiscriminatorDoc4);
+      await conn.insertOne(newDiscriminatorDoc3);
+      await conn.insertOne(newDiscriminatorDoc4);
 
       let res2 = await conn.find(
         'test2',
@@ -299,7 +299,7 @@ describe('# CRUD Operations', () => {
 
   it('insertMany documents', async () => {
     try {
-      await conn.insertMany('test2', [
+      await conn.insertMany([
         newDiscriminatorDoc5,
         newDiscriminatorDoc6,
         newDiscriminatorDoc7,
@@ -325,10 +325,7 @@ describe('# CRUD Operations', () => {
 
   it('should not insertMany documents becaure are duplicated', async () => {
     try {
-      await conn.insertMany('test2', [
-        newDiscriminatorDoc9,
-        newDiscriminatorDoc10,
-      ]);
+      await conn.insertMany([newDiscriminatorDoc9, newDiscriminatorDoc10]);
 
       let res2 = await conn.find(
         'test2',

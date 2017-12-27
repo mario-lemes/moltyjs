@@ -32,6 +32,12 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.4.1] - 2017-12-27
+
+### Removed
+
+* tenant param from insertOne() and insertMany() since is not needed anumore because is already attached to the Document object
+
 ## [0.4.0] - 2017-12-27
 
 ### Added
@@ -225,6 +231,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.4.1]: https://github.com/Yonirt/moltyjs/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Yonirt/moltyjs/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Yonirt/moltyjs/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/Yonirt/moltyjs/compare/v0.2.0...v0.2.1

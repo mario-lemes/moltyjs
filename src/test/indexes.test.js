@@ -38,7 +38,7 @@ describe('# Indexes', () => {
           relation: 'Brother',
         },
       },
-      'test',
+      'test2',
     );
 
     newDoc2 = m2.new(
@@ -55,11 +55,11 @@ describe('# Indexes', () => {
           relation: 'Brother',
         },
       },
-      'test',
+      'test2',
     );
 
-    const res = await conn.insertOne('test2', newDoc);
-    const res2 = await conn.insertOne('test2', newDoc2);
+    const res = await conn.insertOne(newDoc);
+    const res2 = await conn.insertOne(newDoc2);
   });
 
   it('Ensuring index on the DB collection', async () => {

@@ -394,14 +394,17 @@ class MongoClient {
    *
    * @returns {Promise}
    */
-  async insertOne(tenant, doc, options = {}) {
-    if (!tenant && typeof tenant != 'string')
-      throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
-      );
+  async insertOne(doc, options = {}) {
     const Document = require('../document');
     if (!(doc instanceof Document))
       throw new Error('The document should be a proper Document instance');
+    if (!doc._tenant && typeof doc._tenant != 'string')
+      throw new Error(
+        'The document must specify the tenant name (String), got: ' +
+          doc._tenant,
+      );
+
+    const tenant = doc._tenant;
 
     // Assign default options to perform the inserOne query
     const insertOneOptions = Object.assign(
@@ -503,11 +506,7 @@ class MongoClient {
    *
    * @returns {Promise}
    */
-  async insertMany(tenant, docs, options = {}) {
-    if (!tenant && typeof tenant != 'string')
-      throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
-      );
+  async insertMany(docs, options = {}) {
     if (!(docs instanceof Array))
       throw new Error(
         'The documents should be a proper Array instance with documents',
@@ -517,6 +516,13 @@ class MongoClient {
     const Document = require('../document');
     if (!(docs[0] instanceof Document))
       throw new Error('Elements of the Array should be Document instances');
+    if (!docs[0]._tenant && typeof docs[0]._tenant != 'string')
+      throw new Error(
+        'The document must specify the tenant name (String), got: ' +
+          docs[0]._tenant,
+      );
+
+    const tenant = docs[0]._tenant;
 
     // Assign default options to perform the inserMany query
     const insertManyOptions = Object.assign(

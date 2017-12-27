@@ -33,7 +33,7 @@ describe('# find() Operations', () => {
     const options = {
       connection: {
         engine: 'mongodb',
-        uri: 'mongodb://localhost:27017/test',
+        uri: 'mongodb://localhost:27017/test2',
       },
       tenants: {
         noListener: true,
@@ -57,7 +57,7 @@ describe('# find() Operations', () => {
           relation: 'Brother',
         },
       },
-      'test',
+      'test2',
     );
 
     const TestSchema2 = new Model(testSchema2, 'TestSchema2');
@@ -66,7 +66,7 @@ describe('# find() Operations', () => {
       {
         email,
       },
-      'test',
+      'test2',
     );
 
     const m2 = new Model(s2, 'TestModel9');
@@ -82,7 +82,7 @@ describe('# find() Operations', () => {
         password: '1234567890',
         jobTitle: 'Plumber',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc3 = mDiscriminator.new(
@@ -92,7 +92,7 @@ describe('# find() Operations', () => {
         password: '1234567890',
         jobTitle: 'Developer',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc4 = mDiscriminator.new(
@@ -102,7 +102,7 @@ describe('# find() Operations', () => {
         password: '1234567890',
         jobTitle: 'Designer',
       },
-      'test',
+      'test2',
     );
 
     newDiscriminatorDoc = mDiscriminator.new(
@@ -112,14 +112,14 @@ describe('# find() Operations', () => {
         password: 'asdasdasdasd',
         jobTitle: 'Teacher',
       },
-      'test',
+      'test2',
     );
   });
 
   it('find all documents with projection fields (test: 1)', async () => {
     try {
-      await conn.insertOne('test2', newDiscriminatorDoc3);
-      await conn.insertOne('test2', newDiscriminatorDoc4);
+      await conn.insertOne(newDiscriminatorDoc3);
+      await conn.insertOne(newDiscriminatorDoc4);
 
       let res2 = await conn.find(
         'test2',
