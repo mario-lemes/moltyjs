@@ -119,7 +119,7 @@ const { Schema } = require('moltys');
 const otherSchema = Schema({
   job: {
     type: String,
-    validate: async (value, tenant, connection) => {
+    validate: async (connection, tenant, value) => {
       const exists = await connection.find(tenant, 'TestModel', {
         job: value,
       });
@@ -146,7 +146,11 @@ And the schema options allowed are:
 You can extend the functionality of Document class adding static method to work with the documents instances:
 
 ```javascript
-newSchema.methods.comparePassword = async function(candidatePassword) {
+newSchema.methods.comparePassword = async function(
+  connection,
+  tenant,
+  candidatePassword,
+) {
   const user = this._data;
   return candidatePassword === user.password;
 };

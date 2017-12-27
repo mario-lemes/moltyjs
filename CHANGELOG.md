@@ -32,6 +32,13 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+##
+
+### Fixed
+
+* Documentation about static methods, parameters 'connection' and 'tenant' were missing.
+* Order of Schema fields validate function.
+
 ## [0.4.1] - 2017-12-27
 
 ### Removed

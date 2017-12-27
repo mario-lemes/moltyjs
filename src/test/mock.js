@@ -262,7 +262,7 @@ const veryNewSchema = new Schema(
     tenantId: {
       type: Schema.types().ObjectId,
       ref: 'ModelRef',
-      validate: (value, tenant, dbClient) => {
+      validate: (dbClient, tenant, value) => {
         if (!tenant || !dbClient) return false;
         return true;
       },
@@ -273,8 +273,18 @@ const veryNewSchema = new Schema(
   },
 );
 
-veryNewSchema.methods.newMethod = function(dbClient, tenant, testArg) {
-  if (dbClient.models && tenant === 'test' && testArg === 'NEW VAR')
+veryNewSchema.methods.newMethod = function(
+  dbClient,
+  tenant,
+  testArg,
+  testArg2,
+) {
+  if (
+    dbClient.models &&
+    tenant === 'test' &&
+    testArg === 'NEW VAR' &&
+    testArg2 === 'NEW VAR 2'
+  )
     return true;
   return false;
 };

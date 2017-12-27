@@ -350,7 +350,7 @@ class Model {
       // Custom validation
       if (
         typeof schema[key].validate === 'function' &&
-        !schema[key].validate(payload[key], tenant, mongoClient)
+        !schema[key].validate(mongoClient, tenant, payload[key])
       ) {
         throw new Error(
           'Value assigned to ' +

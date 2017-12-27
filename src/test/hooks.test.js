@@ -105,7 +105,7 @@ describe('# Hooks', () => {
         },
         'test',
       );
-      const val = newDoc3.newMethod('NEW VAR');
+      const val = newDoc3.newMethod('NEW VAR', 'NEW VAR 2');
 
       expect(val).to.equal(true);
     } catch (error) {
