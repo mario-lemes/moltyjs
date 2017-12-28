@@ -1,10 +1,12 @@
 [![npm version](https://badge.fury.io/js/moltyjs.svg)](https://badge.fury.io/js/moltyjs)
+[![dependencies Status](https://david-dm.org/Yonirt/moltyjs/status.svg)](https://david-dm.org/Yonirt/moltyjs)
+[![devDependencies Status](https://david-dm.org/Yonirt/moltyjs/dev-status.svg)](https://david-dm.org/Yonirt/moltyjs?type=dev)
 
 # What is moltyjs?
 
 A tiny ODM for MongoDB with multy tenancy support.
 
-**NOTE: THIS LIBRARY IS NOT SUITABLE FOR A PRODUCTION ENVIRONMENT, IS STILL UNDER CONSTRUCCTIONS AND MIGTH BE BREAKING CHANGES FROM ONE COMMIT TO ANOTHER. PLEASE, USE IT CAREFULLY AND CHECK THE DOCUMENTATION IN EACH VERSION RELEASE AND THE CHANGELOG. THANK YOU!**
+**NOTE: THIS LIBRARY IS NOT SUITABLE FOR A PRODUCTION ENVIRONMENT, IS STILL UNDER CONSTRUCCTIONS AND MIGTH BE BREAKING CHANGES FROM ONE COMMIT TO ANOTHER. PLEASE, USE IT CAREFULLY AND CHECK THE DOCUMENTATION AND THE CHANGELOG IN EACH VERSION RELEASE. THANK YOU!**
 
 ## Install
 

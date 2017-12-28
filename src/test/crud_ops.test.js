@@ -318,6 +318,10 @@ describe('# CRUD Operations', () => {
       expect(res2[0]).to.have.property('newDiscriminatorMethod1');
       expect(res2[0]._discriminator).to.equal('TestModel7Discriminator');
       expect(res2[0]._modelName).to.equal('TestModel7');
+
+      expect(res2[4]._data).to.have.property('email', '5@dsfdfadsfsdf.es');
+      expect(res2[5]._data).to.have.property('email', '6@dsfdfadsfsdf.es');
+      expect(res2[6]._data).to.have.property('email', '7@dsfdfadsfsdf.es');
     } catch (error) {
       throw error;
     }

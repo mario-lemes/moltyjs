@@ -109,23 +109,23 @@ class Model {
 
     // Check if paylaod field names are correct
     this._validatePayloadFieldNames(payload, this._schemaNormalized);
+
+    let data = null;
     // Normalize the payload with the model schema
-    this._normalizedPayload = this._normalizePayload(
-      payload,
-      this._schemaNormalized,
-    );
+    data = this._normalizePayload(payload, this._schemaNormalized);
 
     try {
       // Validate all the values
       await this._validatePayloadFieldValues(
-        this._normalizedPayload,
+        data,
         this._schemaNormalized,
         tenant,
+        data,
       );
 
       // Returning the new document created
-      return new Document(
-        this._normalizedPayload,
+      const newDoc = new Document(
+        data,
         this._preHooks,
         this._postHooks,
         this._methods,
@@ -134,10 +134,10 @@ class Model {
         this._discriminator,
         tenant,
       );
+
+      return newDoc;
     } catch (err) {
       throw err;
-    } finally {
-      this._normalizedPayload = null;
     }
   }
 
@@ -270,16 +270,18 @@ class Model {
    * @param {Schema} schema
    * @param {String} tenant
    */
-  async _validatePayloadFieldValues(payload, schema, tenant = null) {
+  async _validatePayloadFieldValues(payload, schema, tenant, parentPayload) {
     for (const key of Object.keys(schema)) {
       // No required values
       if (payload[key] === undefined && !schema[key].required) continue;
 
       // Objects nested
       if (!schema[key].type && isObject(payload[key])) {
-        payload[key] = this._validatePayloadFieldValues(
+        this._validatePayloadFieldValues(
           payload[key],
           schema[key],
+          tenant,
+          parentPayload,
         );
         continue;
       }
@@ -367,14 +369,10 @@ class Model {
         let error, isValid;
         if (schema[key].validate.constructor.name === 'AsyncFunction') {
           [error, isValid] = await to(
-            schema[key].validate(mongoClient, tenant, this._normalizedPayload),
+            schema[key].validate(mongoClient, tenant, parentPayload),
           );
         } else {
-          isValid = schema[key].validate(
-            mongoClient,
-            tenant,
-            this._normalizedPayload,
-          );
+          isValid = schema[key].validate(mongoClient, tenant, parentPayload);
         }
 
         if (!isValid || error) {

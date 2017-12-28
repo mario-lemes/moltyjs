@@ -32,6 +32,12 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.5.1] - 2017-12-28
+
+### Fixed
+
+* Validation Schema function fields for nested objects.
+
 ## [0.5.0] - 2017-12-27
 
 ### Changed
@@ -255,6 +261,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.5.1]: https://github.com/Yonirt/moltyjs/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Yonirt/moltyjs/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/Yonirt/moltyjs/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/Yonirt/moltyjs/compare/v0.4.1...v0.4.2
