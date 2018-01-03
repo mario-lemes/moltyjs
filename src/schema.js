@@ -72,13 +72,6 @@ class Schema {
         throw new Error('Unsupported type or bad variable: ' + key);
       }
 
-      if (schema[key].type === ObjectId && isEmptyValue(schema[key].ref)) {
-        throw new Error(
-          'Unsupported type or bad variable, ref property is missing: ',
-          key,
-        );
-      }
-
       // If the properties of the schema field are not allowed
       if (schema[key].type && Object.keys(schema[key]).length > 1) {
         Object.keys(schema[key]).forEach(propertyKey => {
