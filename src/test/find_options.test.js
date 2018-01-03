@@ -12,7 +12,7 @@ const {
   testOptions,
   s,
   s2,
-  sDiscriminator,
+  sDiscriminator3,
 } = require('./mock');
 
 describe('# find() Operations', () => {
@@ -71,7 +71,7 @@ describe('# find() Operations', () => {
 
     const m2 = new Model(s2, 'TestModel9');
     mDiscriminator = m2.discriminator(
-      sDiscriminator,
+      sDiscriminator3,
       'TestModel7Discriminator',
     );
 

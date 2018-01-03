@@ -23,7 +23,9 @@ before(async () => {
   try {
     const conn = connect(options);
     const res = await conn.dropDatabase('test2');
+    const res2 = await conn.dropDatabase('test3');
     expect(res).to.equal(true);
+    expect(res2).to.equal(true);
   } catch (error) {
     return error;
   }

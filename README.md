@@ -91,6 +91,10 @@ const newSchema = Schema(
     age: {
       type: Number,
     },
+    tests: {
+      type: [Schema.types().ObjectId],
+      ref: 'ReferenceSchema',
+    },
   },
   {
     timestamps: true,
@@ -437,6 +441,15 @@ const resFind = await connection.find('tenant_test', 'TestModel',
 
 ### `updateOne(tenant, collection, filter, payload, options = {}) {Promise}`
 
+* {String} `tanant` Tenant name
+* {String} `collection` Collection name
+* {Object} `query` Query object
+* {Object} `options` Optional settings
+  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
+    instead of MongoDB Document
+  * {Number} `limit` (0 by default: no limit) Limit the results to the amount specified
+  * {Object} `projection` (null by default) Create a projection of a field, the projection document limits the fields to return for all matching documents
+
 ```javascript
 const resUpdate = await connection.updateOne(
   'tenant_test',
@@ -449,6 +462,49 @@ const resUpdate = await connection.updateOne(
   },
 );
 // {UpdateResult} || Error
+```
+
+## Aggregate
+
+Aggregation operations group values from multiple documents together, and can perform a variety of operations on the grouped data to return a single result.
+
+### `aggregate(tenant, collection, pipeline = [], options = {}) {Promise}`
+
+* {String} `tanant` Tenant name
+* {String} `collection` Collection name
+* {Object[]} `pipeline` Array containing all the aggregation framework commands for the execution.
+  * Pipeline stages supported [(use the same syntax as MongoDB Native Driver)](https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/):
+    * $match
+    * $lookup
+    * $project
+* {Object} `options` Optional settings
+  * "There is no options supported yet"
+
+```javascript
+const pipeline = [
+  {
+    $match: {
+      _id: newDoc._data._id,
+    },
+  },
+  {
+    $lookup: {
+      from: 'ReferenceSchema',
+      localField: 'tests',
+      foreignField: '_id',
+      as: 'models',
+    },
+  },
+  {
+    $project: {
+      _id: 0,
+      tests: 1,
+    },
+  },
+];
+
+const aggregate = await connection.aggregate('tenant_test', 'TestModel', pipeline, {});
+// {Result} || Error
 ```
 
 Updating a document support all the [update operators](https://docs.mongodb.com/v3.4/reference/operator/update/) from MongoDB

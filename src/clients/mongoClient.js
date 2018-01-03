@@ -12,6 +12,43 @@ const {
 
 const { to } = require('await-to-js');
 
+// https://docs.mongodb.com/v3.4/reference/operator/update/
+const validUpdateOperators = [
+  // Fields
+  '$currentDate',
+  '$inc',
+  '$min',
+  '$max',
+  '$mul',
+  '$rename',
+  '$set',
+  '$setOnInsert',
+  '$unset',
+  // Array
+  '$',
+  '$addToSet',
+  '$pop',
+  '$pull',
+  '$pushAll',
+  '$push',
+  '$pullAll',
+  // Modifiers
+  '$each',
+  '$position',
+  '$slice',
+  '$sort',
+  // Bitwise
+  '$bit',
+  '$isolated',
+];
+
+// https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/
+const validAggregateOperators = {
+  $match: [],
+  $lookup: ['from', 'localField', 'foreignField', 'as'],
+  $project: [],
+};
+
 const defaultTenantsOptions = {
   noListener: false,
   returnNonCachedInstance: false,
@@ -33,6 +70,8 @@ const defaultInsertManyOptions = {
   ordered: false,
   forceServerObjectId: true,
 };
+
+const defaultAggregateOptions = {};
 
 class MongoClient {
   constructor() {
@@ -148,26 +187,27 @@ class MongoClient {
     let updateHooks = new Middleware();
     let deleteHooks = new Middleware();
 
-    hooksList.forEach(key => {
-      switch (key.hook) {
-        case 'insertOne':
-          insertHooks.use(key.fn.bind(objectBinded, this, tenant));
-          break;
-        case 'insertMany':
-          insertManyHooks.use(key.fn.bind(objectBinded, this, tenant));
-          break;
-        case 'update':
-          updateHooks.use(key.fn.bind(objectBinded, this, tenant));
-          break;
-        case 'delete':
-          deleteHooks.use(key.fn.bind(objectBinded, this, tenant));
-          break;
-        default:
-          throw new Error('Hook "' + key.hook + '" is not allowed.');
-          break;
-      }
-    });
-
+    if (hooksList.length > 0) {
+      hooksList.forEach(key => {
+        switch (key.hook) {
+          case 'insertOne':
+            insertHooks.use(key.fn.bind(objectBinded, this, tenant));
+            break;
+          case 'insertMany':
+            insertManyHooks.use(key.fn.bind(objectBinded, this, tenant));
+            break;
+          case 'update':
+            updateHooks.use(key.fn.bind(objectBinded, this, tenant));
+            break;
+          case 'delete':
+            deleteHooks.use(key.fn.bind(objectBinded, this, tenant));
+            break;
+          default:
+            throw new Error('Hook "' + key.hook + '" is not allowed.');
+            break;
+        }
+      });
+    }
     return {
       insertOne: insertHooks,
       insertMany: insertManyHooks,
@@ -182,41 +222,58 @@ class MongoClient {
    * @param {Object} payload
    */
   _validateUpdateOperators(payload) {
-    // https://docs.mongodb.com/v3.4/reference/operator/update/
-    const validUpdateOperators = [
-      // Fields
-      '$currentDate',
-      '$inc',
-      '$min',
-      '$max',
-      '$mul',
-      '$rename',
-      '$set',
-      '$setOnInsert',
-      '$unset',
-      // Array
-      '$',
-      '$addToSet',
-      '$pop',
-      '$pull',
-      '$pushAll',
-      '$push',
-      '$pullAll',
-      // Modifiers
-      '$each',
-      '$position',
-      '$slice',
-      '$sort',
-      // Bitwise
-      '$bit',
-      '$isolated',
-    ];
     Object.keys(payload).forEach(operator => {
       if (validUpdateOperators.indexOf(operator) < 0) {
         throw new Error('The update operator is not allowed, got: ' + operator);
       }
-      return;
     });
+  }
+
+  /**
+   * _validateAndIndexAggregateOperators(): Check if the aggregate operators
+   * are correct and supported
+   *
+   * @param {Object} pipeline
+   */
+  _validateAndIndexAggregateOperators(pipeline) {
+    let operatorIndexes = {};
+    let i = 0;
+    for (let stage of pipeline) {
+      Object.keys(stage).forEach(operator => {
+        // Save the position of all
+        if (!operatorIndexes[operator])
+          operatorIndexes = { ...operatorIndexes, [operator]: [i] };
+        else
+          operatorIndexes = {
+            ...operatorIndexes,
+            [operator]: [operator].push(i),
+          };
+
+        if (Object.keys(validAggregateOperators).indexOf(operator) < 0) {
+          throw new Error(
+            'The aggregate operator is not allowed, got: ' + operator,
+          );
+        }
+
+        // If the aggregate operator has additional parameters let's check
+        // which we support
+        if (validAggregateOperators[operator].length > 0) {
+          Object.keys(stage[operator]).forEach(suboperator => {
+            if (validAggregateOperators[operator].indexOf(suboperator) < 0) {
+              throw new Error(
+                'The paramater ' +
+                  suboperator +
+                  ' in ' +
+                  operator +
+                  ' aggreagate operator is not allowed',
+              );
+            }
+          });
+        }
+      });
+      i++;
+    }
+    return operatorIndexes;
   }
 
   /**
@@ -707,19 +764,26 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        // Get the Cursor
-        const cursor = conn
-          .db(tenant, this._tenantsOptions)
-          .collection(collection)
-          .find(query);
+        // Get and run the Cursor
+        const [error, result] = await to(
+          conn
+            .db(tenant, this._tenantsOptions)
+            .collection(collection)
+            .find(query, {
+              limit: findOptions.limit,
+              projection: findOptions.projection,
+            })
+            .toArray(),
+        );
 
         // Run the cursor
-        const [error, result] = await to(
+        // http://mongodb.github.io/node-mongodb-native/3.0/api/Cursor.html
+        /*const [error, result] = await to(
           cursor
             .limit(findOptions.limit)
             .project(findOptions.projection)
             .toArray(),
-        );
+        );*/
 
         if (error) {
           reject(error);
@@ -782,6 +846,9 @@ class MongoClient {
     if (!payload && typeof payload != 'string')
       throw new Error('Should specify the payload object, got: ' + payload);
 
+    // Check update operators
+    this._validateUpdateOperators(payload);
+
     // If we are updating a resources in a discriminator model
     // we have to set the proper filter and addres to the parent collection
     let model = {};
@@ -810,9 +877,6 @@ class MongoClient {
           'does not exist and is not registered.',
       );
     }
-
-    // Check update operators
-    this._validateUpdateOperators(payload);
 
     // Validate the payload
     this._validatePayload(payload, model._schemaNormalized);
@@ -848,6 +912,146 @@ class MongoClient {
           await _postHooksAux.update.exec();
 
           resolve(result.result);
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        return await this._connectionManager.release(conn);
+      }
+    });
+  }
+
+  /**
+   * aggregate(): Execute an aggregation framework pipeline against the collection.
+   *
+   * @param {String} tenant
+   * @param {String} collection
+   * @param {Object[]} pipeline Array containing all the aggregation framework commands for the execution
+   * @param {Object} options Optional settings.
+   *
+   * @returns {Promise}
+   */
+  async aggregate(tenant, collection, pipeline = [], options = {}) {
+    if (!tenant && typeof tenant != 'string')
+      throw new Error(
+        'Should specify the tenant name (String), got: ' + tenant,
+      );
+    if (!collection && typeof collection != 'string')
+      throw new Error(
+        'Should specify the collection name (String), got: ' + collection,
+      );
+
+    // Check aggregate operators
+    const operatorsIndexes = this._validateAndIndexAggregateOperators(pipeline);
+
+    // Assign default options to perform the aggregate query
+    const aggregateOptions = Object.assign(
+      {},
+      defaultAggregateOptions,
+      options,
+    );
+
+    // If we are looking for resources in a discriminator model
+    // we have to set the proper filter and address to the parent collection
+    let model = {};
+    if (this.models[collection]) {
+      const { _discriminator } = this.models[collection];
+
+      if (_discriminator) {
+        const { discriminatorKey } = this.models[
+          collection
+        ]._schemaOptions.inheritOptions;
+
+        if (pipeline[0]['$match'].discriminatorKey)
+          throw new Error(
+            'You can not include a specific value for the "discriminatorKey" on the query.',
+          );
+
+        pipeline[0]['$match'] = {
+          ...pipeline[0]['$match'],
+          [discriminatorKey]: collection,
+        };
+      }
+      model = this.models[collection];
+      collection = this.models[collection]._modelName;
+    } else {
+      throw new Error(
+        'The collection ' +
+          collection +
+          'does not exist and is not registered.',
+      );
+    }
+
+    // Check if there is a $lookup operator in the pipeline with
+    // discriminated models pointing out
+    if (operatorsIndexes['$lookup']) {
+      for (let i = 0; i < operatorsIndexes['$lookup'].length; i++) {
+        let lookup = pipeline[operatorsIndexes['$lookup'][i]].$lookup;
+        if (this.models[lookup.from]) {
+          const { _discriminator } = this.models[lookup.from];
+          if (_discriminator) {
+            lookup.from = this.models[lookup.from]._modelName;
+          }
+        }
+      }
+    }
+
+    // Ensure index are created
+    if (this._indexes[collection] && this._indexes[collection].length > 0) {
+      await this.createIndexes(tenant, collection, this._indexes[collection]);
+    }
+
+    // Acquiring db instance
+    const conn = await this._connectionManager.acquire();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Get and run the Cursor
+        const [error, result] = await to(
+          conn
+            .db(tenant, this._tenantsOptions)
+            .collection(collection)
+            .aggregate(pipeline, {}) //{} = aggregateOptions
+            .toArray(),
+        );
+
+        // Run the cursor
+        // http://mongodb.github.io/node-mongodb-native/3.0/api/Cursor.html
+        /*const [error, result] = await to(
+          cursor
+            .limit(findOptions.limit)
+            .project(findOptions.projection)
+            .toArray(),
+        );*/
+
+        if (error) {
+          reject(error);
+        } else {
+          if (result) {
+            if (aggregateOptions.moltyClass) {
+              /* const Document = require('../document');
+              let docs = [];
+              result.forEach(doc => {
+                docs.push(
+                  new Document(
+                    doc,
+                    model._preHooks,
+                    model._postHooks,
+                    model._methods,
+                    model._schemaOptions,
+                    model._modelName,
+                    model._discriminator,
+                  ),
+                );
+              });
+              resolve(docs);*/
+              resolve(result);
+            } else {
+              resolve(result);
+            }
+          } else {
+            resolve(result);
+          }
         }
       } catch (error) {
         reject(error);

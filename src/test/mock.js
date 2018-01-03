@@ -218,6 +218,8 @@ const discriminatorOptions = {
 };
 
 const sDiscriminator = new Schema(discriminatorSchema, discriminatorOptions);
+const sDiscriminator2 = new Schema(discriminatorSchema, discriminatorOptions);
+const sDiscriminator3 = new Schema(discriminatorSchema, discriminatorOptions);
 
 // Pre hooks
 sDiscriminator.pre('insertOne', function(dbClient, tenant, next) {
@@ -249,6 +251,18 @@ sDiscriminator.post('insertMany', function(dbClient, tenant, next) {
 
 // Static methods
 sDiscriminator.methods.newDiscriminatorMethod1 = function() {
+  this.test = ['YESSSSSSSSSSSSSSSSSSS'];
+  return 'Static method 1!';
+};
+
+// Static methods
+sDiscriminator2.methods.newDiscriminatorMethod1 = function() {
+  this.test = ['YESSSSSSSSSSSSSSSSSSS'];
+  return 'Static method 1!';
+};
+
+// Static methods
+sDiscriminator3.methods.newDiscriminatorMethod1 = function() {
   this.test = ['YESSSSSSSSSSSSSSSSSSS'];
   return 'Static method 1!';
 };
@@ -289,14 +303,138 @@ veryNewSchema.methods.newMethod = function(
   return false;
 };
 
+const emailSchema = new Schema(
+  {
+    email: {
+      type: String,
+    },
+    files: {
+      type: [Schema.types().ObjectId],
+      ref: 'Files',
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const fileSchema = new Schema(
+  {
+    name: {
+      type: String,
+    },
+    email: {
+      type: Schema.types().ObjectId,
+      ref: 'Emails',
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+// Post hooks
+fileSchema.post('insertOne', async function(dbClient, tenant, next) {
+  try {
+    const res = await dbClient.updateOne(
+      tenant,
+      'Emails',
+      {
+        _id: Schema.types().ObjectId(this._data.email),
+      },
+      { $push: { files: this._data._id } },
+    );
+  } catch (error) {
+    throw error;
+  }
+  return next();
+});
+
+const usersSchema = new Schema(
+  {
+    name: {
+      type: String,
+    },
+    test: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+    inheritOptions: {
+      discriminatorKey: '__kind',
+    },
+  },
+);
+
+const studentsSchema = new Schema(
+  {
+    term: {
+      type: String,
+    },
+    teacher: {
+      type: Schema.types().ObjectId,
+      ref: 'Users',
+    },
+  },
+  {
+    timestamps: true,
+    inheritOptions: {
+      discriminatorKey: '__kind',
+    },
+  },
+);
+
+const teachersSchema = new Schema(
+  {
+    subject: {
+      type: String,
+    },
+    students: {
+      type: [Schema.types().ObjectId],
+      ref: 'Users',
+    },
+  },
+  {
+    timestamps: true,
+    inheritOptions: {
+      discriminatorKey: '__kind',
+    },
+  },
+);
+
+// Post hooks
+studentsSchema.post('insertOne', async function(dbClient, tenant, next) {
+  try {
+    const res = await dbClient.updateOne(
+      tenant,
+      'Teachers',
+      {
+        _id: Schema.types().ObjectId(this._data.teacher),
+      },
+      { $push: { students: this._data._id } },
+    );
+  } catch (error) {
+    throw error;
+  }
+  return next();
+});
+
 module.exports = {
   testSchema,
   testSchema2,
   veryNewSchema,
   testSchemaRefArray,
   testOptions,
+  emailSchema,
+  fileSchema,
   s,
   s2,
   s3,
   sDiscriminator,
+  sDiscriminator2,
+  sDiscriminator3,
+  usersSchema,
+  studentsSchema,
+  teachersSchema,
 };

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "watch \"npm run build\" src",
     "build": "babel src -d lib",
+    "test:coverage": "\"nyc --reporter=html --reporter=text npm run test\"",
     "test:watch": "\"npm run test -- --watch\"",
     "test": "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-core/register --require babel-polyfill --recursive --reporter spec --timeout 5000 --exit",
     "prepublish": "npm run build",
@@ -38,7 +39,7 @@
     "mocha": "^4.0.1",
     "moment": "^2.19.4",
     "np": "^2.18.2",
-    "npm": "^5.6.0",
+    "nyc": "^11.4.1",
     "watch": "^1.0.2"
   },
   "dependencies": {

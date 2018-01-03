@@ -177,16 +177,6 @@ class Model {
           ']',
       );
 
-    let schema = {
-      methods: {},
-      _preHooks: {},
-      _postHooks: {},
-      _schema: {},
-      _options: {},
-    };
-
-    schema._options = schemaDiscriminator._options;
-
     if (merge && merge.indexOf('methods') >= 0) {
       Object.keys(schemaDiscriminator.methods).forEach(key => {
         if (key in this._methods)
@@ -196,32 +186,30 @@ class Model {
           );
       });
 
-      schema.methods = Object.assign(
-        {},
-        this._methods,
-        schemaDiscriminator.methods,
-      );
+      Object.assign(schemaDiscriminator.methods, this._methods);
     }
 
     if (merge && merge.indexOf('preHooks') >= 0) {
-      schema._preHooks = this._preHooks.concat(schemaDiscriminator._preHooks);
+      schemaDiscriminator._preHooks = this._preHooks.concat(
+        schemaDiscriminator._preHooks,
+      );
     }
+
     if (merge && merge.indexOf('postHooks') >= 0) {
-      schema._postHooks = this._postHooks.concat(
+      schemaDiscriminator._postHooks = this._postHooks.concat(
         schemaDiscriminator._postHooks,
       );
     }
 
-    schema._schema = Object.assign(
-      {},
-      this._schemaNormalized,
+    Object.assign(schemaDiscriminator._schema, this._schemaNormalized);
+
+    this._validateDiscriminatorName(
+      childDiscriminatorKey,
       schemaDiscriminator._schema,
     );
 
-    this._validateDiscriminatorName(childDiscriminatorKey, schema._schema);
-
     const discriminatorModel = new Model(
-      schema,
+      schemaDiscriminator,
       this._modelName,
       discriminatorModelName,
     );

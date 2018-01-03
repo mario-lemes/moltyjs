@@ -1,8 +1,8 @@
 ## [Unreleased]
 
 * Wrap results docs in moltyClass but not remove the metadata provided by MongoDB
+* Add support to more pipeline stages in the aggregate function
 * Fix english misspelling in the documentation.
-* Populate documents with references to other documments.
 * Add deleteOne() document
 * Add embedded documents features
 * Add query operations ([mquery](https://github.com/aheckmann/mquery) query builder))
@@ -31,6 +31,17 @@
   * .sort([['a', 1]]) // Sets the sort order of the cursor query
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
+
+## [0.6.0] - 2018-01-02
+
+### Added
+
+* aggregate() function with support for $match, $project, and $lookup (without recursivity) stages pipeline
+* Documentation about new aggreagte() function
+
+### Fixed
+
+* Error that cause wrong merging og prehooks, posthooks and methods of discriminated models.
 
 ## [0.5.1] - 2017-12-28
 
@@ -261,6 +272,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.6.0]: https://github.com/Yonirt/moltyjs/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/Yonirt/moltyjs/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Yonirt/moltyjs/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/Yonirt/moltyjs/compare/v0.4.2...v0.4.3
