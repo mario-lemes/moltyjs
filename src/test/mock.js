@@ -97,7 +97,6 @@ const testSchema = {
     type: Date,
     default: () => Date.now(),
   },
-  // TODO: Change it
   emergencyContactInfo: {
     location: {
       type: String,

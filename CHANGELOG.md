@@ -32,6 +32,13 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.6.2] - 2018-01-03
+
+### Changed
+
+* Now is possible to have Mongo ObjectId type field in the Schema without refferencing any model.
+* Improoved way of validating payload on schemas and payloads
+
 ## [0.6.1] - 2018-01-03
 
 ### Fixed
@@ -278,6 +285,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.6.2]: https://github.com/Yonirt/moltyjs/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/Yonirt/moltyjs/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Yonirt/moltyjs/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/Yonirt/moltyjs/compare/v0.5.0...v0.5.1

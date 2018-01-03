@@ -259,19 +259,29 @@ class Model {
    * @param {String} tenant
    */
   async _validatePayloadFieldValues(payload, schema, tenant, parentPayload) {
-    for (const key of Object.keys(schema)) {
-      // No required values
-      if (payload[key] === undefined && !schema[key].required) continue;
-
+    for (let key of Object.keys(schema)) {
       // Objects nested
-      if (!schema[key].type && isObject(payload[key])) {
-        this._validatePayloadFieldValues(
-          payload[key],
-          schema[key],
-          tenant,
-          parentPayload,
-        );
+      if (!schema[key].type && isObject(schema[key])) {
+        try {
+          await this._validatePayloadFieldValues(
+            payload[key],
+            schema[key],
+            tenant,
+            parentPayload,
+          );
+          continue;
+        } catch (error) {
+          throw error;
+        }
+      }
+
+      // No required values
+      if ((!payload || payload[key] === undefined) && !schema[key].required)
         continue;
+
+      // Is required validation
+      if (schema[key].required && (!payload || isEmptyValue(payload[key]))) {
+        throw new Error('Key ' + key + ' is required');
       }
 
       // Validation type
@@ -388,35 +398,47 @@ class Model {
    */
   _normalizePayload(payload, schema) {
     Object.keys(schema).forEach(key => {
+      // Objects nested
+      if (!schema[key].type && isObject(schema[key])) {
+        payload[key] = this._normalizePayload(payload[key], schema[key]);
+        return;
+      }
+
       // Default values
-      if (payload[key] === undefined && 'default' in schema[key]) {
-        const defaultValue = schema[key].default;
-        payload[key] =
-          typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+      if (
+        (!payload || payload[key] === undefined) &&
+        'default' in schema[key]
+      ) {
+        const defaultValue =
+          typeof schema[key].default === 'function'
+            ? schema[key].default()
+            : schema[key].default;
+
+        if (!payload)
+          payload = {
+            [key]: defaultValue,
+          };
+        else payload[key] = defaultValue;
+
         return;
       }
 
       // If we don't have the ref Id on the payload let set as null or empty []
       // to keep record of it in the database
-      if (schema[key].ref && isEmptyValue(payload[key])) {
-        payload[key] = isArray(schema[key].type) ? [] : null;
-      }
+      if (schema[key].ref && (!payload || isEmptyValue(payload[key]))) {
+        const refNormalValue = isArray(schema[key].type) ? [] : null;
+        if (!payload)
+          payload = {
+            [key]: refNormalValue,
+          };
+        else payload[key] = refNormalValue;
 
-      // No required values
-      if (payload[key] === undefined && !schema[key].required) return;
-
-      // Objects nested
-      if (!schema[key].type && isObject(payload[key])) {
-        payload[key] = this._normalizePayload(payload[key], schema[key]);
         return;
       }
 
-      // Is required validation
-      if (schema[key].required && isEmptyValue(payload[key])) {
-        throw new Error(
-          'Key ' + key + ' is required' + ', but got ' + payload[key],
-        );
-      }
+      // No required values
+      if ((!payload || payload[key] === undefined) && !schema[key].required)
+        return;
     });
 
     return payload;
