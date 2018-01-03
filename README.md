@@ -464,6 +464,8 @@ const resUpdate = await connection.updateOne(
 // {UpdateResult} || Error
 ```
 
+Updating a document support all the [update operators](https://docs.mongodb.com/v3.4/reference/operator/update/) from MongoDB
+
 ## Aggregate
 
 Aggregation operations group values from multiple documents together, and can perform a variety of operations on the grouped data to return a single result.
@@ -506,5 +508,3 @@ const pipeline = [
 const aggregate = await connection.aggregate('tenant_test', 'TestModel', pipeline, {});
 // {Result} || Error
 ```
-
-Updating a document support all the [update operators](https://docs.mongodb.com/v3.4/reference/operator/update/) from MongoDB
