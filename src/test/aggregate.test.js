@@ -7,6 +7,7 @@ const { Schema, connect, Model } = Molty;
 const Middleware = require('../middleware');
 
 const {
+  conn,
   emailSchema,
   fileSchema,
   usersSchema,
@@ -19,7 +20,6 @@ describe('# aggregate() Operations', () => {
     newEmail2,
     newFile1,
     newFile2,
-    conn,
     Users,
     Students,
     Teachers,
@@ -28,80 +28,51 @@ describe('# aggregate() Operations', () => {
 
   before(async () => {
     try {
-      const options = {
-        connection: {
-          engine: 'mongodb',
-          uri: 'mongodb://localhost:27017/test3',
-        },
-        tenants: {
-          noListener: true,
-        },
-      };
-
-      conn = connect(options);
       const Emails = new Model(emailSchema, 'Emails');
       const Files = new Model(fileSchema, 'Files');
 
-      newEmail1 = await Emails.new(
-        {
-          email: 'test1@test.com',
-        },
-        'test3',
-      );
+      newEmail1 = await Emails.new({
+        email: 'test1@test.com',
+      });
 
-      newEmail2 = await Emails.new(
-        {
-          email: 'test2@test.com',
-        },
-        'test3',
-      );
+      newEmail2 = await Emails.new({
+        email: 'test2@test.com',
+      });
 
-      newFile1 = await Files.new(
-        {
-          name: 'My first file',
-          email: newEmail1._data._id,
-        },
-        'test3',
-      );
+      newFile1 = await Files.new({
+        name: 'My first file',
+        email: newEmail1._data._id,
+      });
 
-      newFile2 = await Files.new(
-        {
-          name: 'My second file',
-          email: newEmail1._data._id,
-        },
-        'test3',
-      );
-      await conn.insertOne(newEmail1);
-      await conn.insertOne(newEmail2);
-      await conn.insertOne(newFile1);
-      await conn.insertOne(newFile2);
+      newFile2 = await Files.new({
+        name: 'My second file',
+        email: newEmail1._data._id,
+      });
+      await conn.insertOne('test3', newEmail1);
+      await conn.insertOne('test3', newEmail2);
+      await conn.insertOne('test3', newFile1);
+      await conn.insertOne('test3', newFile2);
 
       // Discriminator
       Users = new Model(usersSchema, 'Users');
       Students = Users.discriminator(studentsSchema, 'Students');
       Teachers = Users.discriminator(teachersSchema, 'Teachers');
 
-      newTeacher = await Teachers.new(
-        {
-          name: 'Teacher',
-          subject: 'Math',
-          test: 'both',
-        },
-        'test3',
-      );
+      newTeacher = await Teachers.new({
+        name: 'Teacher',
+        subject: 'Math',
+        test: 'both',
+      });
 
-      newStudent = await Students.new(
-        {
-          name: 'Student',
-          term: '1º',
-          test: 'both',
-          teacher: newTeacher._data._id,
-        },
-        'test3',
-      );
+      newStudent = await Students.new({
+        name: 'Student',
+        term: '1º',
+        test: 'both',
+        teacher: newTeacher._data._id,
+      });
 
-      await conn.insertOne(newTeacher);
-      await conn.insertOne(newStudent);
+      await conn.insertOne('test3', newTeacher);
+      await conn.insertOne('test3', newStudent);
     } catch (error) {
       throw error;
     }

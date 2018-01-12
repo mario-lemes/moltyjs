@@ -6,10 +6,17 @@ const { Schema, connect, Model } = Molty;
 
 const Middleware = require('../middleware');
 
-const { testSchema, testOptions, s, s2, sDiscriminator } = require('./mock');
+const {
+  testSchema,
+  testOptions,
+  s,
+  s2,
+  sDiscriminator,
+  conn,
+} = require('./mock');
 
 describe('# Discriminators', () => {
-  let newDiscriminatorDoc, mDiscriminator, conn, newDoc;
+  let newDiscriminatorDoc, mDiscriminator, newDoc;
   const email = 'mariolemes5@gmail.com';
   const password = '123455647o87i87';
   const firstName = 'Mario';
@@ -17,39 +24,21 @@ describe('# Discriminators', () => {
   const gender = 'Male';
 
   before(async () => {
-    const options = {
-      connection: {
-        engine: 'mongodb',
-        uri: 'mongodb://localhost:27017/test2',
-      },
-      tenants: {
-        noListener: true,
-      },
-    };
-
-    conn = connect(options);
-
     const m = new Model(s2, 'TestModel5');
     mDiscriminator = m.discriminator(sDiscriminator, 'TestModel5Discriminator');
 
-    newDiscriminatorDoc = await mDiscriminator.new(
-      {
-        test: ['OOOKK', 'YEEEES'],
-        email,
-        password,
-        jobTitle: 'Teacher',
-      },
-      'test2',
-    );
+    newDiscriminatorDoc = await mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email,
+      password,
+      jobTitle: 'Teacher',
+    });
 
-    newDoc = await m.new(
-      {
-        test: ['OOOKK', 'YEEEES'],
-        email: 'hello@gmail.com',
-        password,
-      },
-      'test2',
-    );
+    newDoc = await m.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: 'hello@gmail.com',
+      password,
+    });
   });
 
   it('Creating a new model which inherit all the properties from another model', () => {
@@ -79,7 +68,7 @@ describe('# Discriminators', () => {
 
   it('Testing hooks in inherited models', async () => {
     try {
-      const res = await conn.insertOne(newDiscriminatorDoc);
+      const res = await conn.insertOne('test2', newDiscriminatorDoc);
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDiscriminatorDoc._data._id);
       expect(res._data).to.deep.equal(newDiscriminatorDoc._data);
@@ -94,7 +83,7 @@ describe('# Discriminators', () => {
 
   it('Insert one doc from a parent doc', async () => {
     try {
-      const res = await conn.insertOne(newDoc);
+      const res = await conn.insertOne('test2', newDoc);
 
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDoc._data._id);

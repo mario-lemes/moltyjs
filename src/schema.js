@@ -20,11 +20,10 @@ class Schema {
     if (arguments.length < 1) throw new Error('Schema is missing');
 
     this._checkFormatType(schema);
+    this._schema = schema;
 
     this._checkOptions(options);
-
     this._options = options;
-    this._schema = schema;
 
     this._preHooks = [];
     this._postHooks = [];
@@ -81,6 +80,16 @@ class Schema {
         });
       }
 
+      if (key === 'collection') {
+        throw new Error(
+          'Schema fields can not be called "collection" since is a reserved word',
+        );
+      }
+
+      if (key[0] === '_') {
+        throw new Error('Schema fields can not start with "_": ' + key);
+      }
+
       // Objects nested
       if (!schema[key].type && isObject(schema[key])) {
         return this._checkFormatType(schema[key]);
@@ -100,12 +109,44 @@ class Schema {
         throw new Error('Unsupported schema option: ' + key);
 
       // Objects inheritOptions
-      if (key == 'inheritOptions' && isObject(options[key])) {
+      if (key === 'inheritOptions' && isObject(options[key])) {
         Object.keys(options[key]).forEach(inheritOptionsKey => {
           if (!this._isValidInheritOption(inheritOptionsKey, options[key]))
             throw new Error(
               'Unsupported schema inherit option: ' + inheritOptionsKey,
             );
+
+          if (
+            inheritOptionsKey === 'discriminatorKey' &&
+            options[key].discriminatorKey[0] === '_'
+          )
+            throw new Error(
+              'Discriminator key can not start with "_": ' +
+                options[key].discriminatorKey,
+            );
+        });
+      }
+
+      // Objects elasticSearchIndexes
+      if (key === 'elasticSearchIndexes' && isObject(options[key])) {
+        Object.keys(options[key]).forEach(elasticSearchKey => {
+          if (Object.keys(this._schema).indexOf(elasticSearchKey) < 0) {
+            throw new Error(
+              'Elastic Search indexes must be belongs to the Schema, got: ' +
+                elasticSearchKey,
+            );
+          }
+
+          if (
+            !this._isValidElasticSearchIndexType(
+              options[key][elasticSearchKey].type,
+            )
+          ) {
+            throw new Error(
+              'Elastic Search index type not supported, got: ' +
+                options[key][elasticSearchKey].type,
+            );
+          }
         });
       }
     });
@@ -184,7 +225,11 @@ class Schema {
    * @returns {Boolean}
    */
   _isValidOption(option) {
-    const fieldOptions = ['timestamps', 'inheritOptions'];
+    const fieldOptions = [
+      'timestamps',
+      'inheritOptions',
+      'elasticSearchIndexes',
+    ];
     return fieldOptions.indexOf(option) > -1;
   }
 
@@ -209,6 +254,30 @@ class Schema {
       }
     }
 
+    return true;
+  }
+
+  /**
+   * _isValidElasticSearchIndexType(): Check if the ES index types
+   * is supported
+   *
+   * @param {String} type
+   *
+   * @returns {Boolean}
+   */
+  _isValidElasticSearchIndexType(type) {
+    const elasticSearchIndexTypes = [
+      'text',
+      'keyword',
+      'date',
+      'long',
+      'double',
+      'boolean',
+      'ip',
+      'object',
+      'nested',
+    ];
+    if (elasticSearchIndexTypes.indexOf(type) < 0) return false;
     return true;
   }
 }

@@ -14,10 +14,11 @@ const {
   s,
   s2,
   s3,
+  conn,
 } = require('./mock');
 
 describe('# References', () => {
-  let newDoc, conn, refDoc;
+  let newDoc, refDoc;
   const email = 'asdasdaasss@213243.com';
   const email2 = 'asdasd@asdasd.com';
   const firstName = 'Mario';
@@ -26,17 +27,6 @@ describe('# References', () => {
   const password = '1321321';
   const test = ['OOOKK', 'YEEEES'];
   before(async () => {
-    const options = {
-      connection: {
-        engine: 'mongodb',
-        uri: 'mongodb://localhost:27017/test2',
-      },
-      tenants: {
-        noListener: true,
-      },
-    };
-    conn = connect(options);
-
     const TestSchema8 = new Model(testSchema2, 'TestSchema8');
 
     const TestSchemaRefArray = new Model(
@@ -44,25 +34,19 @@ describe('# References', () => {
       'TestSchemaRefArray',
     );
 
-    refDoc = await TestSchema8.new(
-      {
-        email,
-        tenantId: Schema.types().ObjectId(),
-      },
-      'test2',
-    );
+    refDoc = await TestSchema8.new({
+      email,
+      tenantId: Schema.types().ObjectId(),
+    });
 
-    refArrayDoc = await TestSchemaRefArray.new(
-      {
-        email: 'sakjdfhasjdfh@3312123.com',
-      },
-      'test2',
-    );
+    refArrayDoc = await TestSchemaRefArray.new({
+      email: 'sakjdfhasjdfh@3312123.com',
+    });
   });
 
   it('Updating a document with a reference to another collection', async () => {
     try {
-      const res = await conn.insertOne(refDoc);
+      const res = await conn.insertOne('test2', refDoc);
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(refDoc._data._id);
       expect(res._data).to.deep.equal(refDoc._data);
@@ -74,7 +58,7 @@ describe('# References', () => {
 
   it('Updating a document with an array of references to another collection', async () => {
     try {
-      const res = await conn.insertOne(refArrayDoc);
+      const res = await conn.insertOne('test2', refArrayDoc);
       const resUpdate = await conn.updateOne(
         'test2',
         'TestSchemaRefArray',

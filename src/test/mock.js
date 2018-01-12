@@ -3,7 +3,7 @@ const moment = require('moment');
 
 const Molty = require('../index');
 
-const { Schema, model } = Molty;
+const { Schema, model, connect } = Molty;
 
 const testSchema2 = new Schema(
   {
@@ -118,7 +118,15 @@ const testSchema = {
 const testOptions = {
   timestamps: true,
   inheritOptions: {
-    discriminatorKey: '__kind',
+    discriminatorKey: 'kind',
+  },
+  elasticSearchIndexes: {
+    firstName: {
+      type: 'text',
+    },
+    lastName: {
+      type: 'text',
+    },
   },
 };
 
@@ -211,7 +219,7 @@ const discriminatorSchema = {
 const discriminatorOptions = {
   timestamps: true,
   inheritOptions: {
-    discriminatorKey: '__kind',
+    discriminatorKey: 'kind',
     merge: ['methods', 'preHooks', 'postHooks'],
   },
 };
@@ -275,8 +283,8 @@ const veryNewSchema = new Schema(
     tenantId: {
       type: Schema.types().ObjectId,
       ref: 'ModelRef',
-      validate: (dbClient, tenant, payload) => {
-        if (!tenant || !dbClient) return false;
+      validate: payload => {
+        if (!payload) return false;
         return true;
       },
     },
@@ -286,19 +294,8 @@ const veryNewSchema = new Schema(
   },
 );
 
-veryNewSchema.methods.newMethod = function(
-  dbClient,
-  tenant,
-  testArg,
-  testArg2,
-) {
-  if (
-    dbClient.models &&
-    tenant === 'test' &&
-    testArg === 'NEW VAR' &&
-    testArg2 === 'NEW VAR 2'
-  )
-    return true;
+veryNewSchema.methods.newMethod = function(testArg, testArg2) {
+  if (testArg === 'NEW VAR' && testArg2 === 'NEW VAR 2') return true;
   return false;
 };
 
@@ -314,6 +311,11 @@ const emailSchema = new Schema(
   },
   {
     timestamps: true,
+    elasticSearchIndexes: {
+      email: {
+        type: 'text',
+      },
+    },
   },
 );
 
@@ -329,6 +331,11 @@ const fileSchema = new Schema(
   },
   {
     timestamps: true,
+    elasticSearchIndexes: {
+      name: {
+        type: 'text',
+      },
+    },
   },
 );
 
@@ -361,7 +368,12 @@ const usersSchema = new Schema(
   {
     timestamps: true,
     inheritOptions: {
-      discriminatorKey: '__kind',
+      discriminatorKey: 'kind',
+    },
+    elasticSearchIndexes: {
+      name: {
+        type: 'text',
+      },
     },
   },
 );
@@ -379,7 +391,12 @@ const studentsSchema = new Schema(
   {
     timestamps: true,
     inheritOptions: {
-      discriminatorKey: '__kind',
+      discriminatorKey: 'kind',
+    },
+    elasticSearchIndexes: {
+      term: {
+        type: 'text',
+      },
     },
   },
 );
@@ -397,7 +414,7 @@ const teachersSchema = new Schema(
   {
     timestamps: true,
     inheritOptions: {
-      discriminatorKey: '__kind',
+      discriminatorKey: 'kind',
     },
   },
 );
@@ -419,7 +436,24 @@ studentsSchema.post('insertOne', async function(dbClient, tenant, next) {
   return next();
 });
 
+const options = {
+  connection: {
+    engine: 'mongodb',
+    uri:
+      'mongodb://localhost:27017,localhost:27018,localhost:27019/test?replicaSet=rs0',
+  },
+  elasticSearch: {
+    host: 'localhost:9200',
+  },
+  tenants: {
+    noListener: true,
+  },
+};
+
+const conn = connect(options);
+
 module.exports = {
+  conn,
   testSchema,
   testSchema2,
   veryNewSchema,

@@ -2,50 +2,34 @@ const { expect } = require('chai');
 
 const Molty = require('../index');
 
-const MongoClient = require('../clients/mongoClient');
+const Mongoconn = require('../clients/mongoClient');
 const ConnectionManager = require('../clients/connectionManager');
 
 const { Schema, connect } = Molty;
 
-const { testSchema, testOptions, s, m } = require('./mock');
+const { testSchema, testOptions, s, m, conn } = require('./mock');
 
 describe('# Connection', () => {
   before(() => {});
 
   it('Creating a new connection', async () => {
-    const options = {
-      connection: {
-        engine: 'mongodb',
-        uri: 'mongodb://localhost:27017/test',
-      },
-      tenants: {
-        noListener: true,
-      },
-    };
-
     try {
-      const client = await connect(options);
-      expect(client).to.have.property('_connectionManager');
-      expect(client._connectionManager).to.be.an.instanceof(ConnectionManager);
-      expect(client._connectionManager).to.have.property('_pool');
-      expect(client._connectionManager._pool).to.have.property(
-        '_started',
-        true,
-      );
-      expect(client._connectionManager._pool._factory).to.be.an.instanceof(
+      expect(conn).to.have.property('_connectionManager');
+      expect(conn._connectionManager).to.be.an.instanceof(ConnectionManager);
+      expect(conn._connectionManager).to.have.property('_pool');
+      expect(conn._connectionManager._pool).to.have.property('_started', true);
+      expect(conn._connectionManager._pool._factory).to.be.an.instanceof(
         Object,
       );
-      expect(client._connectionManager._pool._factory).to.have.property(
-        'create',
-      );
-      expect(client._connectionManager._pool._factory).to.have.property(
+      expect(conn._connectionManager._pool._factory).to.have.property('create');
+      expect(conn._connectionManager._pool._factory).to.have.property(
         'destroy',
       );
+      expect(conn._connectionManager._pool._factory.create).to.be.an.instanceof(
+        Function,
+      );
       expect(
-        client._connectionManager._pool._factory.create,
-      ).to.be.an.instanceof(Function);
-      expect(
-        client._connectionManager._pool._factory.destroy,
+        conn._connectionManager._pool._factory.destroy,
       ).to.be.an.instanceof(Function);
     } catch (error) {
       throw error;

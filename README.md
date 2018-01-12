@@ -4,7 +4,9 @@
 
 # What is moltyjs?
 
-A tiny ODM for MongoDB with multy tenancy support.
+A tiny ODM for MongoDB with multy tenancy support and Elasticsearch integration.
+
+MoltyJS allow you all what you expect from an object database modeling librarie plus multy tenancy support and Elasticsearch integration behind the scene.
 
 **NOTE: THIS LIBRARY IS NOT SUITABLE FOR A PRODUCTION ENVIRONMENT, IS STILL UNDER CONSTRUCCTIONS AND MIGTH BE BREAKING CHANGES FROM ONE COMMIT TO ANOTHER. PLEASE, USE IT CAREFULLY AND CHECK THE DOCUMENTATION AND THE CHANGELOG IN EACH VERSION RELEASE. THANK YOU!**
 
@@ -43,6 +45,9 @@ const options = {
     noListener: false, // By default
     returnNonCachedInstance: false, // By default
   },
+  elasticSearch: {
+    host: 'localhost:9200',
+  },
 };
 
 const connection = connect(options);
@@ -50,7 +55,18 @@ const connection = connect(options);
 
 "connect()" will return a connection instance which will allow you to perform all the actions availables on the DB.
 
-**Note:** For the time being MoltyJS only support Mongo Databases.
+Options settings allowed are:
+
+* _connection_: Object to set up the connection parameters to the MongoDB instance and the connection pool settings:
+  * _engine_: {String} By default 'mongodb', and for the time being MoltyJS only supports Mongo Databases.
+  * _uri_: {String} Mongo connection URI, to get more information about this take a look to the [official documentation](https://docs.mongodb.com/manual/reference/connection-string/)
+  * _max_: {Number} By default 100, set the maximum connection simultaneasly to the DB.
+  * _min_: {Number} Bu default 1, set the minimum connection simultaneasly to the DB.
+* _tenants_: Object to set up the db instance configuration
+  * _noListener_: {Boolean} By default false, do not make the db an event listener to the original connection. Keep it false if you are using MoltyJS in a multy tenancy architecture since MongoDB propagate all the events throug all the db instances oppened.
+  * _returnNonCachedInstance_: {Boolean} By default false, control if you want to return a cached instance or have a new one created
+* _elasticSearch_: Object to set up the connection parameter to the Elasticsearch instance
+  * _host_: {String} Host of the Elasticsearch instance
 
 ## Drop a DB
 
@@ -117,7 +133,7 @@ The schema field properties alowed are:
 * _min_: Optional, minimum number allowed.
 * _max_: Optional, maximum number allowed.
 * _maxlength_: Optional, maximum length of a **String**
-* _validate_: Optional, function to perform a custom validation. Payload of the document, connection instance and tenant name is passing through the function args:
+* _validate_: Optional, function to perform a custom validation. Document is passing through the function arg:
 
 ```javascript
 const { Schema } = require('moltys');
@@ -125,17 +141,10 @@ const { Schema } = require('moltys');
 const otherSchema = Schema({
   job: {
     type: String,
-    validate: async (connection, tenant, payload) => {
-      const exists = await connection.find(tenant, 'TestModel', {
-        job: payload.job,
-      });
+    validate: async doc => {
+      if (doc.field === 'exist') return true;
 
-      // If the document already exists we
-      // propagate an error with error.code = 'VALIDATION_FAILED'
-      // by returning false
-      if (exists) return false;
-
-      return true;
+      return false;
     },
   },
 });
@@ -147,33 +156,53 @@ And the schema options allowed are:
 * _inheritOptions_: Optional, used for inherit from a parent Schema
   * _discriminatorKey_: Required once "_inheritOptions_" is set
   * _merge_: Optional, must be an array with a combination of these three values ['methods', 'preHooks', 'postHooks'], depending of what you want to merge from the parent Schema.
+* _elasticSearchIndexes_: Optional, used for set the Schema field will be indexed by the Elasticsearch server and in which type: 'text', 'keyword', 'date', 'long', 'double', 'boolean', 'ip', 'object', 'nested'
+
+```javascript
+const { Schema } = require('moltys');
+
+const schemaOptions = {
+  timestamps: true,
+  inheritOptions: {
+    discriminatorKey: 'kind',
+  },
+  elasticSearchIndexes: {
+    version: {
+      type: 'text',
+    },
+  },
+};
+
+const elasticSearchSchema = Schema(
+  {
+    version: {
+      type: String,
+    },
+    counter: {
+      type: Number,
+    },
+  },
+  schemaOptions,
+);
+```
 
 ## Static methods
 
 You can extend the functionality of Document class adding static method to work with the documents instances:
 
 ```javascript
-newSchema.methods.comparePassword = async function(
-  connection,
-  tenant,
-  candidatePassword,
-) {
+newSchema.methods.comparePassword = async function(candidatePassword) {
   const user = this._data;
   return candidatePassword === user.password;
 };
 
-// Later on, after creating a model associated to the schema and then a new document from that model
-
 const TestModel = new Model(newSchema, 'TestModel');
 
-newDoc = TestModel.new(
-  {
-    email: 'test@moltyjs.com',
-    password: '1321321',
-    name: 'Michael Scott',
-  },
-  'test',
-);
+newDoc = TestModel.new({
+  email: 'test@moltyjs.com',
+  password: '1321321',
+  name: 'Michael Scott',
+});
 
 // You can call static methods from the document itself
 newDoc.comparePassword('000000'); // false
@@ -183,7 +212,7 @@ newDoc.comparePassword('000000'); // false
 
 All hooks have binded the connection instance and the tenant name beside the document or the query depending of the hook.
 
-#### Document middleware is supported for the following document functions.
+#### Document middleware is supported for the following functions.
 
 * insertOne
 * insertMany
@@ -231,9 +260,12 @@ newSchema.post('insertMany', async function(connection, tenant, next) {
 });
 ```
 
-#### Query middleware is supported for the following Model and Query functions.
+#### Query middleware is supported for the following functions.
 
 * update
+* delete
+
+In query middleware functions, **this** refers to the query.
 
 Examples:
 
@@ -241,18 +273,16 @@ Examples:
 // Pre hooks on update
 newSchema.pre('update', function(connection, tenant, next) {
   // this refers to the update query
-  console.log(this); // Ex. { $set: {jobTitle: 'Test' }}
+  console.log(this); // Ex. { $set: {jobTitle: 'Test' }} => update query
   return next();
 });
 
-// Post hooks on update
-newSchema.post('update', async function(connection, tenant, next) {
-  //...
+// Post hooks on delete
+newSchema.post('delete', async function(connection, tenant, next) {
+  console.log(this); // Ex. {_id: 5a57b7e35f142544ec0e68dc} => filter query
   return next();
 });
 ```
-
-In query middleware functions, **this** refers to the query.
 
 ## Create a new Model
 
@@ -310,7 +340,7 @@ The **merge** option must be an array with the element you want to merge from th
 
 Once we have already set up the Schema and registered the Model with it we can start creating document from that Model as follow:
 
-### `.new(payload, tenant) {Promise}`
+### `.new(payload) {Promise}`
 
 ```javascript
 const { Model } = require('moltys');
@@ -323,11 +353,8 @@ newDoc = await TestModel.new(
     password: '1321321',
     name: 'Michael Scott',
   },
-  'test',
 ); // Document // Error
 ```
-
-**Note**: The tenant name is required to allow performing actions against the DB in the validate schema fields function, in the static methods and also in the hooks. This librarie was built to cover a lack of mongo multytenancy libraries support, if you are only working with a single tenant you can just pass the same value as a constant.
 
 ## Referencing Documents
 
@@ -380,8 +407,9 @@ You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get 
 
 ## Saving a document
 
-### `insertOne(doc, options = {}) {Promise}`
+### `insertOne(tenant, doc, options = {}) {Promise}`
 
+* {String} Tenant name
 * {Document} `doc` Document instance object
 * {Object} `options` Optional settings
   * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
@@ -393,8 +421,9 @@ const res = await connection.insertOne(newDoc);
 // Document || Error
 ```
 
-### `insertMany(docs, options = {}) {Promise}`
+### `insertMany(tenant, docs, options = {}) {Promise}`
 
+* {String} Tenant name
 * [{Document}] `docs` Array of Document instances of the same model and for the same tenant
 * {Object} `options` Optional settings
   * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
@@ -406,7 +435,7 @@ newDoc2 = TestModel.new({
   email: 'test2@moltyjs.com',
   password: '1321321',
   name: 'Dwight Schrute',
-}, 'test');
+});
 
 const res = await connection.insertMany([newDoc, newDoc2], {moltyClass: false});
 // Document || Error
@@ -443,12 +472,10 @@ const resFind = await connection.find('tenant_test', 'TestModel',
 
 * {String} `tanant` Tenant name
 * {String} `collection` Collection name
-* {Object} `query` Query object
+* {Object} `filter` Filter object used to select the document to update
 * {Object} `options` Optional settings
   * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
     instead of MongoDB Document
-  * {Number} `limit` (0 by default: no limit) Limit the results to the amount specified
-  * {Object} `projection` (null by default) Create a projection of a field, the projection document limits the fields to return for all matching documents
 
 ```javascript
 const resUpdate = await connection.updateOne(
@@ -465,6 +492,26 @@ const resUpdate = await connection.updateOne(
 ```
 
 Updating a document support all the [update operators](https://docs.mongodb.com/v3.4/reference/operator/update/) from MongoDB
+
+## Deleting a document
+
+### `deleteOne(tenant, collection, filter, options = {}) {Promise}`
+
+* {String} `tanant` Tenant name
+* {String} `collection` Collection name
+* {Object} `filter` Filter object used to select the document to delete
+* {Object} `options` Optional settings
+  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
+    instead of MongoDB Document
+
+```javascript
+const resUpdate = await connection.deleteOne(
+  'tenant_test',
+  'TestModel',
+  { name: 'Michael Scott' },
+);
+// {DeleteResult} || Error
+```
 
 ## Aggregate
 

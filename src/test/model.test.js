@@ -6,45 +6,31 @@ const { Schema, connect, Model } = Molty;
 
 const Middleware = require('../middleware');
 
-const { testSchema, testSchema2, testOptions, s } = require('./mock');
+const { testSchema, testSchema2, testOptions, s, conn } = require('./mock');
 
 describe('# Model', () => {
-  let newDoc, conn;
+  let newDoc;
   const email = 'mariolemes4@gmail.com';
   const firstName = 'Mario';
   const lastName = 'Lemes';
   const gender = 'Male';
 
   before(async () => {
-    const options = {
-      connection: {
-        engine: 'mongodb',
-        uri: 'mongodb://localhost:27017/test2',
-      },
-      tenants: {
-        noListener: true,
-      },
-    };
-
-    conn = connect(options);
     const m = new Model(s, 'TestModel');
 
-    newDoc = await m.new(
-      {
-        test: ['OOOKK', 'YEEEES'],
-        email,
-        firstName,
-        lastName,
-        password: '1321321',
-        birthdate: Date.now(),
-        gender,
-        emergencyContactInfo: {
-          location: 'Las Palmas',
-          relation: 'Brother',
-        },
+    newDoc = await m.new({
+      test: ['OOOKK', 'YEEEES'],
+      email,
+      firstName,
+      lastName,
+      password: '1321321',
+      birthdate: Date.now(),
+      gender,
+      emergencyContactInfo: {
+        location: 'Las Palmas',
+        relation: 'Brother',
       },
-      'test2',
-    );
+    });
 
     const Test2 = new Model(testSchema2, 'Schema2');
   });
@@ -61,7 +47,7 @@ describe('# Model', () => {
 
   it('Saving the new doc into the DB', async () => {
     try {
-      const res = await conn.insertOne(newDoc);
+      const res = await conn.insertOne('test2', newDoc);
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDoc._data._id);
       expect(res._data).to.deep.equal(newDoc._data);

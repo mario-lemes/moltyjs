@@ -3,10 +3,9 @@
 * Wrap results docs in moltyClass but not remove the metadata provided by MongoDB
 * Add support to more pipeline stages in the aggregate function
 * Fix english misspelling in the documentation.
-* Add deleteOne() document
 * Add embedded documents features
 * Add query operations ([mquery](https://github.com/aheckmann/mquery) query builder))
-* Add cursor options ([MongoDB Doc](https://docs.mongodb.com/manual/reference/method/js-cursor/)).
+* Add more cursor options ([MongoDB Doc](https://docs.mongodb.com/manual/reference/method/js-cursor/)).
   * .skip(1) // Skip 1
   * .limit(10) // Limit 10
   * .batchSize(5) // Set batchSize on cursor to 5
@@ -31,6 +30,25 @@
   * .sort([['a', 1]]) // Sets the sort order of the cursor query
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
+
+## [0.7.0] - 2018-01-12
+
+### Added
+
+* MoltyJS now supports Elasticsearch integration! :)
+* deleteOne() method is available to perform documents deletions
+* new 'delete' hook is available
+
+### Changed
+
+* Schema methods now don't pass neither the 'tenant' name or the 'connection' instance
+* validate property Schema field now don't pass neither the 'tenant' name or the 'connection' instance
+* 'tenant' is not required in 'new Document()' anymore
+* 'tenant' now is required in 'insertOne()' and in 'insertMany()'
+
+### Fixed
+
+* Now Schemas, Models and Documents are not copied but cloned.
 
 ## [0.6.2] - 2018-01-03
 
@@ -285,6 +303,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.7.0]: https://github.com/Yonirt/moltyjs/compare/v0.6.2...v0.7.0
 [0.6.2]: https://github.com/Yonirt/moltyjs/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/Yonirt/moltyjs/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Yonirt/moltyjs/compare/v0.5.1...v0.6.0

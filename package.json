@@ -43,10 +43,14 @@
     "watch": "^1.0.2"
   },
   "dependencies": {
+    "async": "^2.6.0",
     "await-to-js": "^2.0.1",
+    "backoff": "^2.5.0",
     "bson": "^1.0.4",
+    "elasticsearch": "^14.0.0",
     "generic-pool": "^3.2.0",
     "lodash": "^4.17.4",
+    "mongo-oplog": "^2.1.0",
     "mongodb": "^3.0.0-rc0"
   }
 }

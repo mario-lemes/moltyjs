@@ -4,7 +4,7 @@ const Molty = require('../index');
 
 const { Schema } = Molty;
 
-const { testSchema, testOptions, s, s2, s3 } = require('./mock');
+const { testSchema, testOptions, s, s2, s3, conn } = require('./mock');
 
 describe('# Schema', () => {
   before(() => {});

@@ -13,12 +13,12 @@ const {
   s,
   s2,
   sDiscriminator3,
+  conn,
 } = require('./mock');
 
 describe('# find() Operations', () => {
   let newDoc,
     refDoc,
-    conn,
     mDiscriminator,
     newDiscriminatorDoc2,
     newDiscriminatorDoc3,
@@ -30,100 +30,71 @@ describe('# find() Operations', () => {
   const gender = 'Male';
 
   before(async () => {
-    const options = {
-      connection: {
-        engine: 'mongodb',
-        uri: 'mongodb://localhost:27017/test2',
-      },
-      tenants: {
-        noListener: true,
-      },
-    };
-
-    conn = connect(options);
     const m = new Model(s, 'TestModel8');
 
-    newDoc = await m.new(
-      {
-        test: ['OOOKK', 'YEEEES'],
-        email,
-        firstName,
-        lastName,
-        password: '1321321',
-        birthdate: Date.now(),
-        gender,
-        emergencyContactInfo: {
-          location: 'Las Palmas',
-          relation: 'Brother',
-        },
+    newDoc = await m.new({
+      test: ['OOOKK', 'YEEEES'],
+      email,
+      firstName,
+      lastName,
+      password: '1321321',
+      birthdate: Date.now(),
+      gender,
+      emergencyContactInfo: {
+        location: 'Las Palmas',
+        relation: 'Brother',
       },
-      'test2',
-    );
+    });
 
-    const TestSchema2 = new Model(testSchema2, 'TestSchema2');
+    const TestModel2 = new Model(testSchema2, 'TestSchema2_2');
 
-    refDoc = await TestSchema2.new(
-      {
-        email,
-      },
-      'test2',
-    );
+    refDoc = await TestModel2.new({
+      email,
+    });
 
     const m2 = new Model(s2, 'TestModel9');
     mDiscriminator = m2.discriminator(
       sDiscriminator3,
-      'TestModel7Discriminator',
+      'TestModel7Discriminator_B',
     );
 
-    newDiscriminatorDoc2 = await mDiscriminator.new(
-      {
-        test: ['OOOKK', 'YEEEES'],
-        email: 'asdfsadfsdfsfd@dsfdfadsfsdf.es',
-        password: '1234567890',
-        jobTitle: 'Plumber',
-      },
-      'test2',
-    );
+    newDiscriminatorDoc2 = await mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: 'asdfsadfsdfsfd@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Plumber',
+    });
 
-    newDiscriminatorDoc3 = await mDiscriminator.new(
-      {
-        test: ['OOOKK', 'YEEEES'],
-        email: 'asdfsassssssd@dsfdfadsfsdf.es',
-        password: '1234567890',
-        jobTitle: 'Developer',
-      },
-      'test2',
-    );
+    newDiscriminatorDoc3 = await mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: 'asdfsassssssd@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Developer',
+    });
 
-    newDiscriminatorDoc4 = await mDiscriminator.new(
-      {
-        test: ['OOOKK', 'YEEEES'],
-        email: 'a444sssssd@dsfdfadsfsdf.es',
-        password: '1234567890',
-        jobTitle: 'Designer',
-      },
-      'test2',
-    );
+    newDiscriminatorDoc4 = await mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: 'a444sssssd@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Designer',
+    });
 
-    newDiscriminatorDoc = await mDiscriminator.new(
-      {
-        test: ['OOOKK', 'YEEEES'],
-        email: email2,
-        password: 'asdasdasdasd',
-        jobTitle: 'Teacher',
-      },
-      'test2',
-    );
+    newDiscriminatorDoc = await mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: email2,
+      password: 'asdasdasdasd',
+      jobTitle: 'Teacher',
+    });
   });
 
   it('find all documents with projection fields (test: 1)', async () => {
     try {
-      await conn.insertOne(newDiscriminatorDoc3);
-      await conn.insertOne(newDiscriminatorDoc4);
+      await conn.insertOne('test2', newDiscriminatorDoc3);
+      await conn.insertOne('test2', newDiscriminatorDoc4);
 
       let res2 = await conn.find(
         'test2',
-        'TestModel7Discriminator',
+        'TestModel7Discriminator_B',
         {},
         { moltyClass: false, projection: { test: 1 } },
       );

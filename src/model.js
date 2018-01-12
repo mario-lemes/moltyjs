@@ -100,13 +100,10 @@ class Model {
    * new(): Create a new document based on this model
    *
    * @param {Object} payload
-   * @param {String} tenant
    *
    * @returns {Onject} doc
    */
-  async new(payload, tenant) {
-    if (!tenant) throw new Error('Tenant name is required, got ' + tenant);
-
+  async new(payload) {
     // Check if paylaod field names are correct
     this._validatePayloadFieldNames(payload, this._schemaNormalized);
 
@@ -119,7 +116,6 @@ class Model {
       await this._validatePayloadFieldValues(
         data,
         this._schemaNormalized,
-        tenant,
         data,
       );
 
@@ -132,7 +128,6 @@ class Model {
         this._schemaOptions,
         this._modelName,
         this._discriminator,
-        tenant,
       );
 
       return newDoc;
@@ -149,10 +144,14 @@ class Model {
    * @param {String} discriminatorModelName
    */
   discriminator(schemaDiscriminator, discriminatorModelName) {
+    const schemaAux = {};
+
+    schemaAux._options = Object.assign({}, schemaDiscriminator._options);
+
     const {
       merge,
       discriminatorKey: childDiscriminatorKey,
-    } = schemaDiscriminator._options.inheritOptions;
+    } = schemaAux._options.inheritOptions;
 
     if (!childDiscriminatorKey)
       throw new Error(
@@ -177,6 +176,7 @@ class Model {
           ']',
       );
 
+    schemaAux.methods = Object.assign({}, schemaDiscriminator.methods);
     if (merge && merge.indexOf('methods') >= 0) {
       Object.keys(schemaDiscriminator.methods).forEach(key => {
         if (key in this._methods)
@@ -186,30 +186,29 @@ class Model {
           );
       });
 
-      Object.assign(schemaDiscriminator.methods, this._methods);
+      schemaAux.methods = Object.assign({}, schemaAux.methods, this._methods);
     }
 
+    schemaAux._preHooks = schemaDiscriminator._preHooks;
     if (merge && merge.indexOf('preHooks') >= 0) {
-      schemaDiscriminator._preHooks = this._preHooks.concat(
-        schemaDiscriminator._preHooks,
-      );
+      schemaAux._preHooks = this._preHooks.concat(schemaAux._preHooks);
     }
 
+    schemaAux._postHooks = schemaDiscriminator._postHooks;
     if (merge && merge.indexOf('postHooks') >= 0) {
-      schemaDiscriminator._postHooks = this._postHooks.concat(
-        schemaDiscriminator._postHooks,
-      );
+      schemaAux._postHooks = this._postHooks.concat(schemaAux._postHooks);
     }
 
-    Object.assign(schemaDiscriminator._schema, this._schemaNormalized);
-
-    this._validateDiscriminatorName(
-      childDiscriminatorKey,
+    schemaAux._schema = Object.assign(
+      {},
       schemaDiscriminator._schema,
+      this._schemaNormalized,
     );
 
+    this._validateDiscriminatorName(childDiscriminatorKey, schemaAux._schema);
+
     const discriminatorModel = new Model(
-      schemaDiscriminator,
+      schemaAux,
       this._modelName,
       discriminatorModelName,
     );
@@ -258,7 +257,7 @@ class Model {
    * @param {Schema} schema
    * @param {String} tenant
    */
-  async _validatePayloadFieldValues(payload, schema, tenant, parentPayload) {
+  async _validatePayloadFieldValues(payload, schema, parentPayload) {
     for (let key of Object.keys(schema)) {
       // Objects nested
       if (!schema[key].type && isObject(schema[key])) {
@@ -266,7 +265,6 @@ class Model {
           await this._validatePayloadFieldValues(
             payload[key],
             schema[key],
-            tenant,
             parentPayload,
           );
           continue;
@@ -366,11 +364,9 @@ class Model {
       if (typeof schema[key].validate === 'function') {
         let error, isValid;
         if (schema[key].validate.constructor.name === 'AsyncFunction') {
-          [error, isValid] = await to(
-            schema[key].validate(mongoClient, tenant, parentPayload),
-          );
+          [error, isValid] = await to(schema[key].validate(parentPayload));
         } else {
-          isValid = schema[key].validate(mongoClient, tenant, parentPayload);
+          isValid = schema[key].validate(parentPayload);
         }
 
         if (!isValid || error) {
