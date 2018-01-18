@@ -436,6 +436,91 @@ studentsSchema.post('insertOne', async function(dbClient, tenant, next) {
   return next();
 });
 
+// Schema fiedls
+const schemaFields = new Schema(
+  {
+    string: {
+      type: String,
+    },
+    buffer: {
+      type: Buffer,
+    },
+    boolean: {
+      type: Boolean,
+    },
+    date: {
+      type: Date,
+    },
+    number: {
+      type: Number,
+    },
+    mixed: {
+      type: Object,
+    },
+    someId: {
+      type: Schema.types().ObjectId,
+    },
+    nested: {
+      stuff: {
+        type: String,
+        required: true,
+      },
+    },
+    array: {
+      type: [],
+    },
+    arrayOfString: {
+      type: [String],
+    },
+    arrayOfNumber: {
+      type: [Number],
+    },
+    arrayOfDate: {
+      type: [Date],
+    },
+    arrayOfBuffer: {
+      type: [Buffer],
+    },
+    arrayOfBoolean: {
+      type: [Boolean],
+    },
+    arrayOfMixed: {
+      type: [Object],
+    },
+    arrayOfId: {
+      type: [Schema.types().ObjectId],
+      required: true,
+    },
+    arrayOfNested: [
+      {
+        stuff: {
+          type: String,
+          required: true,
+        },
+        test: {
+          type: String,
+          maxlength: 5,
+        },
+        custom: {
+          type: String,
+          validate: payload => {
+            return payload.arrayOfNested[2].custom === 'yes';
+          },
+        },
+      },
+    ],
+    arrayOfArray: {
+      type: [[]],
+    },
+    arrayOfArrayOfNumber: {
+      type: [[Number]],
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
 const options = {
   connection: {
     engine: 'mongodb',
@@ -470,4 +555,5 @@ module.exports = {
   usersSchema,
   studentsSchema,
   teachersSchema,
+  schemaFields,
 };

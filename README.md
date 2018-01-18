@@ -6,7 +6,7 @@
 
 A tiny ODM for MongoDB with multy tenancy support and Elasticsearch integration.
 
-MoltyJS allow you all what you expect from an object database modeling librarie plus multy tenancy support and Elasticsearch integration behind the scene.
+MoltyJS allow you all what you expect from an object database modeling library plus multy tenancy support and Elasticsearch integration behind the scene.
 
 **NOTE: THIS LIBRARY IS NOT SUITABLE FOR A PRODUCTION ENVIRONMENT, IS STILL UNDER CONSTRUCCTIONS AND MIGTH BE BREAKING CHANGES FROM ONE COMMIT TO ANOTHER. PLEASE, USE IT CAREFULLY AND CHECK THE DOCUMENTATION AND THE CHANGELOG IN EACH VERSION RELEASE. THANK YOU!**
 

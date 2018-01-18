@@ -1,2 +1,7 @@
 test
 src
+node_modules
+.vscode
+.prettierignore
+coverage
+.nyc_output

@@ -70,7 +70,7 @@ const isType = function(value, type) {
   } else if (type === ObjectId) {
     return isObjectId(value);
   } else {
-    throw new Error('Unsupported type: ' + type);
+    return false;
   }
 };
 

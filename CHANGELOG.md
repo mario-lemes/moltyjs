@@ -31,7 +31,72 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
-## [0.7.0] - 2018-01-12
+## [0.8.0] - 2018-01-12
+
+### Added
+
+* Support for a better scheme field layout:
+  * ````javascript
+        {
+          nested: {
+            stuff: {
+              type: String,
+              required: true,
+            },
+          },
+          array: {
+            type: [],
+          },
+          arrayOfString: {
+            type: [String],
+          },
+          arrayOfNumber: {
+            type: [Number],
+          },
+          arrayOfDate: {
+            type: [Date],
+          },
+          arrayOfBuffer: {
+            type: [Buffer],
+          },
+          arrayOfBoolean: {
+            type: [Boolean],
+          },
+          arrayOfMixed: {
+            type: [Object],
+          },
+          arrayOfId: {
+            type: [Schema.types().ObjectId],
+            required: true,
+          },
+          arrayOfNested: [
+            {
+              stuff: {
+                type: String,
+                required: true,
+              },
+              test: {
+                type: String,
+                maxlength: 5,
+              },
+              custom: {
+                type: String,
+                validate: payload => {
+                  return payload.arrayOfNested[2].custom === 'yes';
+                },
+              },
+            },
+          ],
+          arrayOfArray: {
+            type: [[]],
+          },
+          arrayOfArrayOfNumber: {
+            type: [[Number]],
+          }
+        }
+        ```
+    ## [0.7.0] - 2018-01-12
+    ````
 
 ### Added
 
@@ -303,6 +368,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.8.0]: https://github.com/Yonirt/moltyjs/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Yonirt/moltyjs/compare/v0.6.2...v0.7.0
 [0.6.2]: https://github.com/Yonirt/moltyjs/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/Yonirt/moltyjs/compare/v0.6.0...v0.6.1

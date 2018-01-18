@@ -240,9 +240,15 @@ class Model {
             ' does not correspond to any field name on the schema',
         );
       }
+      // Array
+      if (!schema[key].type && isArray(schema[key])) {
+        payload[key].forEach(arrayItem => {
+          return this._validatePayloadFieldNames(arrayItem, schema[key][0]);
+        });
+      }
 
       // Objects nested
-      if (!schema[key].type && isObject(schema[key])) {
+      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
         return this._validatePayloadFieldNames(payload[key], schema[key]);
       }
     });
@@ -259,8 +265,24 @@ class Model {
    */
   async _validatePayloadFieldValues(payload, schema, parentPayload) {
     for (let key of Object.keys(schema)) {
+      // Array
+      if (!schema[key].type && isArray(schema[key])) {
+        for (let arrayItem of payload[key]) {
+          try {
+            await this._validatePayloadFieldValues(
+              arrayItem,
+              schema[key][0],
+              parentPayload,
+            );
+            continue;
+          } catch (error) {
+            throw error;
+          }
+        }
+      }
+
       // Objects nested
-      if (!schema[key].type && isObject(schema[key])) {
+      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
         try {
           await this._validatePayloadFieldValues(
             payload[key],
@@ -283,12 +305,17 @@ class Model {
       }
 
       // Validation type
-      if (!isValidType(payload[key], schema[key].type)) {
+      if (
+        !isValidType(
+          payload[key],
+          isArray(schema[key]) ? Array : schema[key].type,
+        )
+      ) {
         throw new Error(
           'Unsuported value (' +
-            payload[key] +
+            JSON.stringify(payload[key]) +
             ') for type ' +
-            schema[key].type,
+            schemaKeyTypeAux,
         );
       }
 
@@ -299,9 +326,9 @@ class Model {
         !schema[key].match.test(payload[key])
       ) {
         throw new Error(
-          'Value assigned to ' +
+          'Value assigned to "' +
             key +
-            ' does not match the regex/string ' +
+            '" does not match the regex/string ' +
             schema[key].match.toString() +
             '. Value was ' +
             payload[key],
@@ -311,9 +338,9 @@ class Model {
       // Enum validation
       if (!isInEnum(schema[key].enum, payload[key])) {
         throw new Error(
-          'Value assigned to ' +
+          'Value assigned to "' +
             key +
-            ' should be in enum [' +
+            '" should be in enum [' +
             schema[key].enum.join(', ') +
             '], got ' +
             payload[key],
@@ -323,9 +350,9 @@ class Model {
       // Min value validation
       if (isNumber(schema[key].min) && payload[key] < schema[key].min) {
         throw new Error(
-          'Value assigned to ' +
+          'Value assigned to "' +
             key +
-            ' is less than min, ' +
+            '" is less than min, ' +
             schema[key].min +
             ', got ' +
             payload[key],
@@ -335,9 +362,9 @@ class Model {
       // Max value validation
       if (isNumber(schema[key].max) && payload[key] > schema[key].max) {
         throw new Error(
-          'Value assigned to ' +
+          'Value assigned to "' +
             key +
-            ' is less than max, ' +
+            '" is less than max, ' +
             schema[key].max +
             ', got ' +
             payload[key],
@@ -351,9 +378,9 @@ class Model {
         payload[key].length > schema[key].maxlength
       ) {
         throw new Error(
-          'Value assigned to ' +
+          'Value assigned to "' +
             key +
-            ' is bigger than ' +
+            '" is bigger than ' +
             schema[key].maxlength.toString() +
             '. Value was ' +
             payload[key].length,
@@ -371,9 +398,9 @@ class Model {
 
         if (!isValid || error) {
           let err = new Error(
-            'Value assigned to ' +
+            'Value assigned to "' +
               key +
-              ' failed custom validator. Value was ' +
+              '" failed custom validator. Value was ' +
               payload[key],
           );
           err.code = 'VALIDATION_FAILED';

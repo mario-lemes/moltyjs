@@ -18,6 +18,8 @@ before(async () => {
     await conn.dropDatabase('es2');
     await conn.dropDatabase('es3');
     await conn.dropDatabase('es4');
+    await conn.dropDatabase('embedded');
+    await conn.dropDatabase('schemafields');
     expect(res).to.equal(true);
   } catch (error) {
     return error;
