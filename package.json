@@ -9,7 +9,8 @@
     "test:coverage": "\"nyc --reporter=html --reporter=text npm run test\"",
     "test:watch": "\"npm run test -- --watch\"",
     "test": "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-core/register --require babel-polyfill --recursive --reporter spec --timeout 5000 --exit",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build",
     "release": "np"
   },
   "repository": {

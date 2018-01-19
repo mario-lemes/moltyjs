@@ -104,6 +104,12 @@ class Model {
    * @returns {Onject} doc
    */
   async new(payload) {
+    if (
+      !payload ||
+      (Object.keys(payload).length === 0 && payload.constructor === Object)
+    )
+      throw new Error('Document payload is required');
+
     // Check if paylaod field names are correct
     this._validatePayloadFieldNames(payload, this._schemaNormalized);
 
@@ -266,7 +272,7 @@ class Model {
   async _validatePayloadFieldValues(payload, schema, parentPayload) {
     for (let key of Object.keys(schema)) {
       // Array
-      if (!schema[key].type && isArray(schema[key])) {
+      if (isArray(schema[key]) && payload[key]) {
         for (let arrayItem of payload[key]) {
           try {
             await this._validatePayloadFieldValues(
@@ -282,7 +288,7 @@ class Model {
       }
 
       // Objects nested
-      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
+      if (isObject(schema[key]) && !isArray(schema[key]) && payload[key]) {
         try {
           await this._validatePayloadFieldValues(
             payload[key],
@@ -421,9 +427,24 @@ class Model {
    */
   _normalizePayload(payload, schema) {
     Object.keys(schema).forEach(key => {
+      // Array
+      if (
+        !schema[key].type &&
+        isArray(schema[key]) &&
+        (payload[key] && payload[key].length > 0)
+      ) {
+        for (let i = 0; i < payload[key].length; i++) {
+          payload[key][i] = this._normalizePayload(
+            payload[key][i],
+            schema[key][0],
+          );
+        }
+      }
+
       // Objects nested
-      if (!schema[key].type && isObject(schema[key])) {
-        payload[key] = this._normalizePayload(payload[key], schema[key]);
+      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
+        const aux = this._normalizePayload(payload[key], schema[key]);
+        if (aux) payload[key] = aux;
         return;
       }
 
