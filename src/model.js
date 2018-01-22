@@ -247,14 +247,19 @@ class Model {
         );
       }
       // Array
-      if (!schema[key].type && isArray(schema[key])) {
+      if (isArray(schema[key]) && !schema[key][0].type && payload[key]) {
         payload[key].forEach(arrayItem => {
           return this._validatePayloadFieldNames(arrayItem, schema[key][0]);
         });
       }
 
       // Objects nested
-      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
+      if (
+        isObject(schema[key]) &&
+        !isArray(schema[key]) &&
+        !schema[key].type &&
+        (isObject(payload[key]) && Object.keys(payload[key]).length > 0)
+      ) {
         return this._validatePayloadFieldNames(payload[key], schema[key]);
       }
     });
