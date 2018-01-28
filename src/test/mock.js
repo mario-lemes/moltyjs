@@ -387,6 +387,9 @@ const studentsSchema = new Schema(
       type: Schema.types().ObjectId,
       ref: 'Users',
     },
+    marks: {
+      type: Number,
+    },
   },
   {
     timestamps: true,
@@ -409,6 +412,30 @@ const teachersSchema = new Schema(
     students: {
       type: [Schema.types().ObjectId],
       ref: 'Users',
+    },
+    dept: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+    inheritOptions: {
+      discriminatorKey: 'kind',
+    },
+  },
+);
+
+const directorSchema = new Schema(
+  {
+    name: {
+      type: String,
+    },
+    teachers: {
+      type: [Schema.types().ObjectId],
+      ref: 'Users',
+    },
+    salary: {
+      type: Number,
     },
   },
   {
@@ -555,5 +582,6 @@ module.exports = {
   usersSchema,
   studentsSchema,
   teachersSchema,
+  directorSchema,
   schemaFields,
 };

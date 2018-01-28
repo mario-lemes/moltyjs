@@ -45,7 +45,7 @@ const validUpdateOperators = [
 // https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/
 const validAggregateOperators = {
   $match: [],
-  $lookup: ['from', 'localField', 'foreignField', 'as'],
+  $lookup: ['from', 'localField', 'foreignField', 'as', 'let', 'pipeline'],
   $project: [],
 };
 
@@ -233,25 +233,33 @@ class MongoClient {
   }
 
   /**
-   * _validateAndIndexAggregateOperators(): Check if the aggregate operators
+   * _validateUpdatePayload(): Validate update payload
+   */
+  async _validateUpdatePayload(payload, model) {
+    let validations = [];
+    Object.keys(payload).forEach(operator => {
+      validations.push(
+        model.validatePayloadFieldValues(
+          payload[operator],
+          model._schemaNormalized,
+          payload[operator],
+          operator,
+        ),
+      );
+    });
+
+    validations = await Promise.all(validations);
+  }
+
+  /**
+   * _validateAggregateOperators(): Check if the aggregate operators
    * are correct and supported
    *
    * @param {Object} pipeline
    */
-  _validateAndIndexAggregateOperators(pipeline) {
-    let operatorIndexes = {};
-    let i = 0;
+  _validateAggregateOperators(pipeline) {
     for (let stage of pipeline) {
       Object.keys(stage).forEach(operator => {
-        // Save the position of all
-        if (!operatorIndexes[operator])
-          operatorIndexes = { ...operatorIndexes, [operator]: [i] };
-        else
-          operatorIndexes = {
-            ...operatorIndexes,
-            [operator]: [operator].push(i),
-          };
-
         if (Object.keys(validAggregateOperators).indexOf(operator) < 0) {
           throw new Error(
             'The aggregate operator is not allowed, got: ' + operator,
@@ -273,127 +281,66 @@ class MongoClient {
             }
           });
         }
+
+        if (operator === '$lookup' && stage['$lookup']['pipeline']) {
+          return this._validateAggregateOperators(stage['$lookup']['pipeline']);
+        }
       });
-      i++;
     }
-    return operatorIndexes;
   }
 
   /**
-   * _validatePayload(): Check if the payload is valid based on the model schema
+   * _normalizeAggregatePipeline(): Normalize $looup stages in the aggregate
+   * pipeline in case of discriminated models
    *
-   * @params {Object} payload
-   * @params {Object} schema
+   * @param {Object} pipeline
    *
-   * @returns {Boolean}
+   * @returns {Array}
    */
-  _validatePayload(payload, schema) {
-    Object.keys(payload).forEach(operator => {
-      Object.keys(payload[operator]).forEach(key => {
-        let value = payload[operator][key];
+  _normalizeAggregatePipeline(pipeline, parentDiscriminator) {
+    for (let stage of pipeline) {
+      Object.keys(stage).forEach(operator => {
+        if (operator === '$lookup') {
+          // Check if there is a $lookup operator in the pipeline with
+          // discriminated models pointing out
 
-        if (schema[key] === undefined) {
-          throw new Error(
-            'Field name ' +
-              key +
-              ' does not correspond to any field name on the schema',
-          );
-        }
+          let _discriminator = null;
+          let lookupFrom = stage['$lookup'].from;
+          if (this.models[lookupFrom]) {
+            _discriminator = this.models[lookupFrom]._discriminator;
+            if (_discriminator) {
+              stage['$lookup'].from = this.models[lookupFrom]._modelName;
+            }
+          }
 
-        // Objects nested
-        if (!schema[key].type && isObject(value)) {
-          return this._validatePayload(value, schema[key]);
-        }
-
-        // Validation type
-        if (!isValidType(value, schema[key].type)) {
-          throw new Error(
-            'Unsuported value (' + value + ') for type ' + schema[key].type,
-          );
-        }
-
-        // Reg exp validation
-        if (
-          schema[key].match &&
-          isString(value) &&
-          !schema[key].match.test(value)
-        ) {
-          throw new Error(
-            'Value assigned to ' +
-              key +
-              ' does not match the regex/string ' +
-              schema[key].match.toString() +
-              '. Value was ' +
-              value,
-          );
-        }
-
-        // Enum validation
-        if (!isInEnum(schema[key].enum, value)) {
-          throw new Error(
-            'Value assigned to ' +
-              key +
-              ' should be in enum [' +
-              schema[key].enum.join(', ') +
-              '], got ' +
-              value,
-          );
-        }
-
-        // Min value validation
-        if (isNumber(schema[key].min) && value < schema[key].min) {
-          throw new Error(
-            'Value assigned to ' +
-              key +
-              ' is less than min, ' +
-              schema[key].min +
-              ', got ' +
-              value,
-          );
-        }
-
-        // Max value validation
-        if (isNumber(schema[key].max) && value > schema[key].max) {
-          throw new Error(
-            'Value assigned to ' +
-              key +
-              ' is less than max, ' +
-              schema[key].max +
-              ', got ' +
-              value,
-          );
-        }
-
-        // Max lenght validation
-        if (
-          schema[key].maxlength &&
-          isString(value) &&
-          value.length > schema[key].maxlength
-        ) {
-          throw new Error(
-            'Value assigned to ' +
-              key +
-              ' is bigger than ' +
-              schema[key].maxlength.toString() +
-              '. Value was ' +
-              value.length,
-          );
-        }
-
-        // Custom validation
-        if (
-          typeof schema[key].validate === 'function' &&
-          !schema[key].validate(value)
-        ) {
-          throw new Error(
-            'Value assigned to ' +
-              key +
-              ' failed custom validator. Value was ' +
-              value,
-          );
+          if (stage['$lookup']['pipeline']) {
+            return this._normalizeAggregatePipeline(
+              stage['$lookup']['pipeline'],
+              _discriminator,
+            );
+          }
         }
       });
-    });
+    }
+
+    if (parentDiscriminator) {
+      const { discriminatorKey } = this.models[
+        parentDiscriminator
+      ]._schemaOptions.inheritOptions;
+
+      if (pipeline[0]['$match'] && pipeline[0]['$match'].discriminatorKey)
+        throw new Error(
+          'You can not include a specific value for the "discriminatorKey" on the query.',
+        );
+
+      const pipelineKeys = Object.keys(pipeline[0]);
+
+      pipeline.unshift({
+        $match: { [discriminatorKey]: parentDiscriminator },
+      });
+    }
+
+    return pipeline;
   }
 
   /**
@@ -876,7 +823,12 @@ class MongoClient {
     }
 
     // Validate the payload
-    this._validatePayload(payload, model._schemaNormalized);
+    await this._validateUpdatePayload(payload, model);
+    /*await model.validatePayloadFieldValues(
+      payload,
+      model._schemaNormalized,
+      payload,
+    );*/
 
     // Ensure index are created
     if (this._indexes[collection] && this._indexes[collection].length > 0) {
@@ -938,9 +890,6 @@ class MongoClient {
         'Should specify the collection name (String), got: ' + collection,
       );
 
-    // Check aggregate operators
-    const operatorsIndexes = this._validateAndIndexAggregateOperators(pipeline);
-
     // Assign default options to perform the aggregate query
     const aggregateOptions = Object.assign(
       {},
@@ -948,26 +897,28 @@ class MongoClient {
       options,
     );
 
+    this._validateAggregateOperators(pipeline);
+
     // If we are looking for resources in a discriminator model
     // we have to set the proper filter and address to the parent collection
-    let model = {};
+    let model = {},
+      discriminator = null;
     if (this.models[collection]) {
       const { _discriminator } = this.models[collection];
+
       if (_discriminator) {
         const { discriminatorKey } = this.models[
           collection
         ]._schemaOptions.inheritOptions;
 
-        if (pipeline[0]['$match'].discriminatorKey)
+        if (pipeline[0]['$match'] && pipeline[0]['$match'].discriminatorKey)
           throw new Error(
             'You can not include a specific value for the "discriminatorKey" on the query.',
           );
 
-        pipeline[0]['$match'] = {
-          ...pipeline[0]['$match'],
-          [discriminatorKey]: collection,
-        };
+        discriminator = collection;
       }
+
       model = this.models[collection];
       collection = this.models[collection]._modelName;
     } else {
@@ -978,19 +929,9 @@ class MongoClient {
       );
     }
 
-    // Check if there is a $lookup operator in the pipeline with
-    // discriminated models pointing out
-    if (operatorsIndexes['$lookup']) {
-      for (let i = 0; i < operatorsIndexes['$lookup'].length; i++) {
-        let lookup = pipeline[operatorsIndexes['$lookup'][i]].$lookup;
-        if (this.models[lookup.from]) {
-          const { _discriminator } = this.models[lookup.from];
-          if (_discriminator) {
-            lookup.from = this.models[lookup.from]._modelName;
-          }
-        }
-      }
-    }
+    // Check all stages in the pipeline looking for any lookup stage
+    // pointing out to a discriminated model
+    pipeline = this._normalizeAggregatePipeline(pipeline, discriminator);
 
     // Ensure index are created
     if (this._indexes[collection] && this._indexes[collection].length > 0) {

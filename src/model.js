@@ -119,11 +119,7 @@ class Model {
 
     try {
       // Validate all the values
-      await this._validatePayloadFieldValues(
-        data,
-        this._schemaNormalized,
-        data,
-      );
+      await this.validatePayloadFieldValues(data, this._schemaNormalized, data);
 
       // Returning the new document created
       const newDoc = new Document(
@@ -266,7 +262,7 @@ class Model {
   }
 
   /**
-   * _validatePayloadFieldValues : Check if the data type and format is
+   * validatePayloadFieldValues : Check if the data type and format is
    * accepted by the schema assigned to this model and
    * also pass all the validation
    *
@@ -274,16 +270,22 @@ class Model {
    * @param {Schema} schema
    * @param {String} tenant
    */
-  async _validatePayloadFieldValues(payload, schema, parentPayload) {
+  async validatePayloadFieldValues(
+    payload,
+    schema,
+    parentPayload,
+    operator = null,
+  ) {
     for (let key of Object.keys(schema)) {
       // Array
-      if (isArray(schema[key]) && payload[key]) {
+      if (isArray(schema[key]) && payload[key] && !schema[key].type) {
         for (let arrayItem of payload[key]) {
           try {
-            await this._validatePayloadFieldValues(
+            await this.validatePayloadFieldValues(
               arrayItem,
               schema[key][0],
               parentPayload,
+              operator,
             );
             continue;
           } catch (error) {
@@ -293,12 +295,18 @@ class Model {
       }
 
       // Objects nested
-      if (isObject(schema[key]) && !isArray(schema[key]) && payload[key]) {
+      if (
+        isObject(schema[key]) &&
+        !isArray(schema[key]) &&
+        payload[key] &&
+        !schema[key].type
+      ) {
         try {
-          await this._validatePayloadFieldValues(
+          await this.validatePayloadFieldValues(
             payload[key],
             schema[key],
             parentPayload,
+            operator,
           );
           continue;
         } catch (error) {
@@ -307,11 +315,18 @@ class Model {
       }
 
       // No required values
-      if ((!payload || payload[key] === undefined) && !schema[key].required)
+      if (
+        (!payload || payload[key] === undefined) &&
+        (!schema[key].requiredn || operator)
+      )
         continue;
 
       // Is required validation
-      if (schema[key].required && (!payload || isEmptyValue(payload[key]))) {
+      if (
+        (!operator || operator === '$unset') &&
+        schema[key].required &&
+        (!payload || isEmptyValue(payload[key]))
+      ) {
         throw new Error('Key ' + key + ' is required');
       }
 
@@ -326,7 +341,7 @@ class Model {
           'Unsuported value (' +
             JSON.stringify(payload[key]) +
             ') for type ' +
-            schemaKeyTypeAux,
+            schema[key].type,
         );
       }
 

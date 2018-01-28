@@ -173,6 +173,7 @@ describe('# CRUD Operations', () => {
         { _id: refDoc._data._id },
         {
           $set: {
+            email: 'test@test.com',
             tenantId: Schema.types().ObjectId('5a3411ed14ee497f1c2bcb58'),
           },
         },
@@ -209,6 +210,7 @@ describe('# CRUD Operations', () => {
         { _id: newDiscriminatorDoc._data._id },
         {
           $set: {
+            email: 'test@test.com',
             jobTitle: 'CAMIONERO',
           },
         },

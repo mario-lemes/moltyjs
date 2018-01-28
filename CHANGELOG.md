@@ -31,6 +31,20 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.8.3] - 2018-01-23
+
+### Added
+
+* Support for multiple join conditions with $lookup operator in the aggregate() method
+
+### Changed
+
+* Validation payload method on updated() action, now is used the same from the Model itself.
+
+### Fixed
+
+* Bug in aggregate() method for discriminated models
+
 ## [0.8.2] - 2018-01-22
 
 ### Fixed
@@ -380,6 +394,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.8.3]: https://github.com/Yonirt/moltyjs/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/Yonirt/moltyjs/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/Yonirt/moltyjs/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/Yonirt/moltyjs/compare/v0.7.0...v0.8.0
