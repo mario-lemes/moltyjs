@@ -1,5 +1,6 @@
 const mongoClient = require('./clients/mongoClient');
 const Document = require('./document');
+
 const { to } = require('await-to-js');
 const {
   isValidType,
@@ -278,7 +279,7 @@ class Model {
   ) {
     for (let key of Object.keys(schema)) {
       // Array
-      if (isArray(schema[key]) && payload[key] && !schema[key].type) {
+      if (!schema[key].type && isArray(schema[key]) && payload[key]) {
         for (let arrayItem of payload[key]) {
           try {
             await this.validatePayloadFieldValues(
@@ -296,10 +297,10 @@ class Model {
 
       // Objects nested
       if (
+        !schema[key].type &&
         isObject(schema[key]) &&
         !isArray(schema[key]) &&
-        payload[key] &&
-        !schema[key].type
+        payload[key]
       ) {
         try {
           await this.validatePayloadFieldValues(
@@ -317,7 +318,7 @@ class Model {
       // No required values
       if (
         (!payload || payload[key] === undefined) &&
-        (!schema[key].requiredn || operator)
+        (!schema[key].required || operator)
       )
         continue;
 
@@ -487,17 +488,25 @@ class Model {
         return;
       }
 
-      // If we don't have the ref Id on the payload let set as null or empty []
-      // to keep record of it in the database
-      if (schema[key].ref && (!payload || isEmptyValue(payload[key]))) {
-        const refNormalValue = isArray(schema[key].type) ? [] : null;
-        if (!payload)
+      // Ref values (Ids)
+      if (schema[key].ref) {
+        if (!payload || isEmptyValue(payload[key])) {
+          const refNormalValue = isArray(schema[key].type) ? [] : null;
           payload = {
+            ...payload,
             [key]: refNormalValue,
           };
-        else payload[key] = refNormalValue;
-
-        return;
+          return;
+        } else if (payload[key]) {
+          const Schema = require('./schema');
+          if (isArray(schema[key].type)) {
+            payload[key].forEach(value => {
+              payload[key] = Schema.types().ObjectId(value);
+            });
+          } else {
+            payload[key] = Schema.types().ObjectId(payload[key]);
+          }
+        }
       }
 
       // No required values

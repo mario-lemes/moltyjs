@@ -31,6 +31,22 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.8.4] - 2018-01-28
+
+### Added
+
+* Normalization of Mongo Ids
+* New aggregation pipeline stages ( $replaceRoot, $facet, $unwind, $group)
+
+### Removed
+
+* Validation on update Documents
+
+### Fixed
+
+* Bug validating empty (null) values
+* Bug validating enum array values
+
 ## [0.8.3] - 2018-01-23
 
 ### Added
@@ -394,6 +410,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.8.4]: https://github.com/Yonirt/moltyjs/compare/v0.8.3...v0.8.4
 [0.8.3]: https://github.com/Yonirt/moltyjs/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/Yonirt/moltyjs/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/Yonirt/moltyjs/compare/v0.8.0...v0.8.1

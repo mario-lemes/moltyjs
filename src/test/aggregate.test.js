@@ -267,7 +267,6 @@ describe('# aggregate() Operations', () => {
 
       const aggregate = await conn.aggregate('test3', 'Teachers', pipeline, {});
 
-      console.log(aggregate);
       expect(aggregate[0]).to.have.property('students');
       expect(aggregate[0].students).to.have.lengthOf(2);
       expect(aggregate[0].students[0]).to.have.property('name', 'Student');

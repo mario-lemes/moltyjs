@@ -47,6 +47,10 @@ const validAggregateOperators = {
   $match: [],
   $lookup: ['from', 'localField', 'foreignField', 'as', 'let', 'pipeline'],
   $project: [],
+  $replaceRoot: [],
+  $facet: [],
+  $unwind: [],
+  $group: [],
 };
 
 const defaultTenantsOptions = {
@@ -230,25 +234,6 @@ class MongoClient {
         throw new Error('The update operator is not allowed, got: ' + operator);
       }
     });
-  }
-
-  /**
-   * _validateUpdatePayload(): Validate update payload
-   */
-  async _validateUpdatePayload(payload, model) {
-    let validations = [];
-    Object.keys(payload).forEach(operator => {
-      validations.push(
-        model.validatePayloadFieldValues(
-          payload[operator],
-          model._schemaNormalized,
-          payload[operator],
-          operator,
-        ),
-      );
-    });
-
-    validations = await Promise.all(validations);
   }
 
   /**
@@ -821,14 +806,6 @@ class MongoClient {
           'does not exist and is not registered.',
       );
     }
-
-    // Validate the payload
-    await this._validateUpdatePayload(payload, model);
-    /*await model.validatePayloadFieldValues(
-      payload,
-      model._schemaNormalized,
-      payload,
-    );*/
 
     // Ensure index are created
     if (this._indexes[collection] && this._indexes[collection].length > 0) {

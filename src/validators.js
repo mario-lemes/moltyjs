@@ -117,11 +117,20 @@ const isInEnum = function(choices, choice) {
   if (!choices) {
     return true;
   }
+
+  if (isArray(choice)) {
+    for (let choiceItem of choice) {
+      if (choices.indexOf(choiceItem) < 0) return false;
+    }
+    return true;
+  }
+
   return choices.indexOf(choice) > -1;
 };
 
 const isEmptyValue = function(value) {
   return (
+    value === null ||
     typeof value === 'undefined' ||
     (!(
       typeof value === 'number' ||

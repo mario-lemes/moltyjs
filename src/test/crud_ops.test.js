@@ -330,7 +330,6 @@ describe('# CRUD Operations', () => {
 
       expect(resFind).to.have.lengthOf(0);
     } catch (error) {
-      console.log(error);
       throw new Error('Unexpected');
     }
   });
