@@ -51,6 +51,10 @@ const validAggregateOperators = {
   $facet: [],
   $unwind: [],
   $group: [],
+  $count: [],
+  $group: [],
+  $addFields: [],
+  $redact: [],
 };
 
 const defaultTenantsOptions = {
