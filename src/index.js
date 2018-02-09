@@ -11,6 +11,7 @@ class Molty {
     this.Model = Model;
 
     this.connection = null;
+    this;
 
     // Binding methods
     this.connect = this.connect.bind(this);
@@ -25,6 +26,16 @@ class Molty {
    */
   connect(options) {
     this.connection = mongoClient.connect(options);
+    if (this.connection._connectionManager._elasticSearch) {
+      this.connection.ES = {
+        search: this.connection._connectionManager.searchOnES.bind(
+          this.connection._connectionManager,
+        ),
+        drop: this.connection._connectionManager.deleteIndexOnES.bind(
+          this.connection._connectionManager,
+        ),
+      };
+    }
     return this.connection;
   }
 }

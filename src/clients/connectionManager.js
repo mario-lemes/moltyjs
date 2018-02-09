@@ -334,7 +334,7 @@ class ConnectionManager {
     if (!indexExists) {
       const [error, result] = await to(this._elasticSearch.createIndex(index));
 
-      /*Object.keys(indexes).forEach(index => {
+      Object.keys(indexes).forEach(index => {
         indexes = {
           ...indexes,
           [index]: {
@@ -344,10 +344,72 @@ class ConnectionManager {
         };
       });
 
-      await this._elasticSearch.putMapping(index, collection, indexes);*/
+      await this._elasticSearch.putMapping(index, collection, indexes);
     }
 
     return [index, collection];
+  }
+
+  // ===============================
+  // PUBLIC ELASTIC SEARCH API =====
+  // ===============================
+
+  /**
+   * searchOnES(): Get documents from ES based
+   * on its query
+   *
+   * @param {String} index
+   * @param {String} collection
+   * @param {Object} query
+   *
+   * @returns {Array}
+   */
+  async searchOnES(index, collection, query = []) {
+    const model = this.models[collection];
+    let match = {};
+
+    if (model._schemaOptions && model._schemaOptions.inheritOptions) {
+      const { discriminatorKey } = model._schemaOptions.inheritOptions;
+      match = [
+        {
+          match: {
+            collection: model._modelName,
+          },
+        },
+        {
+          match: {
+            [discriminatorKey]: collection,
+          },
+        },
+      ];
+    } else {
+      match = {
+        match: {
+          collection: model._modelName,
+        },
+      };
+    }
+
+    query = {
+      bool: {
+        must: [...match, ...query],
+      },
+    };
+
+    return await this._elasticSearch.search(index, 'doc', query);
+  }
+
+  /**
+   * deleteIndexOnES(): Delete index from ES
+   *
+   * @param {String} index
+   * @param {String} collection
+   * @param {Object} query
+   *
+   * @returns {Array}
+   */
+  async deleteIndexOnES(index) {
+    return await this._elasticSearch.deleteIndex(index);
   }
 }
 

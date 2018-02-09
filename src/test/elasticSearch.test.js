@@ -152,4 +152,39 @@ describe('# Elastic Search', () => {
       throw error;
     }
   });
+
+  it('Get suggestions from ES', async () => {
+    try {
+      // GET SUGGESTIONS
+      query = [
+        {
+          match_phrase_prefix: {
+            firstName: {
+              query: 'Great',
+              max_expansions: 100,
+              slop: 10,
+            },
+          },
+          /*wildcard: {
+          name: '*',
+        },*/
+        },
+      ];
+
+      const res = await conn.ES.search(
+        'es4',
+        'TestModel7Discriminator_2',
+        query,
+      );
+
+      expect(res).to.have.property('hits');
+      expect(res.hits).to.have.property('hits');
+      expect(res.hits.hits).to.have.lengthOf(5);
+      expect(res.hits.hits[0]).to.have.property('_index', 'es4');
+      expect(res.hits.hits[0]).to.have.property('_source');
+      expect(res.hits.hits[0]._source).to.have.property('firstName', 'GREAT');
+    } catch (error) {
+      throw error;
+    }
+  });
 });

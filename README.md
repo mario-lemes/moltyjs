@@ -555,3 +555,9 @@ const pipeline = [
 const aggregate = await connection.aggregate('tenant_test', 'TestModel', pipeline, {});
 // {Result} || Error
 ```
+
+## Elastisearch API public
+
+### `search(tenant, collection, query=[]) {Promise}`
+
+### `drop(tenant) {Promise}`

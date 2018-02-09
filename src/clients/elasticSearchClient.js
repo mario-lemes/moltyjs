@@ -3,9 +3,13 @@ const elasticsearch = require('elasticsearch');
 class ElasticSearchClient {
   constructor(options) {
     if (!options.host) throw new Error('Elasticsearch host is missing');
-    this.esClient = new elasticsearch.Client({
-      host: options.host,
-    });
+    try {
+      this.esClient = new elasticsearch.Client({
+        host: options.host,
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -95,15 +99,16 @@ class ElasticSearchClient {
         properties: {
           type: { type: 'keyword' },
           ...properties,
-          /*suggest: {
+          suggest: {
             type: 'completion',
             analyzer: 'simple',
             search_analyzer: 'simple',
             payloads: true,
-          },*/
+          },
         },
       },
     };
+    console.log(mapping);
     return this.esClient.indices.putMapping(mapping);
   }
 
@@ -111,10 +116,10 @@ class ElasticSearchClient {
    * addDocument(): Add a document into the ES
    * instance
    *
-   * @param {*} index
-   * @param {*} type
-   * @param {*} id
-   * @param {*} body
+   * @param {String} index
+   * @param {String} type
+   * @param {String} id
+   * @param {Object} body
    *
    * @returns {Promise}
    */
@@ -129,12 +134,12 @@ class ElasticSearchClient {
   }
 
   /**
-   * updateDocument(): Update parts of a document
+   * updateDocument(): Update parts of a document in ES
    *
-   * @param {*} index
-   * @param {*} type
-   * @param {*} id
-   * @param {*} body
+   * @param {String} index
+   * @param {String} type
+   * @param {String} id
+   * @param {Object} body
    *
    * @returns {Promise}
    */
@@ -152,12 +157,41 @@ class ElasticSearchClient {
     });
   }
 
+  /**
+   * deleteDocument(): Delete a document from ES
+   *
+   * @param {String} index
+   * @param {String} type
+   * @param {String} id
+   *
+   * @returns [Promise]
+   */
   deleteDocument(index, type, id) {
     return this.esClient.delete({
       index,
       type,
       id,
       refresh: true,
+    });
+  }
+
+  /**
+   * search(): Get Documents from ES based on
+   * a query
+   *
+   * @param {String} index
+   * @param {String} type
+   * @param {Object} query
+   *
+   * @returns {Promise}
+   */
+  search(index, type, query) {
+    return this.esClient.search({
+      index,
+      type,
+      body: {
+        query,
+      },
     });
   }
 }

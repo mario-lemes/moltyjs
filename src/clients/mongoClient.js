@@ -107,8 +107,13 @@ class MongoClient {
       options.tenants,
     );
 
-    this._connectionManager = new ConnectionManager(options);
-    return this;
+    try {
+      this._connectionManager = new ConnectionManager(options);
+
+      return this;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**

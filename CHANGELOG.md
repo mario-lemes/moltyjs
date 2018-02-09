@@ -31,6 +31,12 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.8.6] - 2018-02-09
+
+### Added
+
+* Exposing API public to manage the Elasticseach (drop, search)
+
 ## [0.8.5] - 2018-02-02
 
 ### Added
@@ -416,6 +422,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.8.6]: https://github.com/Yonirt/moltyjs/compare/v0.8.5...v0.8.6
 [0.8.5]: https://github.com/Yonirt/moltyjs/compare/v0.8.4...v0.8.5
 [0.8.4]: https://github.com/Yonirt/moltyjs/compare/v0.8.3...v0.8.4
 [0.8.3]: https://github.com/Yonirt/moltyjs/compare/v0.8.2...v0.8.3
