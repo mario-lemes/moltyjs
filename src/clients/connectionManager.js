@@ -334,7 +334,7 @@ class ConnectionManager {
     if (!indexExists) {
       const [error, result] = await to(this._elasticSearch.createIndex(index));
 
-      Object.keys(indexes).forEach(index => {
+      /*Object.keys(indexes).forEach(index => {
         indexes = {
           ...indexes,
           [index]: {
@@ -344,7 +344,7 @@ class ConnectionManager {
         };
       });
 
-      await this._elasticSearch.putMapping(index, collection, indexes);
+      await this._elasticSearch.putMapping(index, collection, indexes);*/
     }
 
     return [index, collection];

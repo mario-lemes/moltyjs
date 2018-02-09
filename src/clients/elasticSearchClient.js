@@ -99,16 +99,15 @@ class ElasticSearchClient {
         properties: {
           type: { type: 'keyword' },
           ...properties,
-          suggest: {
+          /*suggest: {
             type: 'completion',
             analyzer: 'simple',
             search_analyzer: 'simple',
             payloads: true,
-          },
+          },*/
         },
       },
     };
-    console.log(mapping);
     return this.esClient.indices.putMapping(mapping);
   }
 

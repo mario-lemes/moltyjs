@@ -31,6 +31,12 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.8.7] - 2018-02-09
+
+### Fixed
+
+* Bug in the index mapping of Elasticsearch
+
 ## [0.8.6] - 2018-02-09
 
 ### Added
@@ -149,8 +155,9 @@
           }
         }
         ```
-    ## [0.7.0] - 2018-01-12
     ````
+
+## [0.7.0] - 2018-01-12
 
 ### Added
 
@@ -422,6 +429,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.8.7]: https://github.com/Yonirt/moltyjs/compare/v0.8.6...v0.8.7
 [0.8.6]: https://github.com/Yonirt/moltyjs/compare/v0.8.5...v0.8.6
 [0.8.5]: https://github.com/Yonirt/moltyjs/compare/v0.8.4...v0.8.5
 [0.8.4]: https://github.com/Yonirt/moltyjs/compare/v0.8.3...v0.8.4
