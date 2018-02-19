@@ -62,6 +62,9 @@ const defaultTenantsOptions = {
   returnNonCachedInstance: false,
 };
 
+/**
+ * DEFAULT METHODS OPTIONS
+ */
 const defaultFindOptions = {
   moltyClass: true,
   limit: 0,
@@ -79,7 +82,18 @@ const defaultInsertManyOptions = {
   forceServerObjectId: true,
 };
 
-const defaultAggregateOptions = {};
+const defaultUpdateOneOptions = {
+  moltyClass: true,
+  upsert: false,
+};
+
+const defaultAggregateOptions = {
+  moltyClass: true,
+};
+
+const defaultDeleteOneOptions = {
+  moltyClass: true,
+};
 
 class MongoClient {
   constructor() {
@@ -411,6 +425,9 @@ class MongoClient {
       options,
     );
 
+    const moltyClassEnabled = insertOneOptions.moltyClass;
+    delete insertOneOptions.moltyClass;
+
     // If we are inserting a resources in a discriminator model
     // we have to set the proper params and address to the parent collection
     const [
@@ -462,7 +479,7 @@ class MongoClient {
           // Running post insert hooks
           await _postHooksAux.insertOne.exec();
           if (result) {
-            if (insertOneOptions.moltyClass) {
+            if (moltyClassEnabled) {
               // Binding model properties to the document
               const Document = require('../document');
 
@@ -525,6 +542,9 @@ class MongoClient {
       defaultInsertManyOptions,
       options,
     );
+
+    const moltyClassEnabled = insertManyOptions.moltyClass;
+    delete insertManyOptions.moltyClass;
 
     // If we are inserting a resources in a discriminator model
     // we have to set the proper params and address to the parent collection
@@ -606,7 +626,7 @@ class MongoClient {
           await _postHooksAux.insertMany.exec();
 
           if (result) {
-            if (insertManyOptions.moltyClass) {
+            if (moltyClassEnabled) {
               let docInserted = [];
               for (let i = 0; i < result.ops.length; i++) {
                 // Binding model properties to the document
@@ -663,6 +683,9 @@ class MongoClient {
 
     // Assign default options to perform the find query
     const findOptions = Object.assign({}, defaultFindOptions, options);
+
+    const moltyClassEnabled = findOptions.moltyClass;
+    delete findOptions.moltyClass;
 
     // If we are looking for resources in a discriminator model
     // we have to set the proper filter and addres to the parent collection
@@ -727,7 +750,7 @@ class MongoClient {
           reject(error);
         } else {
           if (result) {
-            if (findOptions.moltyClass) {
+            if (moltyClassEnabled) {
               const Document = require('../document');
               let docs = [];
               result.forEach(doc => {
@@ -784,6 +807,16 @@ class MongoClient {
     if (!payload && typeof payload != 'string')
       throw new Error('Should specify the payload object, got: ' + payload);
 
+    // Assign default options to perform the updateOne query
+    const updateOneOptions = Object.assign(
+      {},
+      defaultUpdateOneOptions,
+      options,
+    );
+
+    const moltyClassEnabled = updateOneOptions.moltyClass;
+    delete updateOneOptions.moltyClass;
+
     // Check update operators
     this._validateUpdateOperators(payload);
 
@@ -837,7 +870,7 @@ class MongoClient {
           conn
             .db(tenant, this._tenantsOptions)
             .collection(collection)
-            .updateOne(filter, payload, options),
+            .updateOne(filter, payload, updateOneOptions),
         );
 
         if (error) {
@@ -882,6 +915,9 @@ class MongoClient {
       defaultAggregateOptions,
       options,
     );
+
+    const moltyClassEnabled = aggregateOptions.moltyClass;
+    delete aggregateOptions.moltyClass;
 
     this._validateAggregateOperators(pipeline);
 
@@ -934,7 +970,7 @@ class MongoClient {
           conn
             .db(tenant, this._tenantsOptions)
             .collection(collection)
-            .aggregate(pipeline, {}) //{} = aggregateOptions
+            .aggregate(pipeline, aggregateOptions)
             .toArray(),
         );
 
@@ -951,7 +987,7 @@ class MongoClient {
           reject(error);
         } else {
           if (result) {
-            if (aggregateOptions.moltyClass) {
+            if (moltyClassEnabled) {
               /* const Document = require('../document');
               let docs = [];
               result.forEach(doc => {
@@ -1006,6 +1042,16 @@ class MongoClient {
     if (!filter && typeof filter != 'object')
       throw new Error('Should specify the filter options, got: ' + filter);
 
+    // Assign default options to perform the deleteOne query
+    const deleteOneOptions = Object.assign(
+      {},
+      defaultDeleteOneOptions,
+      options,
+    );
+
+    const moltyClassEnabled = deleteOneOptions.moltyClass;
+    delete deleteOneOptions.moltyClass;
+
     // If we are deleting a resources in a discriminator model
     // we have to set the proper filter and addres to the parent collection
     let model = {};
@@ -1056,7 +1102,7 @@ class MongoClient {
           conn
             .db(tenant, this._tenantsOptions)
             .collection(collection)
-            .deleteOne(filter, options),
+            .deleteOne(filter, deleteOneOptions),
         );
 
         if (error) {

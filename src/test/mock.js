@@ -562,6 +562,43 @@ const options = {
   },
 };
 
+const diagnosisSchema = new Schema(
+  {
+    classificationType: {
+      type: String,
+      required: true,
+      maxlength: 30,
+    },
+    code: {
+      type: String,
+      maxlength: 15,
+      required: true,
+      unique: true,
+    },
+    shortDescription: {
+      type: String,
+      maxlength: 100,
+      required: true,
+    },
+    longDescription: {
+      type: String,
+      maxlength: 400,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+    elasticSearchIndexes: {
+      code: {
+        type: 'text',
+      },
+      longDescription: {
+        type: 'text',
+      },
+    },
+  },
+);
+
 const conn = connect(options);
 
 module.exports = {
@@ -573,6 +610,7 @@ module.exports = {
   testOptions,
   emailSchema,
   fileSchema,
+  diagnosisSchema,
   s,
   s2,
   s3,

@@ -9,6 +9,7 @@ const { Schema, connect, Model } = Molty;
 
 const {
   testSchema,
+  diagnosisSchema,
   testOptions,
   s2,
   sDiscriminator2,
@@ -20,6 +21,7 @@ describe('# Elastic Search', () => {
     const res4 = await conn.dropDatabase('es4');
 
     const m2 = new Model(s2, 'TestModel7_2');
+    const m3 = new Model(diagnosisSchema, 'Diagnoses');
 
     mDiscriminator = m2.discriminator(
       sDiscriminator2,
@@ -179,7 +181,7 @@ describe('# Elastic Search', () => {
 
       expect(res).to.have.property('hits');
       expect(res.hits).to.have.property('hits');
-      expect(res.hits.hits).to.have.lengthOf(5);
+      expect(res.hits.hits).to.have.lengthOf(10);
       expect(res.hits.hits[0]).to.have.property('_index', 'es4');
       expect(res.hits.hits[0]).to.have.property('_source');
       expect(res.hits.hits[0]._source).to.have.property('firstName', 'GREAT');

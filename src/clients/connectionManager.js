@@ -383,11 +383,13 @@ class ConnectionManager {
         },
       ];
     } else {
-      match = {
-        match: {
-          collection: model._modelName,
+      match = [
+        {
+          match: {
+            collection: model._modelName,
+          },
         },
-      };
+      ];
     }
 
     query = {

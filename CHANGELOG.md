@@ -31,6 +31,12 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.8.8] - 2018-02-19
+
+### Fixed
+
+* Native MongoDB methods options were merged with MoltyJS options
+
 ## [0.8.7] - 2018-02-09
 
 ### Fixed
@@ -429,6 +435,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.8.8]: https://github.com/Yonirt/moltyjs/compare/v0.8.7...v0.8.8
 [0.8.7]: https://github.com/Yonirt/moltyjs/compare/v0.8.6...v0.8.7
 [0.8.6]: https://github.com/Yonirt/moltyjs/compare/v0.8.5...v0.8.6
 [0.8.5]: https://github.com/Yonirt/moltyjs/compare/v0.8.4...v0.8.5
