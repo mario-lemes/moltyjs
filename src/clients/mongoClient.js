@@ -175,23 +175,26 @@ class MongoClient {
   }
 
   /**
-   * _applyDocumentOptions(): Checkf if the document has associtaed
-   * any options from the schema settings like timestamp or discriminators
+   * _applyTimestamps(): Checkf if the model has associtaed
+   * any options from the schema settings like timestamp and apply
+   * to the object
    *
-   * @param {Document} doc
+   * @param {Object} obj
    * @param {Sting} operation ('insert', 'update')
    */
-  _applyDocumentOptions(doc, operation) {
-    if (doc._options.timestamps && operation === 'insert') {
-      doc._data['createdAt'] = new Date();
-      doc._data['updatedAt'] = new Date();
+  _applyTimestamps(obj, model, operation) {
+    if (model._schemaOptions.timestamps && operation === 'insert') {
+      obj._data['createdAt'] = new Date();
+      obj._data['updatedAt'] = new Date();
     }
 
-    if (doc._options.timestamps && operation === 'update') {
-      doc._data['updatedAt'] = new Date();
+    if (model._schemaOptions.timestamps && operation === 'update') {
+      obj['$currentDate'] = {
+        updatedAt: true,
+      };
     }
 
-    return doc;
+    return obj;
   }
 
   /**
@@ -447,7 +450,7 @@ class MongoClient {
       doc._data[discriminatorKey] = discriminator;
     }
 
-    const docAux = this._applyDocumentOptions(doc, 'insert');
+    const docAux = this._applyTimestamps(doc, model, 'insert');
 
     // Ensure index are created
     if (this._indexes[collection] && this._indexes[collection].length > 0) {
@@ -574,7 +577,7 @@ class MongoClient {
         docs[i]._data[discriminatorKey] = discriminator;
 
         // Check and apply document options before saving
-        const docAux = this._applyDocumentOptions(docs[i], 'insert');
+        const docAux = this._applyTimestamps(docs[i], model, 'insert');
 
         // Preparing the doc
         arrayDocsData.push(docAux._data);
@@ -588,7 +591,7 @@ class MongoClient {
           );
 
         // Check and apply document options before saving
-        const docAux = this._applyDocumentOptions(docs[i], 'insert');
+        const docAux = this._applyTimestamps(docs[i], model, 'insert');
 
         // Preparing the doc
         arrayDocsData.push(docAux._data);
@@ -848,6 +851,8 @@ class MongoClient {
           'does not exist and is not registered.',
       );
     }
+
+    payload = this._applyTimestamps(payload, model, 'update');
 
     // Ensure index are created
     if (this._indexes[collection] && this._indexes[collection].length > 0) {
