@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Yonirt/moltyjs.git"
+    "url": "git+https://github.com/mario-lemes/moltyjs.git"
   },
   "author": {
     "name": "Mario Lemes",
@@ -24,9 +24,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Yonirt/moltyjs/issues"
+    "url": "https://github.com/mario-lemes/moltyjs/issues"
   },
-  "homepage": "https://github.com/Yonirt/moltyjs#readme",
+  "homepage": "https://github.com/mario-lemes/moltyjs#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-loader": "^7.1.2",
