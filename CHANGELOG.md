@@ -31,6 +31,16 @@
   * .stream(options) // Return a modified Readable stream including a possible transform method.
   * .hint('a_1') // Set the cursor hint
 
+## [0.9.0] - 2018-03-09
+
+### Added
+
+* updateMany() method
+
+### Changed
+
+* Hooks names: 'insertOne', 'insertMany', 'updateOne', 'updateMany', 'deleteOne',
+
 ## [0.8.11] - 2018-02-22
 
 ### Fixed
@@ -441,6 +451,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.9.0]: https://github.com/Yonirt/moltyjs/compare/v0.8.11...v0.9.0
 [0.8.11]: https://github.com/Yonirt/moltyjs/compare/v0.8.8...v0.8.11
 [0.8.8]: https://github.com/Yonirt/moltyjs/compare/v0.8.7...v0.8.8
 [0.8.7]: https://github.com/Yonirt/moltyjs/compare/v0.8.6...v0.8.7

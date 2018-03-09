@@ -262,7 +262,8 @@ newSchema.post('insertMany', async function(connection, tenant, next) {
 
 #### Query middleware is supported for the following functions.
 
-* update
+* updateOne
+* updateMany
 * delete
 
 In query middleware functions, **this** refers to the query.
@@ -271,7 +272,7 @@ Examples:
 
 ```javascript
 // Pre hooks on update
-newSchema.pre('update', function(connection, tenant, next) {
+newSchema.pre('updateOne', function(connection, tenant, next) {
   // this refers to the update query
   console.log(this); // Ex. { $set: {jobTitle: 'Test' }} => update query
   return next();
@@ -468,11 +469,14 @@ const resFind = await connection.find('tenant_test', 'TestModel',
 
 ## Updating a document
 
+Updating a document support all the [update operators](https://docs.mongodb.com/v3.4/reference/operator/update/) from MongoDB
+
 ### `updateOne(tenant, collection, filter, payload, options = {}) {Promise}`
 
 * {String} `tanant` Tenant name
 * {String} `collection` Collection name
 * {Object} `filter` Filter object used to select the document to update
+* {Object} `payload` Payload object used to update the document
 * {Object} `options` Optional settings
   * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
     instead of MongoDB Document
@@ -491,7 +495,35 @@ const resUpdate = await connection.updateOne(
 // {UpdateResult} || Error
 ```
 
-Updating a document support all the [update operators](https://docs.mongodb.com/v3.4/reference/operator/update/) from MongoDB
+### `updateMany(tenant, collection, filter, payload, options = {}) {Promise}`
+
+* {String} `tanant` Tenant name
+* {String} `collection` Collection name
+* {Object} `filter` Filter object used to select the document to update
+* {Object} `payload` Payload object used to update the document
+* {Object} `options` Optional settings
+* {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class instead of MongoDB Document
+
+```javascript
+const resUpdate = await connection.updateMany(
+  'tenant_test',
+  'TestModel',
+  _id: {
+    $in: [
+      '5aa1530d604da74824a6c170',
+      '5aa1530d604da74824a6c171',
+      '5aa1530d604da74824a6c172',
+      '5aa1530d604da74824a6c173',
+    ],
+  },
+  {
+    $set: {
+      name: 'Some other name',
+    },
+  },
+);
+// {UpdateResult} || Error
+```
 
 ## Deleting a document
 
@@ -501,8 +533,7 @@ Updating a document support all the [update operators](https://docs.mongodb.com/
 * {String} `collection` Collection name
 * {Object} `filter` Filter object used to select the document to delete
 * {Object} `options` Optional settings
-  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
-    instead of MongoDB Document
+* {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class instead of MongoDB Document
 
 ```javascript
 const resUpdate = await connection.deleteOne(

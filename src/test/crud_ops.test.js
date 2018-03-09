@@ -28,7 +28,10 @@ describe('# CRUD Operations', () => {
     newDiscriminatorDoc7,
     newDiscriminatorDoc8,
     newDiscriminatorDoc9,
-    newDiscriminatorDoc10;
+    newDiscriminatorDoc10,
+    newDiscriminatorDoc11,
+    newDiscriminatorDoc12,
+    newDiscriminatorDoc13;
   const email = 'asdfasdf@gmail.com';
   const email2 = 'awdasdasdfasdf@gmail.com';
   const firstName = 'Mario';
@@ -137,6 +140,28 @@ describe('# CRUD Operations', () => {
       password: '1234567890',
       jobTitle: 'Architect',
     });
+
+    //----------------------------------------
+    newDiscriminatorDoc11 = await mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: '11@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Swimmer',
+    });
+
+    newDiscriminatorDoc12 = await mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: '12@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Lifeguard',
+    });
+
+    newDiscriminatorDoc13 = await mDiscriminator.new({
+      test: ['OOOKK', 'YEEEES'],
+      email: '13@dsfdfadsfsdf.es',
+      password: '1234567890',
+      jobTitle: 'Dancer',
+    });
   });
 
   it('find one document', async () => {
@@ -201,6 +226,64 @@ describe('# CRUD Operations', () => {
     }
   });
 
+  it('updateMany documents', async () => {
+    try {
+      const res = await conn.insertMany('test2', [
+        newDiscriminatorDoc11,
+        newDiscriminatorDoc12,
+        newDiscriminatorDoc13,
+      ]);
+
+      const resUpdate = await conn.updateMany(
+        'test2',
+        'TestModel7Discriminator',
+        {
+          _id: {
+            $in: [
+              newDiscriminatorDoc11._data._id,
+              newDiscriminatorDoc12._data._id,
+              newDiscriminatorDoc13._data._id,
+            ],
+          },
+        },
+        {
+          $set: {
+            notes: 'SUPER TEST',
+          },
+        },
+      );
+
+      const resFind = await conn.find(
+        'test2',
+        'TestModel7Discriminator',
+        {
+          _id: {
+            $in: [
+              newDiscriminatorDoc11._data._id,
+              newDiscriminatorDoc12._data._id,
+              newDiscriminatorDoc13._data._id,
+            ],
+          },
+        },
+        { moltyClass: false },
+      );
+
+      expect(resUpdate).to.have.property('n', 3);
+      expect(resUpdate).to.have.property('nModified', 3);
+      expect(resUpdate).to.have.property('ok', 1);
+
+      expect(resFind[0]._id.toString()).to.eql(
+        newDiscriminatorDoc11._data._id.toString(),
+      );
+
+      expect(resFind[0]).to.have.property('notes', 'SUPER TEST');
+      expect(resFind[1]).to.have.property('notes', 'SUPER TEST');
+      expect(resFind[2]).to.have.property('notes', 'SUPER TEST');
+    } catch (error) {
+      throw error;
+    }
+  });
+
   it('updateOne discriminator document', async () => {
     try {
       const res = await conn.insertOne('test2', newDiscriminatorDoc);
@@ -244,7 +327,7 @@ describe('# CRUD Operations', () => {
         { moltyClass: true },
       );
 
-      expect(res2).to.have.lengthOf(4);
+      expect(res2).to.have.lengthOf(7);
       expect(res2[0]).to.have.property('_data');
       expect(res2[0]).to.have.property('newDiscriminatorMethod1');
       expect(res2[0]._discriminator).to.equal('TestModel7Discriminator');
@@ -263,22 +346,26 @@ describe('# CRUD Operations', () => {
         newDiscriminatorDoc8,
       ]);
 
-      let res2 = await conn.find(
-        'test2',
-        'TestModel7Discriminator',
-        {},
-        { moltyClass: true },
-      );
+      let res2 = await conn.find('test2', 'TestModel7Discriminator', {
+        _id: {
+          $in: [
+            newDiscriminatorDoc5._data._id,
+            newDiscriminatorDoc6._data._id,
+            newDiscriminatorDoc7._data._id,
+            newDiscriminatorDoc8._data._id,
+          ],
+        },
+      });
 
-      expect(res2).to.have.lengthOf(8);
+      expect(res2).to.have.lengthOf(4);
       expect(res2[0]).to.have.property('_data');
       expect(res2[0]).to.have.property('newDiscriminatorMethod1');
       expect(res2[0]._discriminator).to.equal('TestModel7Discriminator');
       expect(res2[0]._modelName).to.equal('TestModel7');
 
-      expect(res2[4]._data).to.have.property('email', '5@dsfdfadsfsdf.es');
-      expect(res2[5]._data).to.have.property('email', '6@dsfdfadsfsdf.es');
-      expect(res2[6]._data).to.have.property('email', '7@dsfdfadsfsdf.es');
+      expect(res2[0]._data).to.have.property('email', '5@dsfdfadsfsdf.es');
+      expect(res2[1]._data).to.have.property('email', '6@dsfdfadsfsdf.es');
+      expect(res2[2]._data).to.have.property('email', '7@dsfdfadsfsdf.es');
     } catch (error) {
       throw error;
     }

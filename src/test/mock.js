@@ -146,11 +146,11 @@ s2.pre('insertOne', function(dbClient, tenant, next) {
   return next();
 });
 
-s2.pre('update', (dbClient, tenant, next) => {
+s2.pre('updateOne', (dbClient, tenant, next) => {
   console.log('PRE: Update World!');
   return next();
 });
-s2.pre('delete', (dbClient, tenant, next) => {
+s2.pre('deleteOne', (dbClient, tenant, next) => {
   console.log('PRE: Delete World!');
   return next();
 });
@@ -162,11 +162,11 @@ s3.post('insertOne', function(dbClient, tenant, next) {
   console.log('POST: Insert World!');
   return next();
 });
-s2.post('update', (dbClient, tenant, next) => {
+s2.post('updateOne', (dbClient, tenant, next) => {
   console.log('POST: Update World!');
   return next();
 });
-s2.post('delete', (dbClient, tenant, next) => {
+s2.post('deleteOne', (dbClient, tenant, next) => {
   console.log('POST: Delete World!');
   return next();
 });

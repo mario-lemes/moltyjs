@@ -188,7 +188,13 @@ class Schema {
    * @returns {Boolean}
    */
   _isValidHook(hook) {
-    const validHooks = ['insertOne', 'insertMany', 'update', 'delete'];
+    const validHooks = [
+      'insertOne',
+      'insertMany',
+      'updateOne',
+      'updateMany',
+      'deleteOne',
+    ];
     return validHooks.indexOf(hook) > -1;
   }
 

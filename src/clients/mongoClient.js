@@ -87,6 +87,11 @@ const defaultUpdateOneOptions = {
   upsert: false,
 };
 
+const defaultUpdateManyOptions = {
+  moltyClass: true,
+  upsert: false,
+};
+
 const defaultAggregateOptions = {
   moltyClass: true,
 };
@@ -217,8 +222,9 @@ class MongoClient {
   _applyHooks(hooksList, objectBinded, tenant) {
     let insertHooks = new Middleware();
     let insertManyHooks = new Middleware();
-    let updateHooks = new Middleware();
-    let deleteHooks = new Middleware();
+    let updateOneHooks = new Middleware();
+    let updateManyHooks = new Middleware();
+    let deleteOneHooks = new Middleware();
 
     if (hooksList.length > 0) {
       hooksList.forEach(key => {
@@ -229,11 +235,14 @@ class MongoClient {
           case 'insertMany':
             insertManyHooks.use(key.fn.bind(objectBinded, this, tenant));
             break;
-          case 'update':
-            updateHooks.use(key.fn.bind(objectBinded, this, tenant));
+          case 'updateOne':
+            updateOneHooks.use(key.fn.bind(objectBinded, this, tenant));
             break;
-          case 'delete':
-            deleteHooks.use(key.fn.bind(objectBinded, this, tenant));
+          case 'updateMany':
+            updateManyHooks.use(key.fn.bind(objectBinded, this, tenant));
+            break;
+          case 'deleteOne':
+            deleteOneHooks.use(key.fn.bind(objectBinded, this, tenant));
             break;
           default:
             throw new Error('Hook "' + key.hook + '" is not allowed.');
@@ -244,8 +253,9 @@ class MongoClient {
     return {
       insertOne: insertHooks,
       insertMany: insertManyHooks,
-      update: updateHooks,
-      delete: deleteHooks,
+      updateOne: updateOneHooks,
+      updateMany: updateManyHooks,
+      deleteOne: deleteOneHooks,
     };
   }
 
@@ -864,7 +874,7 @@ class MongoClient {
     const _postHooksAux = this._applyHooks(model._postHooks, payload, tenant);
 
     // Running pre update hooks
-    await _preHooksAux.update.exec();
+    await _preHooksAux.updateOne.exec();
 
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
@@ -882,7 +892,116 @@ class MongoClient {
           reject(error);
         } else {
           // Running post update hooks
-          await _postHooksAux.update.exec();
+          await _postHooksAux.updateOne.exec();
+
+          resolve(result.result);
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        return await this._connectionManager.release(conn);
+      }
+    });
+  }
+
+  /**
+   * updateMany(): Update many documents on MongoDB.
+   *
+   * @param {String} tenant
+   * @param {String} collection
+   * @param {Object} filter  The Filter used to select the document to update
+   * @param {Object} payload The update operations to be applied to the document
+   * @param {Object} options Optional settings.
+   *
+   * @returns {Promise}
+   */
+  async updateMany(tenant, collection, filter, payload, options = {}) {
+    if (!tenant && typeof tenant != 'string')
+      throw new Error(
+        'Should specify the tenant name (String), got: ' + tenant,
+      );
+    if (!collection && typeof collection != 'string')
+      throw new Error(
+        'Should specify the collection name (String), got: ' + collection,
+      );
+    if (!filter && typeof filter != 'object')
+      throw new Error('Should specify the filter options, got: ' + filter);
+    if (!payload && typeof payload != 'string')
+      throw new Error('Should specify the payload object, got: ' + payload);
+
+    // Assign default options to perform the updateMany query
+    const updateManyOptions = Object.assign(
+      {},
+      defaultUpdateManyOptions,
+      options,
+    );
+
+    const moltyClassEnabled = updateManyOptions.moltyClass;
+    delete updateManyOptions.moltyClass;
+
+    // Check update operators
+    this._validateUpdateOperators(payload);
+
+    // If we are updating a resources in a discriminator model
+    // we have to set the proper filter and addres to the parent collection
+    let model = {};
+    if (this.models[collection]) {
+      const { _discriminator } = this.models[collection];
+
+      if (_discriminator) {
+        const { discriminatorKey } = this.models[
+          collection
+        ]._schemaOptions.inheritOptions;
+
+        if (filter[discriminatorKey])
+          throw new Error(
+            'You can not include a specific value for the "discriminatorKey" on the query.',
+          );
+
+        filter[discriminatorKey] = collection;
+      }
+
+      model = this.models[collection];
+      collection = this.models[collection]._modelName;
+    } else {
+      throw new Error(
+        'The collection ' +
+          collection +
+          'does not exist and is not registered.',
+      );
+    }
+
+    payload = this._applyTimestamps(payload, model, 'update');
+
+    // Ensure index are created
+    if (this._indexes[collection] && this._indexes[collection].length > 0) {
+      await this.createIndexes(tenant, collection, this._indexes[collection]);
+    }
+
+    // Apply hooks
+    const _preHooksAux = this._applyHooks(model._preHooks, payload, tenant);
+    const _postHooksAux = this._applyHooks(model._postHooks, payload, tenant);
+
+    // Running pre update hooks
+    await _preHooksAux.updateMany.exec();
+
+    // Acquiring db instance
+    const conn = await this._connectionManager.acquire();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const [error, result] = await to(
+          conn
+            .db(tenant, this._tenantsOptions)
+            .collection(collection)
+            .updateMany(filter, payload, updateManyOptions),
+        );
+
+        if (error) {
+          reject(error);
+        } else {
+          // Running post update hooks
+          await _postHooksAux.updateMany.exec();
 
           resolve(result.result);
         }
@@ -1096,7 +1215,7 @@ class MongoClient {
     const _postHooksAux = this._applyHooks(model._postHooks, filter, tenant);
 
     // Running pre delete hooks
-    await _preHooksAux.delete.exec();
+    await _preHooksAux.deleteOne.exec();
 
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
@@ -1114,7 +1233,7 @@ class MongoClient {
           reject(error);
         } else {
           // Running post delete hooks
-          await _postHooksAux.delete.exec();
+          await _postHooksAux.deleteOne.exec();
 
           resolve(result.result);
         }
