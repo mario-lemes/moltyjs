@@ -459,6 +459,7 @@ class Model {
             payload[key][i],
             schema[key][0],
           );
+          return;
         }
       }
 
@@ -501,7 +502,7 @@ class Model {
           const Schema = require('./schema');
           if (isArray(schema[key].type)) {
             payload[key].forEach(value => {
-              payload[key] = Schema.types().ObjectId(value);
+              payload[key].push(Schema.types().ObjectId(value));
             });
           } else {
             payload[key] = Schema.types().ObjectId(payload[key]);
