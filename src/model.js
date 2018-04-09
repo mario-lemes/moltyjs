@@ -448,25 +448,24 @@ class Model {
    */
   _normalizePayload(payload, schema) {
     Object.keys(schema).forEach(key => {
-      // Array
-      if (
-        !schema[key].type &&
-        isArray(schema[key]) &&
-        (payload[key] && payload[key].length > 0)
-      ) {
-        for (let i = 0; i < payload[key].length; i++) {
-          payload[key][i] = this._normalizePayload(
-            payload[key][i],
-            schema[key][0],
-          );
-          return;
+      // Ref values (Ids)
+      if (schema[key].ref) {
+        if (!payload || isEmptyValue(payload[key])) {
+          const refNormalValue = isArray(schema[key].type) ? [] : null;
+          payload = {
+            ...payload,
+            [key]: refNormalValue,
+          };
+        } else if (payload[key]) {
+          const Schema = require('./schema');
+          if (isArray(schema[key].type)) {
+            payload[key].forEach(value => {
+              payload[key].push(Schema.types().ObjectId(value));
+            });
+          } else {
+            payload[key] = Schema.types().ObjectId(payload[key]);
+          }
         }
-      }
-
-      // Objects nested
-      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
-        const aux = this._normalizePayload(payload[key], schema[key]);
-        if (aux) payload[key] = aux;
         return;
       }
 
@@ -489,25 +488,26 @@ class Model {
         return;
       }
 
-      // Ref values (Ids)
-      if (schema[key].ref) {
-        if (!payload || isEmptyValue(payload[key])) {
-          const refNormalValue = isArray(schema[key].type) ? [] : null;
-          payload = {
-            ...payload,
-            [key]: refNormalValue,
-          };
+      // Array
+      if (
+        !schema[key].type &&
+        isArray(schema[key]) &&
+        (payload[key] && payload[key].length > 0)
+      ) {
+        for (let i = 0; i < payload[key].length; i++) {
+          payload[key][i] = this._normalizePayload(
+            payload[key][i],
+            schema[key][0],
+          );
           return;
-        } else if (payload[key]) {
-          const Schema = require('./schema');
-          if (isArray(schema[key].type)) {
-            payload[key].forEach(value => {
-              payload[key].push(Schema.types().ObjectId(value));
-            });
-          } else {
-            payload[key] = Schema.types().ObjectId(payload[key]);
-          }
         }
+      }
+
+      // Objects nested
+      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
+        const aux = this._normalizePayload(payload[key], schema[key]);
+        if (aux) payload[key] = aux;
+        return;
       }
 
       // No required values
