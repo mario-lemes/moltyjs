@@ -68,7 +68,28 @@ const defaultTenantsOptions = {
 const defaultFindOptions = {
   moltyClass: true,
   limit: 0,
+  sort: null,
   projection: null,
+  skip: 0,
+  hint: null,
+  explain: false,
+  snapshot: false,
+  timeout: false,
+  tailable: false,
+  returnKey: false,
+  maxScan: null,
+  min: null,
+  max: null,
+  showDiskLoc: false,
+  comment: null,
+  raw: false,
+  promoteLongs: true,
+  promoteValues: true,
+  promoteBuffers: false,
+  readPreference: null,
+  partial: false,
+  maxTimeMS: null,
+  collation: null,
 };
 
 const defaultInsertOneOptions = {
@@ -738,14 +759,40 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
+        // Find Options
+        const {
+          limit,
+          sort,
+          projection,
+          skip,
+          hint,
+          explain,
+          snapshot,
+          timeout,
+          tailable,
+          returnKey,
+          maxScan,
+          min,
+          max,
+          showDiskLoc,
+          comment,
+          raw,
+          promoteLongs,
+          promoteValues,
+          promoteBuffers,
+          readPreference,
+          partial,
+          maxTimeMS,
+          collation,
+        } = findOptions;
+
         // Get and run the Cursor
         const [error, result] = await to(
           conn
             .db(tenant, this._tenantsOptions)
             .collection(collection)
             .find(query, {
-              limit: findOptions.limit,
-              projection: findOptions.projection,
+              ...findOptions,
             })
             .toArray(),
         );
