@@ -43,7 +43,7 @@ const validUpdateOperators = [
 ];
 
 // https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/
-const validAggregateOperators = {
+const validAggregatePipelineStages = {
   $match: [],
   $lookup: ['from', 'localField', 'foreignField', 'as', 'let', 'pipeline'],
   $project: [],
@@ -55,6 +55,10 @@ const validAggregateOperators = {
   $group: [],
   $addFields: [],
   $redact: [],
+  $sort: [],
+  $sortByCount: [],
+  $limit: [],
+  $skip: [],
 };
 
 const defaultTenantsOptions = {
@@ -302,7 +306,7 @@ class MongoClient {
   _validateAggregateOperators(pipeline) {
     for (let stage of pipeline) {
       Object.keys(stage).forEach(operator => {
-        if (Object.keys(validAggregateOperators).indexOf(operator) < 0) {
+        if (Object.keys(validAggregatePipelineStages).indexOf(operator) < 0) {
           throw new Error(
             'The aggregate operator is not allowed, got: ' + operator,
           );
@@ -310,9 +314,11 @@ class MongoClient {
 
         // If the aggregate operator has additional parameters let's check
         // which we support
-        if (validAggregateOperators[operator].length > 0) {
+        if (validAggregatePipelineStages[operator].length > 0) {
           Object.keys(stage[operator]).forEach(suboperator => {
-            if (validAggregateOperators[operator].indexOf(suboperator) < 0) {
+            if (
+              validAggregatePipelineStages[operator].indexOf(suboperator) < 0
+            ) {
               throw new Error(
                 'The paramater ' +
                   suboperator +

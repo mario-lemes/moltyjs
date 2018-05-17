@@ -1,7 +1,6 @@
 ## [Unreleased]
 
 * Wrap results docs in moltyClass but not remove the metadata provided by MongoDB
-* Add support to more pipeline stages in the aggregate function
 * Fix english misspelling in the documentation.
 * Add embedded documents features
 * Add query operations ([mquery](https://github.com/aheckmann/mquery) query builder))
@@ -17,6 +16,12 @@
   * .setCursorOption(field, value) // Set a node.js specific cursor option
   * .showRecordId(true) // Set the cursor showRecordId
   * .stream(options) // Return a modified Readable stream including a possible transform method.
+
+## [0.9.4] - 2018-05-17
+
+### Added
+
+* New agregate pipeline stages: sort, limit, skip, sortByCount,
 
 ## [0.9.3] - 2018-05-17
 
@@ -456,6 +461,7 @@
 * findOne() method.
 * Document inheritence support.
 
+[0.9.4]: https://github.com/Yonirt/moltyjs/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/Yonirt/moltyjs/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/Yonirt/moltyjs/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/Yonirt/moltyjs/compare/v0.9.0...v0.9.1
