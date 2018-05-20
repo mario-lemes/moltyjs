@@ -481,8 +481,11 @@ const schemaFields = new Schema(
     number: {
       type: Number,
     },
-    mixed: {
+    object: {
       type: Object,
+    },
+    mixed: {
+      type: 'Mixed',
     },
     someId: {
       type: Schema.types().ObjectId,
@@ -511,7 +514,7 @@ const schemaFields = new Schema(
     arrayOfBoolean: {
       type: [Boolean],
     },
-    arrayOfMixed: {
+    arrayOfObject: {
       type: [Object],
     },
     arrayOfId: {

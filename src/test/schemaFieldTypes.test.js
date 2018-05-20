@@ -22,7 +22,8 @@ describe('# Schema field types', () => {
       boolean: true,
       date: new Date(),
       number: 30,
-      mixed: { any: { thing: 'i want' } },
+      object: { any: { thing: 'i want' } },
+      mixed: 1,
       someId: Schema.types().ObjectId(),
       nested: {
         stuff: 'Cool stuff',
@@ -33,7 +34,7 @@ describe('# Schema field types', () => {
       arrayOfDate: [new Date(), new Date(), new Date()],
       arrayOfBuffer: [new Buffer(0), new Buffer(1), new Buffer(2)],
       arrayOfBoolean: [true, false, true],
-      arrayOfMixed: [
+      arrayOfObject: [
         { any: { thing: 'i want' } },
         { any: { thing: 'i care' } },
       ],

@@ -48,7 +48,8 @@ const isSupportedType = function(t) {
     t === Array ||
     isArray(t) ||
     t === Object ||
-    t === ObjectId
+    t === ObjectId ||
+    t === 'Mixed'
   );
 };
 
@@ -69,6 +70,8 @@ const isType = function(value, type) {
     return isObject(value);
   } else if (type === ObjectId) {
     return isObjectId(value);
+  } else if (type === 'Mixed') {
+    return true;
   } else {
     return false;
   }

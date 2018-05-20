@@ -31,7 +31,7 @@ class Schema {
   }
 
   /**
-   * types(): Static method to return all the types supportes
+   * types(): Static method to return all the types supported
    * by a schema
    *
    * @returns {Object}
@@ -46,6 +46,7 @@ class Schema {
       Date,
       Array,
       Object,
+      Mixed: 'Mixed',
     };
   }
 
