@@ -54,6 +54,13 @@ describe('# Schema field types', () => {
       ],
       arrayOfArray: [[]],
       arrayOfArrayOfNumber: [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+      doubleNested: {
+        level_1: {
+          level_2: {
+            level_3_1: 'Test',
+          },
+        },
+      },
     });
   });
 

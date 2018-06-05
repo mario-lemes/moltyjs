@@ -271,12 +271,7 @@ class Model {
    * @param {Schema} schema
    * @param {String} tenant
    */
-  async validatePayloadFieldValues(
-    payload,
-    schema,
-    parentPayload,
-    operator = null,
-  ) {
+  async validatePayloadFieldValues(payload = {}, schema, parentPayload) {
     for (let key of Object.keys(schema)) {
       // Array
       if (!schema[key].type && isArray(schema[key]) && payload[key]) {
@@ -286,7 +281,6 @@ class Model {
               arrayItem,
               schema[key][0],
               parentPayload,
-              operator,
             );
             continue;
           } catch (error) {
@@ -296,18 +290,12 @@ class Model {
       }
 
       // Objects nested
-      if (
-        !schema[key].type &&
-        isObject(schema[key]) &&
-        !isArray(schema[key]) &&
-        payload[key]
-      ) {
+      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
         try {
           await this.validatePayloadFieldValues(
             payload[key],
             schema[key],
             parentPayload,
-            operator,
           );
           continue;
         } catch (error) {
@@ -317,18 +305,12 @@ class Model {
 
       // No required values
       if (
-        (!payload || payload[key] === undefined) &&
-        (!schema[key].required || operator)
-      )
-        continue;
-
-      // Is required validation
-      if (
-        (!operator || operator === '$unset') &&
-        schema[key].required &&
-        (!payload || isEmptyValue(payload[key]))
+        !payload ||
+        payload[key] === undefined ||
+        isEmptyValue(payload[key])
       ) {
-        throw new Error('Key ' + key + ' is required');
+        if (!schema[key].required) continue;
+        else throw new Error('Key "' + key + '" is required');
       }
 
       // Validation type
@@ -504,7 +486,13 @@ class Model {
       }
 
       // Objects nested
-      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
+      if (
+        !schema[key].type &&
+        isObject(schema[key]) &&
+        !isArray(schema[key]) &&
+        payload &&
+        !isEmptyValue(payload[key])
+      ) {
         const aux = this._normalizePayload(payload[key], schema[key]);
         if (aux) payload[key] = aux;
         return;

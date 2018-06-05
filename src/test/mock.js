@@ -496,6 +496,19 @@ const schemaFields = new Schema(
         required: true,
       },
     },
+    doubleNested: {
+      level_1: {
+        level_2: {
+          level_3_1: {
+            type: String,
+            required: true,
+          },
+          level_3_2: {
+            type: String,
+          },
+        },
+      },
+    },
     array: {
       type: [],
     },
