@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [0.9.7] - 2018-06-07
+
+### Fixed
+
+- Default values was not set on nested schema structures
+
 ## [0.9.6] - 2018-06-03
 
 ### Added
@@ -473,6 +479,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[0.9.7]: https://github.com/Yonirt/moltyjs/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/Yonirt/moltyjs/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/Yonirt/moltyjs/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/Yonirt/moltyjs/compare/v0.9.3...v0.9.4

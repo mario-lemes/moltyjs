@@ -486,14 +486,11 @@ class Model {
       }
 
       // Objects nested
-      if (
-        !schema[key].type &&
-        isObject(schema[key]) &&
-        !isArray(schema[key]) &&
-        payload &&
-        !isEmptyValue(payload[key])
-      ) {
-        const aux = this._normalizePayload(payload[key], schema[key]);
+      if (!schema[key].type && isObject(schema[key]) && !isArray(schema[key])) {
+        const aux = this._normalizePayload(
+          payload ? payload[key] : {},
+          schema[key],
+        );
         if (aux) payload[key] = aux;
         return;
       }

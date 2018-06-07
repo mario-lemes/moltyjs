@@ -496,6 +496,12 @@ const schemaFields = new Schema(
         required: true,
       },
     },
+    nestedDefault: {
+      valueByDefault: {
+        type: String,
+        default: 'DEFAULT'
+      }
+    },
     doubleNested: {
       level_1: {
         level_2: {
