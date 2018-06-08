@@ -202,6 +202,10 @@ class Model {
       schemaAux._postHooks = this._postHooks.concat(schemaAux._postHooks);
     }
 
+    if (this._schemaOptions && this._schemaOptions.timestamps) {
+      schemaAux._options.timestamps = true;
+    }
+
     schemaAux._schema = Object.assign(
       {},
       schemaDiscriminator._schema,

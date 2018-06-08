@@ -392,7 +392,6 @@ const studentsSchema = new Schema(
     },
   },
   {
-    timestamps: true,
     inheritOptions: {
       discriminatorKey: 'kind',
     },
@@ -418,7 +417,6 @@ const teachersSchema = new Schema(
     },
   },
   {
-    timestamps: true,
     inheritOptions: {
       discriminatorKey: 'kind',
     },
@@ -439,7 +437,6 @@ const directorSchema = new Schema(
     },
   },
   {
-    timestamps: true,
     inheritOptions: {
       discriminatorKey: 'kind',
     },
@@ -499,8 +496,8 @@ const schemaFields = new Schema(
     nestedDefault: {
       valueByDefault: {
         type: String,
-        default: 'DEFAULT'
-      }
+        default: 'DEFAULT',
+      },
     },
     doubleNested: {
       level_1: {

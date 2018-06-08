@@ -213,15 +213,17 @@ class MongoClient {
    * @param {Sting} operation ('insert', 'update')
    */
   _applyTimestamps(obj, model, operation) {
-    if (model._schemaOptions.timestamps && operation === 'insert') {
-      obj._data['createdAt'] = new Date();
-      obj._data['updatedAt'] = new Date();
-    }
+    if (model._schemaOptions.timestamps) {
+      if (operation === 'insert') {
+        obj._data['createdAt'] = new Date();
+        obj._data['updatedAt'] = new Date();
+      }
 
-    if (model._schemaOptions.timestamps && operation === 'update') {
-      obj['$currentDate'] = {
-        updatedAt: true,
-      };
+      if (operation === 'update') {
+        obj['$currentDate'] = {
+          updatedAt: true,
+        };
+      }
     }
 
     return obj;

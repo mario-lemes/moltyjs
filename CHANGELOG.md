@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [0.9.8] - 2018-06-08
+
+### Fixed
+
+- Discriminator schemas did not inherit the timestamp option from the parent
+
 ## [0.9.7] - 2018-06-07
 
 ### Fixed
@@ -479,6 +485,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[0.9.8]: https://github.com/Yonirt/moltyjs/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/Yonirt/moltyjs/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/Yonirt/moltyjs/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/Yonirt/moltyjs/compare/v0.9.4...v0.9.5
