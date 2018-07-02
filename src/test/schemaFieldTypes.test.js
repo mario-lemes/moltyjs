@@ -21,6 +21,7 @@ describe('# Schema field types', () => {
       buffer: new Buffer(0),
       boolean: true,
       date: new Date(),
+      stringDate: new Date().toISOString(),
       number: 30,
       object: { any: { thing: 'i want' } },
       mixed: 1,

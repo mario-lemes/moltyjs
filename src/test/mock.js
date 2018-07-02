@@ -475,6 +475,9 @@ const schemaFields = new Schema(
     date: {
       type: Date,
     },
+    stringDate: {
+      type: Date,
+    },
     number: {
       type: Number,
     },

@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [0.9.9] - 2018-07-02
+
+### Fixed
+
+- Date type schema fields are now saved as Date when they are introduced as string
+
 ## [0.9.8] - 2018-06-08
 
 ### Fixed
@@ -485,6 +491,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[0.9.9]: https://github.com/Yonirt/moltyjs/compare/v0.9.8...v0.9.9
 [0.9.8]: https://github.com/Yonirt/moltyjs/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/Yonirt/moltyjs/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/Yonirt/moltyjs/compare/v0.9.5...v0.9.6

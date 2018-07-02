@@ -474,6 +474,14 @@ class Model {
         return;
       }
 
+      // Date type as string should be converted to date type
+      if (
+        schema[key].type === Date &&
+        typeof payload[key] === typeof 'String'
+      ) {
+        payload[key] = new Date(payload[key]);
+      }
+
       // Array
       if (
         !schema[key].type &&
