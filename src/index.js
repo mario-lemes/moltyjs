@@ -11,7 +11,6 @@ class Molty {
     this.Model = Model;
 
     this.connection = null;
-    this;
 
     // Binding methods
     this.connect = this.connect.bind(this);

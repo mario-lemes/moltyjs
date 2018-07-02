@@ -571,10 +571,11 @@ const schemaFields = new Schema(
 );
 
 const options = {
+  engine: 'mongodb',
+  uri:
+    'mongodb://localhost:27017,localhost:27018,localhost:27019/test?replicaSet=rs0',
   connection: {
-    engine: 'mongodb',
-    uri:
-      'mongodb://localhost:27017,localhost:27018,localhost:27019/test?replicaSet=rs0',
+    replicaSet: 'rs0',
   },
   elasticSearch: {
     host: 'localhost:9200',

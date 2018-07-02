@@ -19,13 +19,12 @@ class ConnectionManager {
   constructor(options) {
     this.models = {};
 
-    const connectionOptions = Object.assign(
-      {},
-      defaultOptions,
-      options.connection,
-    );
+    const poolOptions = Object.assign({}, defaultOptions, {
+      uri: options.uri,
+      engine: options.engine,
+    });
 
-    const uri = connectionOptions.uri;
+    const { uri } = options;
 
     const i = uri.indexOf('://');
     if (i < 0) {
@@ -49,12 +48,19 @@ class ConnectionManager {
       {
         create: () =>
           new Promise((resolve, reject) => {
-            MongoDBClient.connect(uri, {
-              poolSize: 1,
-              native_parser: true,
-            }).then(client => {
-              resolve(client);
-            });
+            //console.log(uri);
+            MongoDBClient.connect(
+              uri,
+              {
+                poolSize: 1,
+                useNewUrlParser: true,
+                ...options.connection,
+              },
+              (err, client) => {
+                if (err) reject(err);
+                resolve(client);
+              },
+            );
           }),
         destroy: client =>
           new Promise(resolve => {
@@ -63,7 +69,7 @@ class ConnectionManager {
             });
           }),
       },
-      connectionOptions,
+      poolOptions,
     );
   }
 
