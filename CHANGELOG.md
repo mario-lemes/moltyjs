@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.0.1] - 2018-07-02
+
+### Fixed
+
+- Bug in conversion dates from string to date type
+
 ## [1.0.0] - 2018-07-02
 
 ### Added
@@ -501,6 +507,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[1.0.1]: https://github.com/Yonirt/moltyjs/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Yonirt/moltyjs/compare/v0.9.9...v1.0.0
 [0.9.9]: https://github.com/Yonirt/moltyjs/compare/v0.9.8...v0.9.9
 [0.9.8]: https://github.com/Yonirt/moltyjs/compare/v0.9.7...v0.9.8

@@ -35,11 +35,12 @@ To connect to a database use the "connect()" function passing trough 'options' p
 const { connect } = require('moltys');
 
 const options = {
+  engine: 'mongodb', // By default
+  uri: 'mongodb://localhost:27017/test',
+  max: 100, // By default
+  min: 1, // By default
   connection: {
-    engine: 'mongodb', // By default
-    uri: 'mongodb://localhost:27017/test',
-    max: 100, // By default
-    min: 1, // By default
+    replicaSet: 'repl-s0123',
   },
   tenants: {
     noListener: false, // By default
@@ -57,16 +58,16 @@ const connection = connect(options);
 
 Options settings allowed are:
 
-* _connection_: Object to set up the connection parameters to the MongoDB instance and the connection pool settings:
-  * _engine_: {String} By default 'mongodb', and for the time being MoltyJS only supports Mongo Databases.
-  * _uri_: {String} Mongo connection URI, to get more information about this take a look to the [official documentation](https://docs.mongodb.com/manual/reference/connection-string/)
-  * _max_: {Number} By default 100, set the maximum connection simultaneasly to the DB.
-  * _min_: {Number} Bu default 1, set the minimum connection simultaneasly to the DB.
-* _tenants_: Object to set up the db instance configuration
-  * _noListener_: {Boolean} By default false, do not make the db an event listener to the original connection. Keep it false if you are using MoltyJS in a multy tenancy architecture since MongoDB propagate all the events throug all the db instances oppened.
-  * _returnNonCachedInstance_: {Boolean} By default false, control if you want to return a cached instance or have a new one created
-* _elasticSearch_: Object to set up the connection parameter to the Elasticsearch instance
-  * _host_: {String} Host of the Elasticsearch instance
+- _engine_: {String} By default 'mongodb', and for the time being MoltyJS only supports Mongo Databases.
+- _uri_: {String} DB connection URI. To get more information about MongoDB connection URI take a look to the [official documentation](https://docs.mongodb.com/manual/reference/connection-string/)
+- _max_: {Number} By default 100, set the maximum connection simultaneasly to the DB.
+- _min_: {Number} Bu default 1, set the minimum connection simultaneasly to the DB.
+- _connection_: Object to set up the connection parameters to the DB instance and the connection pool settings.
+- _tenants_: Object to set up the db instance configuration
+  - _noListener_: {Boolean} By default false, do not make the db an event listener to the original connection. Keep it false if you are using MoltyJS in a multy tenancy architecture since MongoDB propagate all the events throug all the db instances oppened.
+  - _returnNonCachedInstance_: {Boolean} By default false, control if you want to return a cached instance or have a new one created
+- _elasticSearch_: Object to set up the connection parameter to the Elasticsearch instance
+  - _host_: {String} Host of the Elasticsearch instance
 
 ## Drop a DB
 
@@ -123,17 +124,17 @@ const newSchema = Schema(
 
 The schema field properties alowed are:
 
-* _type_: Is the only one which is mandatory and could be a **String, Number, Boolean, Buffer, Date, Array, Object, ObjectId** or an array **[]** of any of them.
-* _ref_: Optional and should be the Model name associated to the collection you want to refeer. The _type_ of areference field must be **ObjectId** or **[ObjectId]**.
-* _required_: Optional and only allow **Boolean** values.
-* _unique_: Optional and only allow **Boolean** values.
-* _default_: Optional, only allows values of the same type which is set on the _type_ property. You also can assigna a function to it which return a value with the correct type.
-* _match_: Optional, allows either RegExp or **String** to validate the value of the field.
-* _enum_: Optional, and must be an array of values of the same type is set on _type_.
-* _min_: Optional, minimum number allowed.
-* _max_: Optional, maximum number allowed.
-* _maxlength_: Optional, maximum length of a **String**
-* _validate_: Optional, function to perform a custom validation. Document is passing through the function arg:
+- _type_: Is the only one which is mandatory and could be a **String, Number, Boolean, Buffer, Date, Array, Object, ObjectId** or an array **[]** of any of them.
+- _ref_: Optional and should be the Model name associated to the collection you want to refeer. The _type_ of areference field must be **ObjectId** or **[ObjectId]**.
+- _required_: Optional and only allow **Boolean** values.
+- _unique_: Optional and only allow **Boolean** values.
+- _default_: Optional, only allows values of the same type which is set on the _type_ property. You also can assigna a function to it which return a value with the correct type.
+- _match_: Optional, allows either RegExp or **String** to validate the value of the field.
+- _enum_: Optional, and must be an array of values of the same type is set on _type_.
+- _min_: Optional, minimum number allowed.
+- _max_: Optional, maximum number allowed.
+- _maxlength_: Optional, maximum length of a **String**
+- _validate_: Optional, function to perform a custom validation. Document is passing through the function arg:
 
 ```javascript
 const { Schema } = require('moltys');
@@ -152,11 +153,11 @@ const otherSchema = Schema({
 
 And the schema options allowed are:
 
-* _timestamps_: Optional, set automatically in the documents saved or updated in the DB the fields: `createdAt` and `updatedAt`
-* _inheritOptions_: Optional, used for inherit from a parent Schema
-  * _discriminatorKey_: Required once "_inheritOptions_" is set
-  * _merge_: Optional, must be an array with a combination of these three values ['methods', 'preHooks', 'postHooks'], depending of what you want to merge from the parent Schema.
-* _elasticSearchIndexes_: Optional, used for set the Schema field will be indexed by the Elasticsearch server and in which type: 'text', 'keyword', 'date', 'long', 'double', 'boolean', 'ip', 'object', 'nested'
+- _timestamps_: Optional, set automatically in the documents saved or updated in the DB the fields: `createdAt` and `updatedAt`
+- _inheritOptions_: Optional, used for inherit from a parent Schema
+  - _discriminatorKey_: Required once "_inheritOptions_" is set
+  - _merge_: Optional, must be an array with a combination of these three values ['methods', 'preHooks', 'postHooks'], depending of what you want to merge from the parent Schema.
+- _elasticSearchIndexes_: Optional, used for set the Schema field will be indexed by the Elasticsearch server and in which type: 'text', 'keyword', 'date', 'long', 'double', 'boolean', 'ip', 'object', 'nested'
 
 ```javascript
 const { Schema } = require('moltys');
@@ -214,8 +215,8 @@ All hooks have binded the connection instance and the tenant name beside the doc
 
 #### Document middleware is supported for the following functions.
 
-* insertOne
-* insertMany
+- insertOne
+- insertMany
 
 In document middleware functions, **this** refers to the document or to the array of documents.
 
@@ -262,9 +263,9 @@ newSchema.post('insertMany', async function(connection, tenant, next) {
 
 #### Query middleware is supported for the following functions.
 
-* updateOne
-* updateMany
-* delete
+- updateOne
+- updateMany
+- delete
 
 In query middleware functions, **this** refers to the query.
 
@@ -333,9 +334,9 @@ TestModelDiscriminator = TestModel.discriminator(
 
 The **merge** option must be an array with the element you want to merge from the parent model, teh options are:
 
-* methods: which corresponds to the static methods.
-* preHooks: which corresponds to the hooks that are executed **before** performing actions on the DB
-* postHooks: which corresponds to the hooks that are executed **after** performing actions on the DB
+- methods: which corresponds to the static methods.
+- preHooks: which corresponds to the hooks that are executed **before** performing actions on the DB
+- postHooks: which corresponds to the hooks that are executed **after** performing actions on the DB
 
 ## Create a new document
 
@@ -410,12 +411,12 @@ You can use an array of ObjectId also as type ([ObjectId]). Noticed that to get 
 
 ### `insertOne(tenant, doc, options = {}) {Promise}`
 
-* {String} Tenant name
-* {Document} `doc` Document instance object
-* {Object} `options` Optional settings
-  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
+- {String} Tenant name
+- {Document} `doc` Document instance object
+- {Object} `options` Optional settings
+  - {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
     instead of MongoDB Document
-  * {Boolean} `forceServerObjectId` (false by default: no limit) Force server to create \_id fields instead of client.
+  - {Boolean} `forceServerObjectId` (false by default: no limit) Force server to create \_id fields instead of client.
 
 ```javascript
 const res = await connection.insertOne(newDoc);
@@ -424,12 +425,12 @@ const res = await connection.insertOne(newDoc);
 
 ### `insertMany(tenant, docs, options = {}) {Promise}`
 
-* {String} Tenant name
-* [{Document}] `docs` Array of Document instances of the same model and for the same tenant
-* {Object} `options` Optional settings
-  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
+- {String} Tenant name
+- [{Document}] `docs` Array of Document instances of the same model and for the same tenant
+- {Object} `options` Optional settings
+  - {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
     instead of MongoDB Document
-  * {Boolean} `forceServerObjectId` (false by default: no limit) Force server to create \_id fields instead of client.
+  - {Boolean} `forceServerObjectId` (false by default: no limit) Force server to create \_id fields instead of client.
 
 ```javascript
 newDoc2 = TestModel.new({
@@ -446,14 +447,14 @@ const res = await connection.insertMany([newDoc, newDoc2], {moltyClass: false});
 
 ### `find(tenant, collection, query = {}, options = {}) {Promise}`
 
-* {String} `tanant` Tenant name
-* {String} `collection` Collection name
-* {Object} `query` Query object
-* {Object} `options` Optional settings
-  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
+- {String} `tanant` Tenant name
+- {String} `collection` Collection name
+- {Object} `query` Query object
+- {Object} `options` Optional settings
+  - {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
     instead of MongoDB Document
-  * {Number} `limit` (0 by default: no limit) Limit the results to the amount specified
-  * {Object} `projection` (null by default) Create a projection of a field, the projection document limits the fields to return for all matching documents
+  - {Number} `limit` (0 by default: no limit) Limit the results to the amount specified
+  - {Object} `projection` (null by default) Create a projection of a field, the projection document limits the fields to return for all matching documents
 
 ```javascript
 const resFind = await connection.find('tenant_test', 'TestModel',
@@ -473,12 +474,12 @@ Updating a document support all the [update operators](https://docs.mongodb.com/
 
 ### `updateOne(tenant, collection, filter, payload, options = {}) {Promise}`
 
-* {String} `tanant` Tenant name
-* {String} `collection` Collection name
-* {Object} `filter` Filter object used to select the document to update
-* {Object} `payload` Payload object used to update the document
-* {Object} `options` Optional settings
-  * {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
+- {String} `tanant` Tenant name
+- {String} `collection` Collection name
+- {Object} `filter` Filter object used to select the document to update
+- {Object} `payload` Payload object used to update the document
+- {Object} `options` Optional settings
+  - {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class
     instead of MongoDB Document
 
 ```javascript
@@ -497,12 +498,12 @@ const resUpdate = await connection.updateOne(
 
 ### `updateMany(tenant, collection, filter, payload, options = {}) {Promise}`
 
-* {String} `tanant` Tenant name
-* {String} `collection` Collection name
-* {Object} `filter` Filter object used to select the document to update
-* {Object} `payload` Payload object used to update the document
-* {Object} `options` Optional settings
-* {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class instead of MongoDB Document
+- {String} `tanant` Tenant name
+- {String} `collection` Collection name
+- {Object} `filter` Filter object used to select the document to update
+- {Object} `payload` Payload object used to update the document
+- {Object} `options` Optional settings
+- {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class instead of MongoDB Document
 
 ```javascript
 const resUpdate = await connection.updateMany(
@@ -529,11 +530,11 @@ const resUpdate = await connection.updateMany(
 
 ### `deleteOne(tenant, collection, filter, options = {}) {Promise}`
 
-* {String} `tanant` Tenant name
-* {String} `collection` Collection name
-* {Object} `filter` Filter object used to select the document to delete
-* {Object} `options` Optional settings
-* {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class instead of MongoDB Document
+- {String} `tanant` Tenant name
+- {String} `collection` Collection name
+- {Object} `filter` Filter object used to select the document to delete
+- {Object} `options` Optional settings
+- {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class instead of MongoDB Document
 
 ```javascript
 const resUpdate = await connection.deleteOne(
@@ -550,15 +551,15 @@ Aggregation operations group values from multiple documents together, and can pe
 
 ### `aggregate(tenant, collection, pipeline = [], options = {}) {Promise}`
 
-* {String} `tanant` Tenant name
-* {String} `collection` Collection name
-* {Object[]} `pipeline` Array containing all the aggregation framework commands for the execution.
-  * Pipeline stages supported [(use the same syntax as MongoDB Native Driver)](https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/):
-    * $match
-    * $lookup
-    * $project
-* {Object} `options` Optional settings
-  * "There is no options supported yet"
+- {String} `tanant` Tenant name
+- {String} `collection` Collection name
+- {Object[]} `pipeline` Array containing all the aggregation framework commands for the execution.
+  - Pipeline stages supported [(use the same syntax as MongoDB Native Driver)](https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/):
+    - $match
+    - $lookup
+    - $project
+- {Object} `options` Optional settings
+  - "There is no options supported yet"
 
 ```javascript
 const pipeline = [
