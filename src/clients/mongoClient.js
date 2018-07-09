@@ -246,7 +246,7 @@ class MongoClient {
    *
    * @returns [{Object}]
    */
-  _applyHooks(hooksList, objectBinded, tenant) {
+  _applyHooks(hooksList, objectBinded, tenant, meta = {}) {
     let insertHooks = new Middleware();
     let insertManyHooks = new Middleware();
     let updateOneHooks = new Middleware();
@@ -257,19 +257,19 @@ class MongoClient {
       hooksList.forEach(key => {
         switch (key.hook) {
           case 'insertOne':
-            insertHooks.use(key.fn.bind(objectBinded, this, tenant));
+            insertHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
           case 'insertMany':
-            insertManyHooks.use(key.fn.bind(objectBinded, this, tenant));
+            insertManyHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
           case 'updateOne':
-            updateOneHooks.use(key.fn.bind(objectBinded, this, tenant));
+            updateOneHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
           case 'updateMany':
-            updateManyHooks.use(key.fn.bind(objectBinded, this, tenant));
+            updateManyHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
           case 'deleteOne':
-            deleteOneHooks.use(key.fn.bind(objectBinded, this, tenant));
+            deleteOneHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
           default:
             throw new Error('Hook "' + key.hook + '" is not allowed.');
@@ -925,8 +925,18 @@ class MongoClient {
     }
 
     // Apply hooks
-    const _preHooksAux = this._applyHooks(model._preHooks, payload, tenant);
-    const _postHooksAux = this._applyHooks(model._postHooks, payload, tenant);
+    const _preHooksAux = this._applyHooks(
+      model._preHooks,
+      payload,
+      tenant,
+      filter,
+    );
+    const _postHooksAux = this._applyHooks(
+      model._postHooks,
+      payload,
+      tenant,
+      filter,
+    );
 
     // Running pre update hooks
     await _preHooksAux.updateOne.exec();
@@ -1034,8 +1044,18 @@ class MongoClient {
     }
 
     // Apply hooks
-    const _preHooksAux = this._applyHooks(model._preHooks, payload, tenant);
-    const _postHooksAux = this._applyHooks(model._postHooks, payload, tenant);
+    const _preHooksAux = this._applyHooks(
+      model._preHooks,
+      payload,
+      tenant,
+      filter,
+    );
+    const _postHooksAux = this._applyHooks(
+      model._postHooks,
+      payload,
+      tenant,
+      filter,
+    );
 
     // Running pre update hooks
     await _preHooksAux.updateMany.exec();

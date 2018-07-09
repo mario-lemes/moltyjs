@@ -218,20 +218,20 @@ All hooks have binded the connection instance and the tenant name beside the doc
 - insertOne
 - insertMany
 
-In document middleware functions, **this** refers to the document or to the array of documents.
+In document middleware functions, **this** refers to the document or to the array of documents and **meta** is other value info related to the transaction like the fiter payload in the updates actions.
 
 Examples:
 
 ```javascript
 // Pre hooks on insertOne
-newSchema.pre('insertOne', function(connection, tenant, next) {
+newSchema.pre('insertOne', function(connection, tenant, meta, next) {
   // this refers to the document
   console.log(this);
   return next();
 });
 
 // Post hooks on insertOne
-newSchema.post('insertOne', function(connection, tenant, next) {
+newSchema.post('insertOne', function(connection, tenant, meta, next) {
   // From any pre or post hook of Document middleware
   // you can call to any of the static methos associated
   // to the docuemnt
@@ -240,7 +240,7 @@ newSchema.post('insertOne', function(connection, tenant, next) {
 });
 
 // Pre hooks on insertMany
-newSchema.pre('insertMany', function(connection, tenant, next) {
+newSchema.pre('insertMany', function(connection, tenant, meta, next) {
   // this refers to the array os documents since the method that
   // trigger this hook is 'insertMany'
   console.log(this); // [{Document}, {Document}]
@@ -248,7 +248,7 @@ newSchema.pre('insertMany', function(connection, tenant, next) {
 });
 
 // Post hooks on insertMany
-newSchema.post('insertMany', async function(connection, tenant, next) {
+newSchema.post('insertMany', async function(connection, tenant, meta, next) {
   // We can perform any action against the DB with the
   // connection instance and the tenant name
   const newDoc = TestModel.new({
@@ -267,20 +267,20 @@ newSchema.post('insertMany', async function(connection, tenant, next) {
 - updateMany
 - delete
 
-In query middleware functions, **this** refers to the query.
+In query middleware functions, **this** refers to the query and **meta** is other value info related to the transaction like the fiter payload in the updates actions.
 
 Examples:
 
 ```javascript
 // Pre hooks on update
-newSchema.pre('updateOne', function(connection, tenant, next) {
+newSchema.pre('updateOne', function(connection, tenant, meta, next) {
   // this refers to the update query
   console.log(this); // Ex. { $set: {jobTitle: 'Test' }} => update query
   return next();
 });
 
 // Post hooks on delete
-newSchema.post('delete', async function(connection, tenant, next) {
+newSchema.post('delete', async function(connection, tenant, meta, next) {
   console.log(this); // Ex. {_id: 5a57b7e35f142544ec0e68dc} => filter query
   return next();
 });
