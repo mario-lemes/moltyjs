@@ -8,8 +8,6 @@ A tiny ODM for MongoDB with multy tenancy support and Elasticsearch integration.
 
 MoltyJS allow you all what you expect from an object database modeling library plus multy tenancy support and Elasticsearch integration behind the scene.
 
-**NOTE: THIS LIBRARY IS NOT SUITABLE FOR A PRODUCTION ENVIRONMENT, IS STILL UNDER CONSTRUCCTIONS AND MIGTH BE BREAKING CHANGES FROM ONE COMMIT TO ANOTHER. PLEASE, USE IT CAREFULLY AND CHECK THE DOCUMENTATION AND THE CHANGELOG IN EACH VERSION RELEASE. THANK YOU!**
-
 ## Install
 
 ```shell
@@ -157,6 +155,7 @@ And the schema options allowed are:
 - _inheritOptions_: Optional, used for inherit from a parent Schema
   - _discriminatorKey_: Required once "_inheritOptions_" is set
   - _merge_: Optional, must be an array with a combination of these three values ['methods', 'preHooks', 'postHooks'], depending of what you want to merge from the parent Schema.
+- _mongoDBIndexes_: Optional, used for set custom schema indexes in mongoDB, like multi-field index, compound indexes, etc. See [https://docs.mongodb.com/manual/reference/command/createIndexes/](mongoDB documetation) for more information.
 - _elasticSearchIndexes_: Optional, used for set the Schema field will be indexed by the Elasticsearch server and in which type: 'text', 'keyword', 'date', 'long', 'double', 'boolean', 'ip', 'object', 'nested'
 
 ```javascript
@@ -167,6 +166,12 @@ const schemaOptions = {
   inheritOptions: {
     discriminatorKey: 'kind',
   },
+  mongoDBIndexes: [
+    {
+      key: { name: 1, age: -1 },
+      unique: true,
+    },
+  ],
   elasticSearchIndexes: {
     version: {
       type: 'text',

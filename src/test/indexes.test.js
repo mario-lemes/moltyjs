@@ -49,13 +49,21 @@ describe('# Indexes', async () => {
     try {
       expect(conn).to.have.property('tenants');
       expect(conn).to.have.property('models');
+      expect(conn).to.have.property('_indexes');
       expect(conn.models).to.be.an.instanceof(Object);
-      expect(conn.models).to.have.property('TestModel2');
-      expect(conn.models).to.have.property('TestModel3');
+      expect(conn.models).to.have.property('TestModel2_2');
+      expect(conn.models).to.have.property('TestModel3_2');
       expect(conn.tenants).to.be.an.instanceof(Object);
       expect(conn.tenants).to.have.property('test2');
-      expect(conn.tenants.test2).to.have.property('TestModel2', true);
-      expect(conn.tenants.test2).to.have.property('TestModel3', true);
+      expect(conn.tenants.test2).to.have.property('TestModel2_2', true);
+      expect(conn.tenants.test2).to.have.property('TestModel3_2', true);
+      expect(conn._indexes).to.be.an.instanceof(Object);
+      expect(conn._indexes).to.have.property('TestModel2_2');
+      expect(conn._indexes).to.have.property('TestModel3_2');
+      expect(conn._indexes.TestModel2_2).to.be.an.instanceof(Array);
+      expect(conn._indexes.TestModel3_2).to.be.an.instanceof(Array);
+      expect(conn._indexes.TestModel2_2).to.have.lengthOf(3);
+      expect(conn._indexes.TestModel3_2).to.have.lengthOf(3);
     } catch (error) {
       throw error;
     }

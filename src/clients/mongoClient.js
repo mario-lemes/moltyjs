@@ -161,6 +161,30 @@ class MongoClient {
   }
 
   /**
+   * _getIndexesColection():  Get schema indexes and custom indexes
+   * we will create on the specific tenant in the DB.
+   *
+   * @param {Model} model
+   */
+  _getIndexesColection(model) {
+    const schema = model._schemaNormalized;
+    let indexes = [];
+
+    Object.keys(schema).forEach(key => {
+      if ('unique' in schema[key] && schema[key].unique) {
+        const index = { key: { [key]: 1 }, unique: true, name: key };
+        indexes.push(index);
+      }
+    });
+
+    if (model._schemaOptions && model._schemaOptions.mongoDBIndexes) {
+      indexes = indexes.concat(model._schemaOptions.mongoDBIndexes);
+    }
+
+    this._indexes[model._modelName] = indexes;
+  }
+
+  /**
    * addModel(): Add model to the MongoClient instance so we know
    * all the models side effects needs to take on the DB like
    * ensure indexes
@@ -183,16 +207,7 @@ class MongoClient {
       );
     }
 
-    const schema = model._schemaNormalized;
-    let indexes = [];
-    Object.keys(schema).forEach(key => {
-      if ('unique' in schema[key] && schema[key].unique) {
-        const index = { key: { [key]: 1 }, unique: true, name: key };
-        indexes.push(index);
-      }
-    });
-
-    this._indexes[model._modelName] = indexes;
+    this._getIndexesColection(model);
 
     if (model._discriminator) {
       this.models[model._discriminator] = model;

@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.0.3] - 2018-07-11
+
+### Added
+
+- Posibility to set custom mongoDB indexes
+
 ## [1.0.2] - 2018-07-09
 
 ### Added
@@ -513,6 +519,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[1.0.3]: https://github.com/Yonirt/moltyjs/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/Yonirt/moltyjs/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/Yonirt/moltyjs/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Yonirt/moltyjs/compare/v0.9.9...v1.0.0

@@ -128,12 +128,32 @@ class Schema {
         });
       }
 
+      // Objects mongoDBIndexes
+      if (key === 'mongoDBIndexes' && isArray(options[key])) {
+        if (options[key].length > 0) {
+          options[key].forEach(mongoDBIndex => {
+            Object.keys(mongoDBIndex.key).forEach(schemaKey => {
+              if (Object.keys(this._schema).indexOf(schemaKey) < 0) {
+                throw new Error(
+                  'mongoDB indexes must belongs to the Schema, got: ' +
+                    schemaKey,
+                );
+              }
+            });
+          });
+        } else {
+          throw new Error(
+            'mongoDB indexes shoudl not be empty if it is declared on the schema options',
+          );
+        }
+      }
+
       // Objects elasticSearchIndexes
       if (key === 'elasticSearchIndexes' && isObject(options[key])) {
         Object.keys(options[key]).forEach(elasticSearchKey => {
           if (Object.keys(this._schema).indexOf(elasticSearchKey) < 0) {
             throw new Error(
-              'Elastic Search indexes must be belongs to the Schema, got: ' +
+              'Elastic Search indexes must belongs to the Schema, got: ' +
                 elasticSearchKey,
             );
           }
@@ -236,6 +256,7 @@ class Schema {
       'timestamps',
       'inheritOptions',
       'elasticSearchIndexes',
+      'mongoDBIndexes',
     ];
     return fieldOptions.indexOf(option) > -1;
   }

@@ -120,6 +120,16 @@ const testOptions = {
   inheritOptions: {
     discriminatorKey: 'kind',
   },
+  mongoDBIndexes: [
+    {
+      key: { test: 1 },
+      unique: true,
+    },
+    {
+      key: { isActive: 1 },
+      name: 'customindex',
+    },
+  ],
   elasticSearchIndexes: {
     firstName: {
       type: 'text',
