@@ -241,6 +241,10 @@ const discriminatorOptions = {
       key: { institution: 1 },
       unique: true,
     },
+    {
+      key: { test: -1 },
+      unique: true,
+    },
   ],
 };
 

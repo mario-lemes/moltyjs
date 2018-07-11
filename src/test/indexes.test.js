@@ -25,9 +25,13 @@ describe('# Indexes', async () => {
       sDiscriminator,
       'TestModel3_2_Discriminated',
     );
-    mDiscriminator2 = m2.discriminator(
-      directorSchema,
+    /* mDiscriminator2 = m2.discriminator(
+      sDiscriminator,
       'TestModel3_2_Discriminated_2',
+    ); */
+    mDiscriminator3 = m2.discriminator(
+      directorSchema,
+      'TestModel3_2_Discriminated_3',
     );
 
     newDoc = await m1.new({
@@ -97,7 +101,7 @@ describe('# Indexes', async () => {
       expect(conn._indexes.TestModel2_2).to.be.an.instanceof(Array);
       expect(conn._indexes.TestModel3_2).to.be.an.instanceof(Array);
       expect(conn._indexes.TestModel2_2).to.have.lengthOf(2);
-      expect(conn._indexes.TestModel3_2).to.have.lengthOf(5);
+      expect(conn._indexes.TestModel3_2).to.have.lengthOf(6);
     } catch (error) {
       throw error;
     }

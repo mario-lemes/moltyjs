@@ -172,17 +172,17 @@ class MongoClient {
       ? this._indexes[model._modelName]
       : [];
 
-    Object.keys(schema).forEach(key => {
-      if ('unique' in schema[key] && schema[key].unique) {
-        const index = { key: { [key]: 1 }, unique: true, name: key };
-        indexes.push(index);
+    Object.keys(schema).forEach(field => {
+      if ('unique' in schema[field] && schema[field].unique) {
+        if (!indexes.some(index => !!index.key[field])) {
+          indexes.push({ key: { [field]: 1 }, unique: true, name: field });
+        }
       }
     });
 
     if (model._schemaOptions && model._schemaOptions.mongoDBIndexes) {
       indexes = indexes.concat(model._schemaOptions.mongoDBIndexes);
     }
-
     this._indexes[model._modelName] = indexes;
   }
 
