@@ -67,7 +67,6 @@ const testSchema = {
   email: {
     type: String,
     required: true,
-    unique: true,
     maxlength: 150,
   },
   password: {
@@ -232,6 +231,17 @@ const discriminatorOptions = {
     discriminatorKey: 'kind',
     merge: ['methods', 'preHooks', 'postHooks'],
   },
+  elasticSearchIndexes: {
+    notes: {
+      type: 'text',
+    },
+  },
+  mongoDBIndexes: [
+    {
+      key: { institution: 1 },
+      unique: true,
+    },
+  ],
 };
 
 const sDiscriminator = new Schema(discriminatorSchema, discriminatorOptions);
@@ -450,6 +460,7 @@ const directorSchema = new Schema(
     inheritOptions: {
       discriminatorKey: 'kind',
     },
+    mongoDBIndexes: [{ key: { teachers: 1 } }],
   },
 );
 

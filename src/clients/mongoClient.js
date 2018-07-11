@@ -168,7 +168,9 @@ class MongoClient {
    */
   _getIndexesColection(model) {
     const schema = model._schemaNormalized;
-    let indexes = [];
+    let indexes = this._indexes[model._modelName]
+      ? this._indexes[model._modelName]
+      : [];
 
     Object.keys(schema).forEach(key => {
       if ('unique' in schema[key] && schema[key].unique) {

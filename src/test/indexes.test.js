@@ -6,12 +6,29 @@ const { Schema, connect, Model } = Molty;
 
 const Middleware = require('../middleware');
 
-const { testSchema, testOptions, s, m, conn } = require('./mock');
+const {
+  testSchema,
+  testOptions,
+  s,
+  sDiscriminator,
+  directorSchema,
+  m,
+  conn,
+} = require('./mock');
 
 describe('# Indexes', async () => {
   before(async () => {
     const m1 = new Model(s, 'TestModel2_2');
     const m2 = new Model(s, 'TestModel3_2');
+
+    mDiscriminator = m2.discriminator(
+      sDiscriminator,
+      'TestModel3_2_Discriminated',
+    );
+    mDiscriminator2 = m2.discriminator(
+      directorSchema,
+      'TestModel3_2_Discriminated_2',
+    );
 
     newDoc = await m1.new({
       test: ['OOOKK', 'YEEEES'],
@@ -28,7 +45,7 @@ describe('# Indexes', async () => {
     });
 
     newDoc2 = await m2.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKK2', 'YEEEES2'],
       email: 'dasdsadsasdasdad@dsfdffds.com',
       firstName: 'sdfasdf',
       lastName: 'sdfsadfsadf',
@@ -41,8 +58,25 @@ describe('# Indexes', async () => {
       },
     });
 
+    newDoc3 = await mDiscriminator.new({
+      test: ['OOOKK3', 'YEEEES3'],
+      email: 'qwerwetret@dsfdffds.com',
+      firstName: 'sdfasdf',
+      lastName: 'sdfsadfsadf',
+      password: '1321321',
+      institution: 'test',
+      birthdate: Date.now(),
+      gender: 'Male',
+      jobTitle: 'TEST',
+      emergencyContactInfo: {
+        location: 'Las Palmas',
+        relation: 'Brother',
+      },
+    });
+
     const res = await conn.insertOne('test2', newDoc);
     const res2 = await conn.insertOne('test2', newDoc2);
+    const res3 = await conn.insertOne('test2', newDoc3);
   });
 
   it('Ensuring index on the DB collection', async () => {
@@ -62,8 +96,8 @@ describe('# Indexes', async () => {
       expect(conn._indexes).to.have.property('TestModel3_2');
       expect(conn._indexes.TestModel2_2).to.be.an.instanceof(Array);
       expect(conn._indexes.TestModel3_2).to.be.an.instanceof(Array);
-      expect(conn._indexes.TestModel2_2).to.have.lengthOf(3);
-      expect(conn._indexes.TestModel3_2).to.have.lengthOf(3);
+      expect(conn._indexes.TestModel2_2).to.have.lengthOf(2);
+      expect(conn._indexes.TestModel3_2).to.have.lengthOf(5);
     } catch (error) {
       throw error;
     }

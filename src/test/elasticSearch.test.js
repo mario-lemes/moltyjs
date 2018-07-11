@@ -30,40 +30,44 @@ describe('# Elastic Search', () => {
 
     newDiscriminatorDoc5 = await mDiscriminator.new(
       {
-        test: ['OOOKK', 'YEEEES'],
+        test: ['OOOKKA', 'YEEEESA'],
         email: '5@dsfdfadsfsdf.es',
         password: '1234567890',
         jobTitle: 'Web Designer',
+        institution: 'A',
       },
       'es4',
     );
 
     newDiscriminatorDoc6 = await mDiscriminator.new(
       {
-        test: ['OOOKK', 'YEEEES'],
+        test: ['OOOKKB', 'YEEEESB'],
         email: '6@dsfdfadsfsdf.es',
         password: '1234567890',
         jobTitle: 'Coach',
+        institution: 'B',
       },
       'es4',
     );
 
     newDiscriminatorDoc7 = await mDiscriminator.new(
       {
-        test: ['OOOKK', 'YEEEES'],
+        test: ['OOOKKC', 'YEEEESC'],
         email: '7@dsfdfadsfsdf.es',
         password: '1234567890',
         jobTitle: 'Engineer',
+        institution: 'C',
       },
       'es4',
     );
 
     newDiscriminatorDoc8 = await mDiscriminator.new(
       {
-        test: ['OOOKK', 'YEEEES'],
+        test: ['OOOKKD', 'YEEEESD'],
         email: '8@dsfdfadsfsdf.es',
         password: '1234567890',
         jobTitle: 'Architect',
+        institution: 'D',
       },
       'es4',
     );

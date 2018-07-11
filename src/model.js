@@ -202,8 +202,20 @@ class Model {
       schemaAux._postHooks = this._postHooks.concat(schemaAux._postHooks);
     }
 
-    if (this._schemaOptions && this._schemaOptions.timestamps) {
-      schemaAux._options.timestamps = true;
+    if (this._schemaOptions) {
+      // Merge timestamps
+      if (this._schemaOptions.timestamps) {
+        schemaAux._options.timestamps = true;
+      }
+
+      // Merge elasticSearchIndexes
+      if (this._schemaOptions.elasticSearchIndexes) {
+        schemaAux._options.elasticSearchIndexes = Object.assign(
+          {},
+          schemaAux._options.elasticSearchIndexes,
+          this._schemaOptions.elasticSearchIndexes,
+        );
+      }
     }
 
     schemaAux._schema = Object.assign(

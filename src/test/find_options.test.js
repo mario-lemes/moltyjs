@@ -59,31 +59,35 @@ describe('# find() Operations', () => {
     );
 
     newDiscriminatorDoc2 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKA', 'YEEEESA'],
       email: 'asdfsadfsdfsfd@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Plumber',
+      institution: 'A',
     });
 
     newDiscriminatorDoc3 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKB', 'YEEEESB'],
       email: 'asdfsassssssd@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Developer',
+      institution: 'B',
     });
 
     newDiscriminatorDoc4 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKC', 'YEEEESC'],
       email: 'a444sssssd@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Designer',
+      institution: 'C',
     });
 
     newDiscriminatorDoc = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKD', 'YEEEESD'],
       email: email2,
       password: 'asdasdasdasd',
       jobTitle: 'Teacher',
+      institution: 'D',
     });
   });
 

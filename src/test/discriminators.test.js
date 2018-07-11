@@ -28,14 +28,15 @@ describe('# Discriminators', () => {
     mDiscriminator = m.discriminator(sDiscriminator, 'TestModel5Discriminator');
 
     newDiscriminatorDoc = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKA', 'YEEEESA'],
       email,
       password,
       jobTitle: 'Teacher',
+      institution: 'A',
     });
 
     newDoc = await m.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKB', 'YEEEESB'],
       email: 'hello@gmail.com',
       password,
     });
@@ -88,7 +89,7 @@ describe('# Discriminators', () => {
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDoc._data._id);
       expect(res._data).to.deep.equal(newDoc._data);
-      expect(res._data.test[0]).to.equal('OOOKK');
+      expect(res._data.test[0]).to.equal('OOOKKB');
       expect(res._data).to.have.property(
         newDoc._options.inheritOptions.discriminatorKey,
       );

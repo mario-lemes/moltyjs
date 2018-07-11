@@ -44,7 +44,7 @@ describe('# CRUD Operations', () => {
     const m = new Model(s, 'TestModel6');
 
     newDoc = await m.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKN', 'YEEEESN'],
       email,
       firstName,
       lastName,
@@ -70,97 +70,110 @@ describe('# CRUD Operations', () => {
     );
 
     newDiscriminatorDoc = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKA', 'YEEEESA'],
       email: email2,
       password: 'asdasdasdasd',
       jobTitle: 'Teacher',
+      institution: 'A',
     });
 
     newDiscriminatorDoc2 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKB', 'YEEEESB'],
       email: 'asdfsadfsdfsfd@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Plumber',
+      institution: 'B',
     });
 
     newDiscriminatorDoc3 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKC', 'YEEEESC'],
       email: 'asdfsassssssd@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Developer',
+      institution: 'C',
     });
 
     newDiscriminatorDoc4 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKD', 'YEEEESD'],
       email: 'a444sssssd@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Designer',
+      institution: 'D',
     });
     // --------------------------------------
 
     newDiscriminatorDoc5 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKE', 'YEEEESE'],
       email: '5@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Web Designer',
+      institution: 'E',
     });
 
     newDiscriminatorDoc6 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKF', 'YEEEESF'],
       email: '6@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Coach',
+      institution: 'F',
     });
 
     newDiscriminatorDoc7 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKG', 'YEEEESG'],
       email: '7@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Engineer',
+      institution: 'G',
     });
 
     newDiscriminatorDoc8 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKH', 'YEEEESH'],
       email: '8@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Architect',
+      institution: 'H',
     });
 
     //----------------------------------------
     newDiscriminatorDoc9 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKI', 'YEEEESI'],
       email: '7@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Engineer',
+      institution: 'I',
     });
 
     newDiscriminatorDoc10 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKJ', 'YEEEESJ'],
       email: '8@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Architect',
+      institution: 'J',
     });
 
     //----------------------------------------
     newDiscriminatorDoc11 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKK', 'YEEEESK'],
       email: '11@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Swimmer',
+      institution: 'K',
     });
 
     newDiscriminatorDoc12 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKL', 'YEEEESL'],
       email: '12@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Lifeguard',
+      institution: 'L',
     });
 
     newDiscriminatorDoc13 = await mDiscriminator.new({
-      test: ['OOOKK', 'YEEEES'],
+      test: ['OOOKKM', 'YEEEESM'],
       email: '13@dsfdfadsfsdf.es',
       password: '1234567890',
       jobTitle: 'Dancer',
+      institution: 'M',
     });
   });
 

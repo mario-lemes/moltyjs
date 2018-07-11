@@ -305,7 +305,7 @@ const TestModel = new Model(newSchema, 'TestModel');
 
 ## Create a Model discriminator
 
-You can also create models which inherits from other models and you can decide in which fashion you wan to do it. You have to make sure that the discriminator key of the child models are the same than the parents and also set what you want to merge from the parent model.
+You can also create models which inherits from other models and you can decide in which fashion you want to do it. You have to make sure that the discriminator key of the child models are the same than the parents and also set what you want to merge from the parent model.
 
 ### `.discriminator(schema, discriminatorName)`
 
@@ -337,7 +337,7 @@ TestModelDiscriminator = TestModel.discriminator(
 );
 ```
 
-The **merge** option must be an array with the element you want to merge from the parent model, teh options are:
+The **merge** option must be an array with the element you want to merge from the parent model, those options are:
 
 - methods: which corresponds to the static methods.
 - preHooks: which corresponds to the hooks that are executed **before** performing actions on the DB

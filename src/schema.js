@@ -130,20 +130,9 @@ class Schema {
 
       // Objects mongoDBIndexes
       if (key === 'mongoDBIndexes' && isArray(options[key])) {
-        if (options[key].length > 0) {
-          options[key].forEach(mongoDBIndex => {
-            Object.keys(mongoDBIndex.key).forEach(schemaKey => {
-              if (Object.keys(this._schema).indexOf(schemaKey) < 0) {
-                throw new Error(
-                  'mongoDB indexes must belongs to the Schema, got: ' +
-                    schemaKey,
-                );
-              }
-            });
-          });
-        } else {
+        if (options[key].length === 0) {
           throw new Error(
-            'mongoDB indexes shoudl not be empty if it is declared on the schema options',
+            'mongoDB indexes should not be empty if it is declared on the schema options',
           );
         }
       }
