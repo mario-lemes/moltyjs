@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.0.7] - 2018-08-12
+
+### Removed
+
+- I added the $reduce operator as a stage pipeline aggregation.........
+
 ## [1.0.6] - 2018-08-12
 
 ### Added
@@ -537,6 +543,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[1.0.7]: https://github.com/Yonirt/moltyjs/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/Yonirt/moltyjs/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/Yonirt/moltyjs/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/Yonirt/moltyjs/compare/v1.0.3...v1.0.4

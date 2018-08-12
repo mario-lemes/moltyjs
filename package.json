@@ -1,6 +1,6 @@
 {
   "name": "moltyjs",
-  "version": "1.0.6",
+  "version": "1.0.5",
   "description": "A tiny ODM for MongoDB with multy tenancy support.",
   "main": "lib/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "babel src -d lib",
     "test:coverage": "\"nyc --reporter=html --reporter=text npm run test\"",
     "test:watch": "\"npm run test -- --watch\"",
-    "test": "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-core/register --require babel-polyfill --recursive --reporter spec --timeout 5000 --exit",
+    "test": "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-core/register --require babel-polyfill --recursive --reporter spec --timeout 10000 --exit",
     "prepublishOnly": "npm run build",
     "prepare": "npm run build",
     "release": "np"

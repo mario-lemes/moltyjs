@@ -59,7 +59,6 @@ const validAggregatePipelineStages = {
   $sortByCount: [],
   $limit: [],
   $skip: [],
-  $reduce: ['input', 'initialValue', 'in'],
 };
 
 const defaultTenantsOptions = {
