@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.0.6] - 2018-08-12
+
+### Added
+
+- $reduce operator to agreggation actions
+
 ## [1.0.5] - 2018-07-11
 
 ### Fixed
@@ -531,6 +537,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[1.0.6]: https://github.com/Yonirt/moltyjs/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/Yonirt/moltyjs/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/Yonirt/moltyjs/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/Yonirt/moltyjs/compare/v1.0.2...v1.0.3
