@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mario-lemes/moltyjs.git"
+    "url": "https://github.com/mario-lemes/moltyjs.git"
   },
   "author": {
     "name": "Mario Lemes",
