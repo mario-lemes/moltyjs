@@ -12,55 +12,6 @@ const {
 
 const { to } = require('await-to-js');
 
-// https://docs.mongodb.com/v3.4/reference/operator/update/
-const validUpdateOperators = [
-  // Fields
-  '$currentDate',
-  '$inc',
-  '$min',
-  '$max',
-  '$mul',
-  '$rename',
-  '$set',
-  '$setOnInsert',
-  '$unset',
-  // Array
-  '$',
-  '$addToSet',
-  '$pop',
-  '$pull',
-  '$pushAll',
-  '$push',
-  '$pullAll',
-  // Modifiers
-  '$each',
-  '$position',
-  '$slice',
-  '$sort',
-  // Bitwise
-  '$bit',
-  '$isolated',
-];
-
-// https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/
-const validAggregatePipelineStages = {
-  $match: [],
-  $lookup: ['from', 'localField', 'foreignField', 'as', 'let', 'pipeline'],
-  $project: [],
-  $replaceRoot: [],
-  $facet: [],
-  $unwind: [],
-  $group: [],
-  $count: [],
-  $group: [],
-  $addFields: [],
-  $redact: [],
-  $sort: [],
-  $sortByCount: [],
-  $limit: [],
-  $skip: [],
-};
-
 const defaultTenantsOptions = {
   noListener: false,
   returnNonCachedInstance: false,
@@ -301,59 +252,6 @@ class MongoClient {
       updateMany: updateManyHooks,
       deleteOne: deleteOneHooks,
     };
-  }
-
-  /**
-   * _validateUpdateOperators(): Check if the update operators are correct
-   *
-   * @param {Object} payload
-   */
-  _validateUpdateOperators(payload) {
-    Object.keys(payload).forEach(operator => {
-      if (validUpdateOperators.indexOf(operator) < 0) {
-        throw new Error('The update operator is not allowed, got: ' + operator);
-      }
-    });
-  }
-
-  /**
-   * _validateAggregateOperators(): Check if the aggregate operators
-   * are correct and supported
-   *
-   * @param {Object} pipeline
-   */
-  _validateAggregateOperators(pipeline) {
-    for (let stage of pipeline) {
-      Object.keys(stage).forEach(operator => {
-        if (Object.keys(validAggregatePipelineStages).indexOf(operator) < 0) {
-          throw new Error(
-            'The aggregate operator is not allowed, got: ' + operator,
-          );
-        }
-
-        // If the aggregate operator has additional parameters let's check
-        // which we support
-        if (validAggregatePipelineStages[operator].length > 0) {
-          Object.keys(stage[operator]).forEach(suboperator => {
-            if (
-              validAggregatePipelineStages[operator].indexOf(suboperator) < 0
-            ) {
-              throw new Error(
-                'The paramater ' +
-                  suboperator +
-                  ' in ' +
-                  operator +
-                  ' aggreagate operator is not allowed',
-              );
-            }
-          });
-        }
-
-        if (operator === '$lookup' && stage['$lookup']['pipeline']) {
-          return this._validateAggregateOperators(stage['$lookup']['pipeline']);
-        }
-      });
-    }
   }
 
   /**
@@ -902,9 +800,6 @@ class MongoClient {
     const moltyClassEnabled = updateOneOptions.moltyClass;
     delete updateOneOptions.moltyClass;
 
-    // Check update operators
-    this._validateUpdateOperators(payload);
-
     // If we are updating a resources in a discriminator model
     // we have to set the proper filter and addres to the parent collection
     let model = {};
@@ -1021,9 +916,6 @@ class MongoClient {
     const moltyClassEnabled = updateManyOptions.moltyClass;
     delete updateManyOptions.moltyClass;
 
-    // Check update operators
-    this._validateUpdateOperators(payload);
-
     // If we are updating a resources in a discriminator model
     // we have to set the proper filter and addres to the parent collection
     let model = {};
@@ -1134,8 +1026,6 @@ class MongoClient {
 
     const moltyClassEnabled = aggregateOptions.moltyClass;
     delete aggregateOptions.moltyClass;
-
-    this._validateAggregateOperators(pipeline);
 
     // If we are looking for resources in a discriminator model
     // we have to set the proper filter and address to the parent collection

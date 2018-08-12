@@ -144,7 +144,7 @@ describe('# aggregate() Operations', () => {
     } catch (error) {
       expect(error).to.have.property(
         'message',
-        'The aggregate operator is not allowed, got: $lookuptest',
+        "Unrecognized pipeline stage name: '$lookuptest'",
       );
     }
   });
@@ -177,7 +177,7 @@ describe('# aggregate() Operations', () => {
     } catch (error) {
       expect(error).to.have.property(
         'message',
-        'The paramater error in $lookup aggreagate operator is not allowed',
+        'unknown argument to $lookup: error',
       );
     }
   });
