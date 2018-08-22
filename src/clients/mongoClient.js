@@ -28,11 +28,9 @@ const defaultFindOptions = {
   skip: 0,
   hint: null,
   explain: false,
-  snapshot: false,
   timeout: false,
   tailable: false,
   returnKey: false,
-  maxScan: null,
   min: null,
   max: null,
   showDiskLoc: false,
@@ -426,7 +424,7 @@ class MongoClient {
           conn
             .db(tenant, this._tenantsOptions)
             .collection(collection)
-            .insert(doc._data, insertOneOptions),
+            .insertOne(doc._data, insertOneOptions),
         );
 
         if (error) {
@@ -689,11 +687,9 @@ class MongoClient {
           skip,
           hint,
           explain,
-          snapshot,
           timeout,
           tailable,
           returnKey,
-          maxScan,
           min,
           max,
           showDiskLoc,
