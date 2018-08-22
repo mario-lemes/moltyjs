@@ -184,7 +184,6 @@ class MongoClient {
     if (model._schemaOptions.timestamps) {
       if (operation === 'insert') {
         obj._data['createdAt'] = new Date();
-        obj._data['updatedAt'] = new Date();
       }
 
       if (operation === 'update') {
@@ -1312,6 +1311,43 @@ class MongoClient {
       try {
         const [error, result] = await to(
           conn.db(tenant, this._tenantsOptions).dropDatabase(),
+        );
+
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        return await this._connectionManager.release(conn);
+      }
+    });
+  }
+
+  /**
+   * dropCollection(): Drop a collection, removing it permanently from the server.
+   *
+   * @param {String} tenant
+   * @param {String} collection
+   * @param [{String}] fields
+   *
+   * @returns {Promise}
+   */
+  async dropCollection(collection, tenant) {
+    if (!tenant && typeof tenant != 'string')
+      throw new Error(
+        'Should specify the tenant name (String), got: ' + tenant,
+      );
+
+    // Acquiring db instance
+    const conn = await this._connectionManager.acquire();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const [error, result] = await to(
+          conn.db(tenant, this._tenantsOptions).dropCollection(collection),
         );
 
         if (error) {

@@ -17,6 +17,16 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.0.9] - 2018-08-22
+
+### Added
+
+- dropCollection() method: remove a entire collection from a specific tenant.
+
+### Removed
+
+- timestamp "updatedAt" on insert actions
+
 ## [1.0.8] - 2018-08-12
 
 ### Removed
@@ -549,6 +559,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[1.0.9]: https://github.com/Yonirt/moltyjs/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/Yonirt/moltyjs/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/Yonirt/moltyjs/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/Yonirt/moltyjs/compare/v1.0.5...v1.0.6
