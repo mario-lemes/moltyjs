@@ -581,6 +581,24 @@ const schemaFields = new Schema(
             return payload.arrayOfNested[2].custom === 'yes';
           },
         },
+        booool: {
+          type: Boolean,
+          default: true,
+        },
+        arr: [
+          {
+            title: {
+              type: String,
+              maxlength: 15,
+              required: true,
+            },
+            value: {
+              type: String,
+              maxlength: 10,
+              default: null,
+            },
+          },
+        ],
       },
     ],
     arrayOfArray: {

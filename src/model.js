@@ -482,7 +482,6 @@ class Model {
             [key]: defaultValue,
           };
         else payload[key] = defaultValue;
-
         return;
       }
 
@@ -508,8 +507,8 @@ class Model {
             payload[key][i],
             schema[key][0],
           );
-          return;
         }
+        return;
       }
 
       // Objects nested

@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.1.0] - 2018-09-10
+
+### Fixed
+
+- initialization default values in array schema properties
+
 ## [1.0.10] - 2018-08-22
 
 ### Fixed
@@ -565,6 +571,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[1.1.0]: https://github.com/Yonirt/moltyjs/compare/v1.0.10...v1.1.0
 [1.0.10]: https://github.com/Yonirt/moltyjs/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/Yonirt/moltyjs/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/Yonirt/moltyjs/compare/v1.0.7...v1.0.8
