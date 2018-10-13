@@ -204,6 +204,7 @@ class Schema {
       'updateOne',
       'updateMany',
       'deleteOne',
+      'deleteMany',
     ];
     return validHooks.indexOf(hook) > -1;
   }

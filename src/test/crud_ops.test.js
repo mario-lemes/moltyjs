@@ -433,4 +433,54 @@ describe('# CRUD Operations', () => {
       throw new Error('Unexpected');
     }
   });
+
+  it('should delete many documents', async () => {
+    try {
+      const newDoc = await mDiscriminator.new({
+        test: ['OOOKK1', 'YEEEES1'],
+        email: 'newdeleteMany1@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Test1',
+        institution: 'DEL1',
+      });
+
+      const newDoc2 = await mDiscriminator.new({
+        test: ['OOOKK2', 'YEEEES2'],
+        email: 'newdeleteMany2@dsfdfadsfsdf.es',
+        password: '1234567890',
+        jobTitle: 'Test2',
+        institution: 'DEL2',
+      });
+
+      await conn.insertOne('test2', newDoc);
+      await conn.insertOne('test2', newDoc2);
+
+      const resDel = await conn.deleteMany('test2', 'TestModel7Discriminator', {
+        _id: { $in: [newDoc._data._id, newDoc2._data._id] },
+      });
+
+      expect(resDel).to.have.property('ok', 1);
+
+      let resFind = await conn.find(
+        'test2',
+        'TestModel7Discriminator',
+        { email: 'newdeleteMany1@dsfdfadsfsdf.es' },
+        { moltyClass: true },
+      );
+
+      expect(resFind).to.have.lengthOf(0);
+
+      resFind = await conn.find(
+        'test2',
+        'TestModel7Discriminator',
+        { email: 'newdeleteMany2@dsfdfadsfsdf.es' },
+        { moltyClass: true },
+      );
+
+      expect(resFind).to.have.lengthOf(0);
+    } catch (error) {
+      console.log(error);
+      throw new Error('Unexpected');
+    }
+  });
 });

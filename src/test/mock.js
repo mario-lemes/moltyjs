@@ -179,6 +179,10 @@ s2.post('deleteOne', (dbClient, tenant, meta, next) => {
   console.log('POST: Delete World!');
   return next();
 });
+s2.post('deleteMany', (dbClient, tenant, meta, next) => {
+  console.log('POST: Delete Many World!');
+  return next();
+});
 
 // Static methods
 s3.methods.newMethod1 = function() {

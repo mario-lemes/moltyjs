@@ -270,7 +270,8 @@ newSchema.post('insertMany', async function(connection, tenant, meta, next) {
 
 - updateOne
 - updateMany
-- delete
+- deleteOne
+- deleteMany
 
 In query middleware functions, **this** refers to the query and **meta** is other value info related to the transaction like the fiter payload in the updates actions.
 
@@ -285,7 +286,7 @@ newSchema.pre('updateOne', function(connection, tenant, meta, next) {
 });
 
 // Post hooks on delete
-newSchema.post('delete', async function(connection, tenant, meta, next) {
+newSchema.post('deleteOne', async function(connection, tenant, meta, next) {
   console.log(this); // Ex. {_id: 5a57b7e35f142544ec0e68dc} => filter query
   return next();
 });
@@ -354,13 +355,11 @@ const { Model } = require('moltys');
 
 const TestModel = new Model(newSchema, 'TestModel');
 
-newDoc = await TestModel.new(
-  {
-    email: 'test@moltyjs.com',
-    password: '1321321',
-    name: 'Michael Scott',
-  },
-); // Document // Error
+newDoc = await TestModel.new({
+  email: 'test@moltyjs.com',
+  password: '1321321',
+  name: 'Michael Scott',
+}); // Document // Error
 ```
 
 ## Referencing Documents
@@ -444,7 +443,9 @@ newDoc2 = TestModel.new({
   name: 'Dwight Schrute',
 });
 
-const res = await connection.insertMany([newDoc, newDoc2], {moltyClass: false});
+const res = await connection.insertMany([newDoc, newDoc2], {
+  moltyClass: false,
+});
 // Document || Error
 ```
 
@@ -462,14 +463,17 @@ const res = await connection.insertMany([newDoc, newDoc2], {moltyClass: false});
   - {Object} `projection` (null by default) Create a projection of a field, the projection document limits the fields to return for all matching documents
 
 ```javascript
-const resFind = await connection.find('tenant_test', 'TestModel',
-{
-  name: 'Michael Scott',
-},
-{
-  limit: 1,
-  projection: { name: 0 }
-});
+const resFind = await connection.find(
+  'tenant_test',
+  'TestModel',
+  {
+    name: 'Michael Scott',
+  },
+  {
+    limit: 1,
+    projection: { name: 0 },
+  },
+);
 // [Document] || Error
 ```
 
@@ -514,13 +518,15 @@ const resUpdate = await connection.updateOne(
 const resUpdate = await connection.updateMany(
   'tenant_test',
   'TestModel',
-  _id: {
-    $in: [
-      '5aa1530d604da74824a6c170',
-      '5aa1530d604da74824a6c171',
-      '5aa1530d604da74824a6c172',
-      '5aa1530d604da74824a6c173',
-    ],
+  {
+    _id: {
+      $in: [
+        '5aa1530d604da74824a6c170',
+        '5aa1530d604da74824a6c171',
+        '5aa1530d604da74824a6c172',
+        '5aa1530d604da74824a6c173',
+      ],
+    },
   },
   {
     $set: {
@@ -542,11 +548,31 @@ const resUpdate = await connection.updateMany(
 - {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class instead of MongoDB Document
 
 ```javascript
-const resUpdate = await connection.deleteOne(
-  'tenant_test',
-  'TestModel',
-  { name: 'Michael Scott' },
-);
+const resUpdate = await connection.deleteOne('tenant_test', 'TestModel', {
+  name: 'Michael Scott',
+});
+// {DeleteResult} || Error
+```
+
+### `deleteMany(tenant, collection, filter, options = {}) {Promise}`
+
+- {String} `tanant` Tenant name
+- {String} `collection` Collection name
+- {Object} `filter` Filter object used to select the document to delete
+- {Object} `options` Optional settings
+- {Boolean} `moltyClass` (true by default) True if you want the results as MoltyJs Document class instead of MongoDB Document
+
+```javascript
+const resUpdate = await connection.deleteMany('tenant_test', 'TestModel', {
+  _id: {
+    $in: [
+      '5aa1530d604da74824a6c170',
+      '5aa1530d604da74824a6c171',
+      '5aa1530d604da74824a6c172',
+      '5aa1530d604da74824a6c173',
+    ],
+  },
+});
 // {DeleteResult} || Error
 ```
 
@@ -589,7 +615,12 @@ const pipeline = [
   },
 ];
 
-const aggregate = await connection.aggregate('tenant_test', 'TestModel', pipeline, {});
+const aggregate = await connection.aggregate(
+  'tenant_test',
+  'TestModel',
+  pipeline,
+  {},
+);
 // {Result} || Error
 ```
 

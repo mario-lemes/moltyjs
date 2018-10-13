@@ -74,6 +74,10 @@ const defaultDeleteOneOptions = {
   moltyClass: true,
 };
 
+const defaultDeleteManyOptions = {
+  moltyClass: true,
+};
+
 class MongoClient {
   constructor() {
     this._connectionManager = null;
@@ -217,6 +221,7 @@ class MongoClient {
     let updateOneHooks = new Middleware();
     let updateManyHooks = new Middleware();
     let deleteOneHooks = new Middleware();
+    let deleteManyHooks = new Middleware();
 
     if (hooksList.length > 0) {
       hooksList.forEach(key => {
@@ -236,6 +241,9 @@ class MongoClient {
           case 'deleteOne':
             deleteOneHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
+          case 'deleteMany':
+            deleteManyHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
+            break;
           default:
             throw new Error('Hook "' + key.hook + '" is not allowed.');
             break;
@@ -248,6 +256,7 @@ class MongoClient {
       updateOne: updateOneHooks,
       updateMany: updateManyHooks,
       deleteOne: deleteOneHooks,
+      deleteMany: deleteManyHooks,
     };
   }
 
@@ -1211,6 +1220,107 @@ class MongoClient {
         } else {
           // Running post delete hooks
           await _postHooksAux.deleteOne.exec();
+
+          resolve(result.result);
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        return await this._connectionManager.release(conn);
+      }
+    });
+  }
+
+  /**
+   * deleteMany(): Delete many documents on MongoDB.
+   *
+   * @param {String} tenant
+   * @param {String} collection
+   * @param {Object} filter  The Filter used to select the document to delete
+   * @param {Object} options Optional settings.
+   *
+   * @returns {Promise}
+   */
+  async deleteMany(tenant, collection, filter, options = {}) {
+    if (!tenant && typeof tenant != 'string')
+      throw new Error(
+        'Should specify the tenant name (String), got: ' + tenant,
+      );
+    if (!collection && typeof collection != 'string')
+      throw new Error(
+        'Should specify the collection name (String), got: ' + collection,
+      );
+    if (!filter && typeof filter != 'object')
+      throw new Error('Should specify the filter options, got: ' + filter);
+
+    // Assign default options to perform the deleteOne query
+    const deleteManyOptions = Object.assign(
+      {},
+      defaultDeleteManyOptions,
+      options,
+    );
+
+    const moltyClassEnabled = deleteManyOptions.moltyClass;
+    delete deleteManyOptions.moltyClass;
+
+    // If we are deleting a resources in a discriminator model
+    // we have to set the proper filter and addres to the parent collection
+    let model = {};
+    if (this.models[collection]) {
+      const { _discriminator } = this.models[collection];
+
+      if (_discriminator) {
+        const { discriminatorKey } = this.models[
+          collection
+        ]._schemaOptions.inheritOptions;
+
+        if (filter[discriminatorKey])
+          throw new Error(
+            'You can not include a specific value for the "discriminatorKey" on the query.',
+          );
+
+        filter[discriminatorKey] = collection;
+      }
+
+      model = this.models[collection];
+      collection = this.models[collection]._modelName;
+    } else {
+      throw new Error(
+        'The collection ' +
+          collection +
+          'does not exist and is not registered.',
+      );
+    }
+
+    // Ensure index are created
+    if (this._indexes[collection] && this._indexes[collection].length > 0) {
+      await this.createIndexes(tenant, collection, this._indexes[collection]);
+    }
+
+    // Apply hooks
+    const _preHooksAux = this._applyHooks(model._preHooks, filter, tenant);
+    const _postHooksAux = this._applyHooks(model._postHooks, filter, tenant);
+
+    // Running pre delete hooks
+    await _preHooksAux.deleteMany.exec();
+
+    // Acquiring db instance
+    const conn = await this._connectionManager.acquire();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const [error, result] = await to(
+          conn
+            .db(tenant, this._tenantsOptions)
+            .collection(collection)
+            .deleteMany(filter, deleteManyOptions),
+        );
+
+        if (error) {
+          reject(error);
+        } else {
+          // Running post delete hooks
+          await _postHooksAux.deleteMany.exec();
 
           resolve(result.result);
         }

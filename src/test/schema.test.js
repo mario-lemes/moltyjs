@@ -41,7 +41,7 @@ describe('# Schema', () => {
   });
 
   it('Append valid post hooks to the schema', () => {
-    expect(s2._postHooks).to.have.lengthOf(2);
+    expect(s2._postHooks).to.have.lengthOf(3);
     expect(s2).to.have.property('_postHooks');
   });
 
@@ -54,7 +54,7 @@ describe('# Schema', () => {
       expect(s2).to.have.property('_preHooks');
       expect(s2).to.have.property('_postHooks');
       expect(s2._preHooks).to.have.lengthOf(4);
-      expect(s2._postHooks).to.have.lengthOf(2);
+      expect(s2._postHooks).to.have.lengthOf(3);
       expect(error.message).to.be.equal('Hook "initialize" is not allowed.');
     }
   });
