@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.2.1] - 2019-02-13
+
+### Changed
+
+- Hooks arguments in deleteOne and deleteMany methods
+
 ## [1.2.0] - 2018-10-13
 
 ### Added
@@ -56,13 +62,13 @@
 
 ### Removed
 
-- I added the $reduce operator as a stage pipeline aggregation.........
+- I added the \$reduce operator as a stage pipeline aggregation.........
 
 ## [1.0.6] - 2018-08-12
 
 ### Added
 
-- $reduce operator to agreggation actions
+- \$reduce operator to agreggation actions
 
 ## [1.0.5] - 2018-07-11
 
@@ -218,7 +224,7 @@
 
 ### Added
 
-- Support for multiple join conditions with $lookup operator in the aggregate() method
+- Support for multiple join conditions with \$lookup operator in the aggregate() method
 
 ### Changed
 
@@ -342,7 +348,7 @@
 
 ### Added
 
-- aggregate() function with support for $match, $project, and $lookup (without recursivity) stages pipeline
+- aggregate() function with support for $match, $project, and \$lookup (without recursivity) stages pipeline
 - Documentation about new aggreagte() function
 
 ### Fixed

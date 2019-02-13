@@ -1197,8 +1197,8 @@ class MongoClient {
     }
 
     // Apply hooks
-    const _preHooksAux = this._applyHooks(model._preHooks, filter, tenant);
-    const _postHooksAux = this._applyHooks(model._postHooks, filter, tenant);
+    const _preHooksAux = this._applyHooks(model._preHooks, {}, tenant, filter);
+    const _postHooksAux = this._applyHooks(model._postHooks, {}, tenant, filter);
 
     // Running pre delete hooks
     await _preHooksAux.deleteOne.exec();
@@ -1298,8 +1298,8 @@ class MongoClient {
     }
 
     // Apply hooks
-    const _preHooksAux = this._applyHooks(model._preHooks, filter, tenant);
-    const _postHooksAux = this._applyHooks(model._postHooks, filter, tenant);
+    const _preHooksAux = this._applyHooks(model._preHooks, {}, tenant, filter);
+    const _postHooksAux = this._applyHooks(model._postHooks, {}, tenant, filter);
 
     // Running pre delete hooks
     await _preHooksAux.deleteMany.exec();
