@@ -537,6 +537,7 @@ const schemaFields = new Schema(
           level_3_1: {
             type: String,
             required: true,
+            maxlength: 5,
           },
           level_3_2: {
             type: String,

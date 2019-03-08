@@ -87,9 +87,12 @@ class Schema {
         );
       }
 
+      /*
+      // Elastic search does not admit fields starting with '_'
       if (key[0] === '_') {
         throw new Error('Schema fields can not start with "_": ' + key);
       }
+      */
 
       // Objects nested
       if (!schema[key].type && isObject(schema[key])) {
@@ -112,19 +115,23 @@ class Schema {
       // Objects inheritOptions
       if (key === 'inheritOptions' && isObject(options[key])) {
         Object.keys(options[key]).forEach(inheritOptionsKey => {
-          if (!this._isValidInheritOption(inheritOptionsKey, options[key]))
+          if (!this._isValidInheritOption(inheritOptionsKey, options[key])) {
             throw new Error(
               'Unsupported schema inherit option: ' + inheritOptionsKey,
             );
-
+          }
+          /*
+          // Elastic search does not admit fields starting with '_'
           if (
             inheritOptionsKey === 'discriminatorKey' &&
             options[key].discriminatorKey[0] === '_'
-          )
+          ) {
             throw new Error(
               'Discriminator key can not start with "_": ' +
                 options[key].discriminatorKey,
             );
+          }
+          */
         });
       }
 
