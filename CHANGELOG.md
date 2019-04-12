@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.2.3] - 2019-03-10
+
+### Added
+
+- executeDbAdminCommand(): Runs a command on the database as admin
+
 ## [1.2.2] - 2019-03-10
 
 ### Removed
@@ -590,6 +596,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[1.2.3]: https://github.com/Yonirt/moltyjs/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/Yonirt/moltyjs/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/Yonirt/moltyjs/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/Yonirt/moltyjs/compare/v1.1.0...v1.2.0

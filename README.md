@@ -76,6 +76,46 @@ const res = await connection.dropDatabase('test');
 // true
 ```
 
+## Drop a Collection
+
+### `.dropCollection(collection, database)`
+
+```javascript
+const res = await connection.dropCollection('collection', 'test');
+// true
+```
+
+## Execute admin commands
+
+### `.executeDbAdminCommand(command, options)`
+
+```javascript
+const res = await connection.executeDbAdminCommand({ listDatabases: 1 });
+/*
+{
+   "databases" : [
+      {
+         "name" : "admin",
+         "sizeOnDisk" : 83886080,
+         "empty" : false
+      },
+      {
+         "name" : "local",
+         "sizeOnDisk" : 83886080,
+         "empty" : false
+      },
+      {
+         "name" : "test",
+         "sizeOnDisk" : 83886080,
+         "empty" : false
+      }
+   ],
+   "totalSize" : 251658240,
+   "ok" : 1
+}
+*/
+```
+
 ## Create a new Schema
 
 Molty Schema are based on Mongoose Schema structure with some changes on the declaration of the inherit schema options. I even keep some field options name to make the Molty integration as easier as posible in those project are currently running Mongoose.
@@ -586,9 +626,9 @@ Aggregation operations group values from multiple documents together, and can pe
 - {String} `collection` Collection name
 - {Object[]} `pipeline` Array containing all the aggregation framework commands for the execution.
   - Pipeline stages supported [(use the same syntax as MongoDB Native Driver)](https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/):
-    - $match
-    - $lookup
-    - $project
+    - \$match
+    - \$lookup
+    - \$project
 - {Object} `options` Optional settings
   - "There is no options supported yet"
 

@@ -75,7 +75,7 @@ describe('# Schema field types', () => {
     }
   });
 
-  it.only('Creating a new document from SchemaFields', async () => {
+  it('Creating a new document from SchemaFields', async () => {
     try {
       const res = await conn.insertOne('schemafields', newDoc);
 

@@ -1198,7 +1198,12 @@ class MongoClient {
 
     // Apply hooks
     const _preHooksAux = this._applyHooks(model._preHooks, {}, tenant, filter);
-    const _postHooksAux = this._applyHooks(model._postHooks, {}, tenant, filter);
+    const _postHooksAux = this._applyHooks(
+      model._postHooks,
+      {},
+      tenant,
+      filter,
+    );
 
     // Running pre delete hooks
     await _preHooksAux.deleteOne.exec();
@@ -1299,7 +1304,12 @@ class MongoClient {
 
     // Apply hooks
     const _preHooksAux = this._applyHooks(model._preHooks, {}, tenant, filter);
-    const _postHooksAux = this._applyHooks(model._postHooks, {}, tenant, filter);
+    const _postHooksAux = this._applyHooks(
+      model._postHooks,
+      {},
+      tenant,
+      filter,
+    );
 
     // Running pre delete hooks
     await _preHooksAux.deleteMany.exec();
@@ -1399,8 +1409,6 @@ class MongoClient {
    * dropDatabase(): Drop a database, removing it permanently from the server.
    *
    * @param {String} tenant
-   * @param {String} collection
-   * @param [{String}] fields
    *
    * @returns {Promise}
    */
@@ -1435,9 +1443,8 @@ class MongoClient {
   /**
    * dropCollection(): Drop a collection, removing it permanently from the server.
    *
-   * @param {String} tenant
    * @param {String} collection
-   * @param [{String}] fields
+   * @param {String} tenant
    *
    * @returns {Promise}
    */
@@ -1447,6 +1454,11 @@ class MongoClient {
         'Should specify the tenant name (String), got: ' + tenant,
       );
 
+    if (!collection && typeof collection != 'string')
+      throw new Error(
+        'Should specify the collection name (String), got: ' + collection,
+      );
+
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
 
@@ -1454,6 +1466,42 @@ class MongoClient {
       try {
         const [error, result] = await to(
           conn.db(tenant, this._tenantsOptions).dropCollection(collection),
+        );
+
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        return await this._connectionManager.release(conn);
+      }
+    });
+  }
+
+  /**
+   * executeDbAdminCommand(): Runs a command on the database as admin.
+   *
+   * @param {Object} command
+   * @param {Object} options
+   *
+   * @returns {Promise}
+   */
+  async executeDbAdminCommand(command, tenant = null, options = {}) {
+    if (Object.keys(command).length <= 0)
+      throw new Error('command field should not be empty');
+
+    // Acquiring db instance
+    const conn = await this._connectionManager.acquire();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const [error, result] = await to(
+          conn
+            .db(tenant, this._tenantsOptions)
+            .executeDbAdminCommand(command, options),
         );
 
         if (error) {
