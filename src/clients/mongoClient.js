@@ -10,7 +10,7 @@ const {
   isNumber,
 } = require('../validators');
 
-const { to } = require('await-to-js');
+//const { to } = require('await-to-js');
 
 const defaultTenantsOptions = {
   noListener: false,
@@ -411,58 +411,48 @@ class MongoClient {
     }
 
     const docAux = this._applyTimestamps(doc, model, 'insert');
-
     // Ensure index are created
     if (this._indexes[collection] && this._indexes[collection].length > 0) {
       await this.createIndexes(tenant, collection, this._indexes[collection]);
     }
-
     // Apply hooks
     const _preHooksAux = this._applyHooks(model._preHooks, doc, tenant);
     const _postHooksAux = this._applyHooks(model._postHooks, doc, tenant);
-
     // Running pre insert hooks
     await _preHooksAux.insertOne.exec();
-
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
-
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .insertOne(doc._data, insertOneOptions),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .insertOne(doc._data, insertOneOptions);
 
-        if (error) {
-          reject(error);
-        } else {
-          // Running post insert hooks
-          await _postHooksAux.insertOne.exec();
-          if (result) {
-            if (moltyClassEnabled) {
-              // Binding model properties to the document
-              const Document = require('../document');
+        // Running post insert hooks
+        await _postHooksAux.insertOne.exec();
 
-              const docInserted = new Document(
-                result.ops[0],
-                model._preHooks,
-                model._postHooks,
-                model._methods,
-                model._schemaOptions,
-                model._modelName,
-                model._discriminator,
-              );
+        if (result) {
+          if (moltyClassEnabled) {
+            // Binding model properties to the document
+            const Document = require('../document');
 
-              resolve(docInserted);
-            } else {
-              resolve(result);
-            }
+            const docInserted = new Document(
+              result.ops[0],
+              model._preHooks,
+              model._postHooks,
+              model._methods,
+              model._schemaOptions,
+              model._modelName,
+              model._discriminator,
+            );
+
+            resolve(docInserted);
           } else {
             resolve(result);
           }
+        } else {
+          resolve(result);
         }
       } catch (error) {
         reject(error);
@@ -575,46 +565,40 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .insertMany(arrayDocsData, insertManyOptions),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .insertMany(arrayDocsData, insertManyOptions);
 
-        if (error) {
-          reject(error);
-        } else {
-          // Running post insert hooks
-          await _postHooksAux.insertMany.exec();
+        // Running post insert hooks
+        await _postHooksAux.insertMany.exec();
 
-          if (result) {
-            if (moltyClassEnabled) {
-              let docInserted = [];
-              for (let i = 0; i < result.ops.length; i++) {
-                // Binding model properties to the document
-                const Document = require('../document');
+        if (result) {
+          if (moltyClassEnabled) {
+            let docInserted = [];
+            for (let i = 0; i < result.ops.length; i++) {
+              // Binding model properties to the document
+              const Document = require('../document');
 
-                docInserted.push(
-                  new Document(
-                    result.ops[i],
-                    model._preHooks,
-                    model._postHooks,
-                    model._methods,
-                    model._schemaOptions,
-                    model._modelName,
-                    model._discriminator,
-                  ),
-                );
-              }
-
-              resolve(docInserted);
-            } else {
-              resolve(result);
+              docInserted.push(
+                new Document(
+                  result.ops[i],
+                  model._preHooks,
+                  model._postHooks,
+                  model._methods,
+                  model._schemaOptions,
+                  model._modelName,
+                  model._discriminator,
+                ),
+              );
             }
+
+            resolve(docInserted);
           } else {
             resolve(result);
           }
+        } else {
+          resolve(result);
         }
       } catch (error) {
         reject(error);
@@ -714,15 +698,13 @@ class MongoClient {
         } = findOptions;
 
         // Get and run the Cursor
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .find(query, {
-              ...findOptions,
-            })
-            .toArray(),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .find(query, {
+            ...findOptions,
+          })
+          .toArray();
 
         // Run the cursor
         // http://mongodb.github.io/node-mongodb-native/3.0/api/Cursor.html
@@ -733,33 +715,29 @@ class MongoClient {
             .toArray(),
         );*/
 
-        if (error) {
-          reject(error);
-        } else {
-          if (result) {
-            if (moltyClassEnabled) {
-              const Document = require('../document');
-              let docs = [];
-              result.forEach(doc => {
-                docs.push(
-                  new Document(
-                    doc,
-                    model._preHooks,
-                    model._postHooks,
-                    model._methods,
-                    model._schemaOptions,
-                    model._modelName,
-                    model._discriminator,
-                  ),
-                );
-              });
-              resolve(docs);
-            } else {
-              resolve(result);
-            }
+        if (result) {
+          if (moltyClassEnabled) {
+            const Document = require('../document');
+            let docs = [];
+            result.forEach(doc => {
+              docs.push(
+                new Document(
+                  doc,
+                  model._preHooks,
+                  model._postHooks,
+                  model._methods,
+                  model._schemaOptions,
+                  model._modelName,
+                  model._discriminator,
+                ),
+              );
+            });
+            resolve(docs);
           } else {
             resolve(result);
           }
+        } else {
+          resolve(result);
         }
       } catch (error) {
         reject(error);
@@ -862,21 +840,15 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .updateOne(filter, payload, updateOneOptions),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .updateOne(filter, payload, updateOneOptions);
 
-        if (error) {
-          reject(error);
-        } else {
-          // Running post update hooks
-          await _postHooksAux.updateOne.exec();
+        // Running post update hooks
+        await _postHooksAux.updateOne.exec();
 
-          resolve(result.result);
-        }
+        resolve(result.result);
       } catch (error) {
         reject(error);
       } finally {
@@ -978,21 +950,15 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .updateMany(filter, payload, updateManyOptions),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .updateMany(filter, payload, updateManyOptions);
 
-        if (error) {
-          reject(error);
-        } else {
-          // Running post update hooks
-          await _postHooksAux.updateMany.exec();
+        // Running post update hooks
+        await _postHooksAux.updateMany.exec();
 
-          resolve(result.result);
-        }
+        resolve(result.result);
       } catch (error) {
         reject(error);
       } finally {
@@ -1076,13 +1042,11 @@ class MongoClient {
     return new Promise(async (resolve, reject) => {
       try {
         // Get and run the Cursor
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .aggregate(pipeline, aggregateOptions)
-            .toArray(),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .aggregate(pipeline, aggregateOptions)
+          .toArray();
 
         // Run the cursor
         // http://mongodb.github.io/node-mongodb-native/3.0/api/Cursor.html
@@ -1093,12 +1057,9 @@ class MongoClient {
             .toArray(),
         );*/
 
-        if (error) {
-          reject(error);
-        } else {
-          if (result) {
-            if (moltyClassEnabled) {
-              /* const Document = require('../document');
+        if (result) {
+          if (moltyClassEnabled) {
+            /* const Document = require('../document');
               let docs = [];
               result.forEach(doc => {
                 docs.push(
@@ -1114,13 +1075,12 @@ class MongoClient {
                 );
               });
               resolve(docs);*/
-              resolve(result);
-            } else {
-              resolve(result);
-            }
+            resolve(result);
           } else {
             resolve(result);
           }
+        } else {
+          resolve(result);
         }
       } catch (error) {
         reject(error);
@@ -1213,21 +1173,15 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .deleteOne(filter, deleteOneOptions),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .deleteOne(filter, deleteOneOptions);
 
-        if (error) {
-          reject(error);
-        } else {
-          // Running post delete hooks
-          await _postHooksAux.deleteOne.exec();
+        // Running post delete hooks
+        await _postHooksAux.deleteOne.exec();
 
-          resolve(result.result);
-        }
+        resolve(result.result);
       } catch (error) {
         reject(error);
       } finally {
@@ -1319,21 +1273,15 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .deleteMany(filter, deleteManyOptions),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .deleteMany(filter, deleteManyOptions);
 
-        if (error) {
-          reject(error);
-        } else {
-          // Running post delete hooks
-          await _postHooksAux.deleteMany.exec();
+        // Running post delete hooks
+        await _postHooksAux.deleteMany.exec();
 
-          resolve(result.result);
-        }
+        resolve(result.result);
       } catch (error) {
         reject(error);
       } finally {
@@ -1371,32 +1319,18 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        // Ensure there are no indexes yet
-        await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .dropIndexes(),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .collection(collection)
+          .createIndexes(fields);
 
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .collection(collection)
-            .createIndexes(fields),
-        );
+        // Set Indexes for this tenant and this collection are already set
+        this.tenants[tenant] = {
+          ...this.tenants[tenant],
+          [collection]: true,
+        };
 
-        if (error) {
-          reject(error);
-        } else {
-          // Set Indexes for this tenant and this collection are already set
-          this.tenants[tenant] = {
-            ...this.tenants[tenant],
-            [collection]: true,
-          };
-
-          resolve(result);
-        }
+        resolve(result);
       } catch (error) {
         reject(error);
       } finally {
@@ -1423,15 +1357,11 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(
-          conn.db(tenant, this._tenantsOptions).dropDatabase(),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .dropDatabase();
 
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
+        resolve(result);
       } catch (error) {
         reject(error);
       } finally {
@@ -1464,15 +1394,11 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(
-          conn.db(tenant, this._tenantsOptions).dropCollection(collection),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .dropCollection(collection);
 
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
+        resolve(result);
       } catch (error) {
         reject(error);
       } finally {
@@ -1498,17 +1424,11 @@ class MongoClient {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const [error, result] = await to(
-          conn
-            .db(tenant, this._tenantsOptions)
-            .executeDbAdminCommand(command, options),
-        );
+        const result = await conn
+          .db(tenant, this._tenantsOptions)
+          .executeDbAdminCommand(command, options);
 
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
+        resolve(result);
       } catch (error) {
         reject(error);
       } finally {

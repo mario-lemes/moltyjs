@@ -79,7 +79,6 @@ describe('# Schema field types', () => {
     try {
       const res = await conn.insertOne('schemafields', newDoc);
 
-      console.log(res._data.arrayOfNested[2]);
       expect(res._data._id).to.eql(newDoc._data._id);
       expect(res).to.be.instanceOf(Document);
       expect(res._discriminator).to.equal(null);

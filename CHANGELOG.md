@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.2.4] - 2019-03-10
+
+### Fixed
+
+- Issue on createIndexes() once the collection didn't exist
+
 ## [1.2.3] - 2019-03-10
 
 ### Added
@@ -596,6 +602,7 @@
 - findOne() method.
 - Document inheritence support.
 
+[1.2.4]: https://github.com/Yonirt/moltyjs/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/Yonirt/moltyjs/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/Yonirt/moltyjs/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/Yonirt/moltyjs/compare/v1.2.0...v1.2.1
