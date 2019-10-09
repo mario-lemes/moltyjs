@@ -1,9 +1,29 @@
+const { EventEmitter } = require('events');
+const Events = new EventEmitter();
+
 const crypto = require('crypto');
 const moment = require('moment');
 
 const Molty = require('../index');
 
 const { Schema, model, connect } = Molty;
+
+const options = {
+  engine: 'mongodb',
+  uri:
+    'mongodb://localhost:27017,localhost:27018,localhost:27019/test?replicaSet=rs0',
+  connection: {
+    replicaSet: 'rs0',
+  },
+  elasticSearch: {
+    host: 'localhost:9200',
+  },
+  tenants: {
+    noListener: true,
+  },
+};
+
+const conn = connect(options);
 
 const testSchema2 = new Schema(
   {
@@ -164,11 +184,35 @@ s2.pre('deleteOne', (dbClient, tenant, meta, next) => {
   return next();
 });
 
+async function executeExternalFunctionOnEvent(tenant, post) {
+  const result = await conn.find(
+    tenant,
+    'TestModel3',
+    {},
+    { moltyClass: false },
+  );
+  console.log('FROM ' + post);
+}
+
+Events.on('EVENT_A', async (tenant, post) => {
+  await executeExternalFunctionOnEvent(tenant, post);
+});
+
 // Post hooks
-s3.post('insertOne', function(dbClient, tenant, meta, next) {
+s3.post('insertOne', async function(dbClient, tenant, meta, next) {
   const r = this.newMethod1();
   console.log(r);
-  console.log('POST: Insert World!');
+  console.log('POST 1: Insert World!');
+  await executeExternalFunctionOnEvent(tenant, 'POST 1');
+  return next();
+});
+s3.post('insertOne', function(dbClient, tenant, meta, next) {
+  Events.emit('EVENT_A', tenant, 'EVENT ON POST 2');
+  console.log('POST 2: Insert World!');
+  return next();
+});
+s3.post('insertOne', function(dbClient, tenant, meta, next) {
+  console.log('POST 3: Insert World!');
   return next();
 });
 s2.post('updateOne', (dbClient, tenant, meta, next) => {
@@ -618,21 +662,6 @@ const schemaFields = new Schema(
   },
 );
 
-const options = {
-  engine: 'mongodb',
-  uri:
-    'mongodb://localhost:27017,localhost:27018,localhost:27019/test?replicaSet=rs0',
-  connection: {
-    replicaSet: 'rs0',
-  },
-  elasticSearch: {
-    host: 'localhost:9200',
-  },
-  tenants: {
-    noListener: true,
-  },
-};
-
 const diagnosisSchema = new Schema(
   {
     classificationType: {
@@ -669,8 +698,6 @@ const diagnosisSchema = new Schema(
     },
   },
 );
-
-const conn = connect(options);
 
 module.exports = {
   conn,

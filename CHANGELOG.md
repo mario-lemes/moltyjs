@@ -17,13 +17,19 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
-## [1.3.0] - 2019-03-10
+## [1.3.1] - 2019-10-09
+
+### Changed
+
+- Improoved the middleware change for executing hooks
+
+## [1.3.0] - 2019-10-08
 
 ### Added
 
 - Updated mongodb module to 3.3.2v
 
-## [1.2.4] - 2019-03-10
+## [1.2.4] - 2019-09-30
 
 ### Fixed
 
