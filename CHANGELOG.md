@@ -17,6 +17,12 @@
   - .showRecordId(true) // Set the cursor showRecordId
   - .stream(options) // Return a modified Readable stream including a possible transform method.
 
+## [1.3.2] - 2019-10-10
+
+### Changed
+
+- Improoved the middleware change for executing async hooks
+
 ## [1.3.1] - 2019-10-09
 
 ### Changed
@@ -614,6 +620,8 @@
 - findOne() method.
 - Document inheritence support.
 
+[1.3.2]: https://github.com/Yonirt/moltyjs/compare/v1.3.1...v1.3.2
+[1.3.1]: https://github.com/Yonirt/moltyjs/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/Yonirt/moltyjs/compare/v1.2.4...v1.3.0
 [1.2.4]: https://github.com/Yonirt/moltyjs/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/Yonirt/moltyjs/compare/v1.2.2...v1.2.3

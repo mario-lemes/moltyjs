@@ -211,8 +211,25 @@ s3.post('insertOne', function(dbClient, tenant, meta, next) {
   console.log('POST 2: Insert World!');
   return next();
 });
-s3.post('insertOne', function(dbClient, tenant, meta, next) {
+s3.post('insertOne', async function(dbClient, tenant, meta, next) {
   console.log('POST 3: Insert World!');
+  const result = await conn.find(
+    tenant,
+    'TestModel3',
+    {},
+    { moltyClass: false },
+  );
+  console.log('RESULTS ');
+  return next();
+});
+s3.post('updateOne', function(dbClient, tenant, meta, next) {
+  console.log('UPDATE 1: Updated Gender!');
+  Events.emit('EVENT_A', tenant, 'EVENT ON UPDATE 1');
+  return next();
+});
+s3.post('updateOne', async function(dbClient, tenant, meta, next) {
+  console.log('UPDATE 2: Updated Gender!');
+  await executeExternalFunctionOnEvent(tenant, 'UPDATE 2');
   return next();
 });
 s2.post('updateOne', (dbClient, tenant, meta, next) => {

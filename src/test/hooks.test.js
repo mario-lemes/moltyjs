@@ -73,13 +73,18 @@ describe('# Hooks', () => {
     }
   });
 
-  it('Saving the new doc into the DB and using static methos in the prehook', async () => {
+  it.only('Saving the new doc into the DB and using static methos in the prehook', async () => {
     try {
       expect(newDoc2._data.password).to.equal(password);
       expect(newDoc2._data.lastName).to.equal(lastName);
       expect(newDoc2._data.test).to.equal(test);
       const res = await conn.insertOne('test2', newDoc2);
-
+      const res2s = await conn.updateOne(
+        'test2',
+        'TestModel3',
+        { _id: res._data._id },
+        { $set: { gender: 'Female' } },
+      );
       expect(res).to.have.property('_data');
       expect(res._data._id).to.equal(newDoc2._data._id);
       expect(res._data).to.deep.equal(newDoc2._data);

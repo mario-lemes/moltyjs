@@ -24,26 +24,26 @@ class Middleware {
 
   /** execute the middlewares */
   exec(...args) {
-    // check for early exit
-    if (!this.middlewares.length) return args;
+    return new Promise((resolve, reject) => {
+      // check for early exit
+      if (!this.middlewares.length) return resolve(args);
 
-    // kickstart the chain
-    let _execute = (i, ...args0) => {
-      nextTick(() => {
+      // kickstart the chain
+      let _execute = async (i, ...args0) => {
         try {
-          this.middlewares[i]((...returnValue) => {
+          await this.middlewares[i]((...returnValue) => {
             if (returnValue.length && returnValue[0] instanceof Error)
               return returnValue[0];
             else if (i >= this.middlewares.length - 1) return returnValue;
             else return _execute(i + 1, ...returnValue);
           }, ...args0);
         } catch (err) {
-          throw err;
+          return reject(err);
         }
-      }, 1);
-    };
+      };
 
-    _execute(0, ...args);
+      return resolve(_execute(0, ...args));
+    });
   }
 }
 
