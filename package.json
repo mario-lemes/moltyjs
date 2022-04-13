@@ -43,7 +43,7 @@
     "watch": "^1.0.2"
   },
   "dependencies": {
-    "async": "^2.6.0",
+    "async": "^3.2.2",
     "await-to-js": "^2.0.1",
     "backoff": "^2.5.0",
     "bson": "^1.0.4",
