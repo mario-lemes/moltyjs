@@ -12,7 +12,7 @@ const { testSchema, testOptions, s, m, conn } = require("./mock");
 describe("# Connection", () => {
   before(() => {});
 
-  it.only("Placeholder test", async () => {
+  it("Placeholder test", async () => {
     return true;
   });
 
