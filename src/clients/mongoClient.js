@@ -1,6 +1,6 @@
-const Middleware = require('../middleware');
-const ConnectionManager = require('./connectionManager');
-const ObjectID = require('mongodb').ObjectID;
+const Middleware = require("../middleware");
+const ConnectionManager = require("./connectionManager");
+const ObjectID = require("mongodb").ObjectID;
 const {
   isValidType,
   isObject,
@@ -8,7 +8,7 @@ const {
   isString,
   isInEnum,
   isNumber,
-} = require('../validators');
+} = require("../validators");
 
 //const { to } = require('await-to-js');
 
@@ -101,7 +101,7 @@ class MongoClient {
     this._tenantsOptions = Object.assign(
       {},
       defaultTenantsOptions,
-      options.tenants,
+      options.tenants
     );
 
     try {
@@ -125,9 +125,9 @@ class MongoClient {
       ? this._indexes[model._modelName]
       : [];
 
-    Object.keys(schema).forEach(field => {
-      if ('unique' in schema[field] && schema[field].unique) {
-        if (!indexes.some(index => !!index.key[field])) {
+    Object.keys(schema).forEach((field) => {
+      if ("unique" in schema[field] && schema[field].unique) {
+        if (!indexes.some((index) => !!index.key[field])) {
           indexes.push({ key: { [field]: 1 }, unique: true, name: field });
         }
       }
@@ -149,16 +149,16 @@ class MongoClient {
   addModel(model) {
     if (this._connectionManager === null)
       throw new Error(
-        'You must first connect to the DB before creating a model.',
+        "You must first connect to the DB before creating a model."
       );
 
     if (model._discriminator && this.models[model._discriminator]) {
       throw new Error(
-        'There is already a model with the same name: ' + model._discriminator,
+        "There is already a model with the same name: " + model._discriminator
       );
     } else if (!model._discriminator && this.models[model._modelName]) {
       throw new Error(
-        'There is already a model with the same name: ' + model._modelName,
+        "There is already a model with the same name: " + model._modelName
       );
     }
 
@@ -184,12 +184,12 @@ class MongoClient {
    */
   _applyTimestamps(obj, model, operation) {
     if (model._schemaOptions.timestamps) {
-      if (operation === 'insert') {
-        obj._data['createdAt'] = new Date();
+      if (operation === "insert") {
+        obj._data["createdAt"] = new Date();
       }
 
-      if (operation === 'update') {
-        obj['$currentDate'] = {
+      if (operation === "update") {
+        obj["$currentDate"] = {
           updatedAt: true,
         };
       }
@@ -224,24 +224,24 @@ class MongoClient {
     let deleteManyHooks = new Middleware();
 
     if (hooksList.length > 0) {
-      hooksList.forEach(key => {
+      hooksList.forEach((key) => {
         switch (key.hook) {
-          case 'insertOne':
+          case "insertOne":
             insertHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
-          case 'insertMany':
+          case "insertMany":
             insertManyHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
-          case 'updateOne':
+          case "updateOne":
             updateOneHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
-          case 'updateMany':
+          case "updateMany":
             updateManyHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
-          case 'deleteOne':
+          case "deleteOne":
             deleteOneHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
-          case 'deleteMany':
+          case "deleteMany":
             deleteManyHooks.use(key.fn.bind(objectBinded, this, tenant, meta));
             break;
           default:
@@ -270,24 +270,24 @@ class MongoClient {
    */
   _normalizeAggregatePipeline(pipeline, parentDiscriminator) {
     for (let stage of pipeline) {
-      Object.keys(stage).forEach(operator => {
-        if (operator === '$lookup') {
+      Object.keys(stage).forEach((operator) => {
+        if (operator === "$lookup") {
           // Check if there is a $lookup operator in the pipeline with
           // discriminated models pointing out
 
           let _discriminator = null;
-          let lookupFrom = stage['$lookup'].from;
+          let lookupFrom = stage["$lookup"].from;
           if (this.models[lookupFrom]) {
             _discriminator = this.models[lookupFrom]._discriminator;
             if (_discriminator) {
-              stage['$lookup'].from = this.models[lookupFrom]._modelName;
+              stage["$lookup"].from = this.models[lookupFrom]._modelName;
             }
           }
 
-          if (stage['$lookup']['pipeline']) {
+          if (stage["$lookup"]["pipeline"]) {
             return this._normalizeAggregatePipeline(
-              stage['$lookup']['pipeline'],
-              _discriminator,
+              stage["$lookup"]["pipeline"],
+              _discriminator
             );
           }
         }
@@ -295,13 +295,12 @@ class MongoClient {
     }
 
     if (parentDiscriminator) {
-      const { discriminatorKey } = this.models[
-        parentDiscriminator
-      ]._schemaOptions.inheritOptions;
+      const { discriminatorKey } =
+        this.models[parentDiscriminator]._schemaOptions.inheritOptions;
 
-      if (pipeline[0]['$match'] && pipeline[0]['$match'].discriminatorKey)
+      if (pipeline[0]["$match"] && pipeline[0]["$match"].discriminatorKey)
         throw new Error(
-          'You can not include a specific value for the "discriminatorKey" on the query.',
+          'You can not include a specific value for the "discriminatorKey" on the query.'
         );
 
       const pipelineKeys = Object.keys(pipeline[0]);
@@ -329,9 +328,9 @@ class MongoClient {
       // If the documents we are inserting are from a discriminator model
       if (!this.models[doc._discriminator])
         throw new Error(
-          'The collection ' +
+          "The collection " +
             collection +
-            'does not exist and is not registered.',
+            "does not exist and is not registered."
         );
       model = this.models[doc._discriminator];
       discriminatorKey = doc._options.inheritOptions.discriminatorKey;
@@ -350,9 +349,9 @@ class MongoClient {
       // which has discriminators model
       if (!this.models[doc._modelName])
         throw new Error(
-          'The collection ' +
+          "The collection " +
             collection +
-            'does not exist and is not registered.',
+            "does not exist and is not registered."
         );
       model = this.models[doc._modelName];
     }
@@ -373,19 +372,19 @@ class MongoClient {
    * @returns {Promise}
    */
   async insertOne(tenant, doc, options = {}) {
-    const Document = require('../document');
+    const Document = require("../document");
     if (!(doc instanceof Document))
-      throw new Error('The document should be a proper Document instance');
-    if (!tenant && typeof tenant != 'string')
+      throw new Error("The document should be a proper Document instance");
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'The document must specify the tenant name (String), got: ' + tenant,
+        "The document must specify the tenant name (String), got: " + tenant
       );
 
     // Assign default options to perform the inserOne query
     const insertOneOptions = Object.assign(
       {},
       defaultInsertOneOptions,
-      options,
+      options
     );
 
     const moltyClassEnabled = insertOneOptions.moltyClass;
@@ -393,24 +392,20 @@ class MongoClient {
 
     // If we are inserting a resources in a discriminator model
     // we have to set the proper params and address to the parent collection
-    const [
-      model,
-      collection,
-      discriminatorKey,
-      discriminator,
-    ] = this._getModelCollectionAndDiscriminator(doc);
+    const [model, collection, discriminatorKey, discriminator] =
+      this._getModelCollectionAndDiscriminator(doc);
 
     // If they have discriminator
     if (discriminator && discriminatorKey) {
       if (doc._data[discriminatorKey])
         throw new Error(
-          'You can not include a specific value for the "discriminatorKey" on the doc.',
+          'You can not include a specific value for the "discriminatorKey" on the doc.'
         );
 
       doc._data[discriminatorKey] = discriminator;
     }
 
-    const docAux = this._applyTimestamps(doc, model, 'insert');
+    const docAux = this._applyTimestamps(doc, model, "insert");
     // Ensure index are created
     if (this._indexes[collection] && this._indexes[collection].length > 0) {
       await this.createIndexes(tenant, collection, this._indexes[collection]);
@@ -435,7 +430,7 @@ class MongoClient {
         if (result) {
           if (moltyClassEnabled) {
             // Binding model properties to the document
-            const Document = require('../document');
+            const Document = require("../document");
 
             const docInserted = new Document(
               result.ops[0],
@@ -444,7 +439,7 @@ class MongoClient {
               model._methods,
               model._schemaOptions,
               model._modelName,
-              model._discriminator,
+              model._discriminator
             );
 
             resolve(docInserted);
@@ -477,23 +472,23 @@ class MongoClient {
   async insertMany(tenant, docs, options = {}) {
     if (!(docs instanceof Array))
       throw new Error(
-        'The documents should be a proper Array instance with documents',
+        "The documents should be a proper Array instance with documents"
       );
     if (docs.length <= 0)
-      throw new Error('The documents Array should not be empty');
-    const Document = require('../document');
+      throw new Error("The documents Array should not be empty");
+    const Document = require("../document");
     if (!(docs[0] instanceof Document))
-      throw new Error('Elements of the Array should be Document instances');
-    if (!tenant && typeof tenant != 'string')
+      throw new Error("Elements of the Array should be Document instances");
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'The document must specify the tenant name (String), got: ' + tenant,
+        "The document must specify the tenant name (String), got: " + tenant
       );
 
     // Assign default options to perform the inserMany query
     const insertManyOptions = Object.assign(
       {},
       defaultInsertManyOptions,
-      options,
+      options
     );
 
     const moltyClassEnabled = insertManyOptions.moltyClass;
@@ -501,12 +496,8 @@ class MongoClient {
 
     // If we are inserting a resources in a discriminator model
     // we have to set the proper params and address to the parent collection
-    const [
-      model,
-      collection,
-      discriminatorKey,
-      discriminator,
-    ] = this._getModelCollectionAndDiscriminator(docs[0]);
+    const [model, collection, discriminatorKey, discriminator] =
+      this._getModelCollectionAndDiscriminator(docs[0]);
 
     let arrayDocsData = [];
 
@@ -516,18 +507,18 @@ class MongoClient {
       for (let i = 0; i < docs.length; i++) {
         if (docs[i]._discriminator !== discriminator)
           throw new Error(
-            'There are documents in the Array that belongs to different collections.',
+            "There are documents in the Array that belongs to different collections."
           );
 
         if (docs[i]._data[discriminatorKey])
           throw new Error(
-            'You can not include a specific value for the "discriminatorKey" on the doc.',
+            'You can not include a specific value for the "discriminatorKey" on the doc.'
           );
 
         docs[i]._data[discriminatorKey] = discriminator;
 
         // Check and apply document options before saving
-        const docAux = this._applyTimestamps(docs[i], model, 'insert');
+        const docAux = this._applyTimestamps(docs[i], model, "insert");
 
         // Preparing the doc
         arrayDocsData.push(docAux._data);
@@ -537,11 +528,11 @@ class MongoClient {
       for (let i = 0; i < docs.length; i++) {
         if (docs[i]._modelName !== model._modelName)
           throw new Error(
-            'There are documents in the Array that belongs to different collections.',
+            "There are documents in the Array that belongs to different collections."
           );
 
         // Check and apply document options before saving
-        const docAux = this._applyTimestamps(docs[i], model, 'insert');
+        const docAux = this._applyTimestamps(docs[i], model, "insert");
 
         // Preparing the doc
         arrayDocsData.push(docAux._data);
@@ -578,7 +569,7 @@ class MongoClient {
             let docInserted = [];
             for (let i = 0; i < result.ops.length; i++) {
               // Binding model properties to the document
-              const Document = require('../document');
+              const Document = require("../document");
 
               docInserted.push(
                 new Document(
@@ -588,8 +579,8 @@ class MongoClient {
                   model._methods,
                   model._schemaOptions,
                   model._modelName,
-                  model._discriminator,
-                ),
+                  model._discriminator
+                )
               );
             }
 
@@ -619,13 +610,13 @@ class MongoClient {
    * @returns {Promise}
    */
   async find(tenant, collection, query = {}, options = {}) {
-    if (!tenant && typeof tenant != 'string')
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
+        "Should specify the tenant name (String), got: " + tenant
       );
-    if (!collection && typeof collection != 'string')
+    if (!collection && typeof collection != "string")
       throw new Error(
-        'Should specify the collection name (String), got: ' + collection,
+        "Should specify the collection name (String), got: " + collection
       );
 
     // Assign default options to perform the find query
@@ -641,13 +632,12 @@ class MongoClient {
       const { _discriminator } = this.models[collection];
 
       if (_discriminator) {
-        const { discriminatorKey } = this.models[
-          collection
-        ]._schemaOptions.inheritOptions;
+        const { discriminatorKey } =
+          this.models[collection]._schemaOptions.inheritOptions;
 
         if (query[discriminatorKey])
           throw new Error(
-            'You can not include a specific value for the "discriminatorKey" on the query.',
+            'You can not include a specific value for the "discriminatorKey" on the query.'
           );
 
         query[discriminatorKey] = collection;
@@ -656,9 +646,7 @@ class MongoClient {
       collection = this.models[collection]._modelName;
     } else {
       throw new Error(
-        'The collection ' +
-          collection +
-          'does not exist and is not registered.',
+        "The collection " + collection + "does not exist and is not registered."
       );
     }
 
@@ -717,9 +705,9 @@ class MongoClient {
 
         if (result) {
           if (moltyClassEnabled) {
-            const Document = require('../document');
+            const Document = require("../document");
             let docs = [];
-            result.forEach(doc => {
+            result.forEach((doc) => {
               docs.push(
                 new Document(
                   doc,
@@ -728,8 +716,8 @@ class MongoClient {
                   model._methods,
                   model._schemaOptions,
                   model._modelName,
-                  model._discriminator,
-                ),
+                  model._discriminator
+                )
               );
             });
             resolve(docs);
@@ -759,24 +747,24 @@ class MongoClient {
    * @returns {Promise}
    */
   async updateOne(tenant, collection, filter, payload, options = {}) {
-    if (!tenant && typeof tenant != 'string')
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
+        "Should specify the tenant name (String), got: " + tenant
       );
-    if (!collection && typeof collection != 'string')
+    if (!collection && typeof collection != "string")
       throw new Error(
-        'Should specify the collection name (String), got: ' + collection,
+        "Should specify the collection name (String), got: " + collection
       );
-    if (!filter && typeof filter != 'object')
-      throw new Error('Should specify the filter options, got: ' + filter);
-    if (!payload && typeof payload != 'string')
-      throw new Error('Should specify the payload object, got: ' + payload);
+    if (!filter && typeof filter != "object")
+      throw new Error("Should specify the filter options, got: " + filter);
+    if (!payload && typeof payload != "string")
+      throw new Error("Should specify the payload object, got: " + payload);
 
     // Assign default options to perform the updateOne query
     const updateOneOptions = Object.assign(
       {},
       defaultUpdateOneOptions,
-      options,
+      options
     );
 
     const moltyClassEnabled = updateOneOptions.moltyClass;
@@ -789,13 +777,12 @@ class MongoClient {
       const { _discriminator } = this.models[collection];
 
       if (_discriminator) {
-        const { discriminatorKey } = this.models[
-          collection
-        ]._schemaOptions.inheritOptions;
+        const { discriminatorKey } =
+          this.models[collection]._schemaOptions.inheritOptions;
 
         if (filter[discriminatorKey])
           throw new Error(
-            'You can not include a specific value for the "discriminatorKey" on the query.',
+            'You can not include a specific value for the "discriminatorKey" on the query.'
           );
 
         filter[discriminatorKey] = collection;
@@ -805,13 +792,11 @@ class MongoClient {
       collection = this.models[collection]._modelName;
     } else {
       throw new Error(
-        'The collection ' +
-          collection +
-          'does not exist and is not registered.',
+        "The collection " + collection + "does not exist and is not registered."
       );
     }
 
-    payload = this._applyTimestamps(payload, model, 'update');
+    payload = this._applyTimestamps(payload, model, "update");
 
     // Ensure index are created
     if (this._indexes[collection] && this._indexes[collection].length > 0) {
@@ -823,13 +808,13 @@ class MongoClient {
       model._preHooks,
       payload,
       tenant,
-      filter,
+      filter
     );
     const _postHooksAux = this._applyHooks(
       model._postHooks,
       payload,
       tenant,
-      filter,
+      filter
     );
 
     // Running pre update hooks
@@ -869,24 +854,24 @@ class MongoClient {
    * @returns {Promise}
    */
   async updateMany(tenant, collection, filter, payload, options = {}) {
-    if (!tenant && typeof tenant != 'string')
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
+        "Should specify the tenant name (String), got: " + tenant
       );
-    if (!collection && typeof collection != 'string')
+    if (!collection && typeof collection != "string")
       throw new Error(
-        'Should specify the collection name (String), got: ' + collection,
+        "Should specify the collection name (String), got: " + collection
       );
-    if (!filter && typeof filter != 'object')
-      throw new Error('Should specify the filter options, got: ' + filter);
-    if (!payload && typeof payload != 'string')
-      throw new Error('Should specify the payload object, got: ' + payload);
+    if (!filter && typeof filter != "object")
+      throw new Error("Should specify the filter options, got: " + filter);
+    if (!payload && typeof payload != "string")
+      throw new Error("Should specify the payload object, got: " + payload);
 
     // Assign default options to perform the updateMany query
     const updateManyOptions = Object.assign(
       {},
       defaultUpdateManyOptions,
-      options,
+      options
     );
 
     const moltyClassEnabled = updateManyOptions.moltyClass;
@@ -899,13 +884,12 @@ class MongoClient {
       const { _discriminator } = this.models[collection];
 
       if (_discriminator) {
-        const { discriminatorKey } = this.models[
-          collection
-        ]._schemaOptions.inheritOptions;
+        const { discriminatorKey } =
+          this.models[collection]._schemaOptions.inheritOptions;
 
         if (filter[discriminatorKey])
           throw new Error(
-            'You can not include a specific value for the "discriminatorKey" on the query.',
+            'You can not include a specific value for the "discriminatorKey" on the query.'
           );
 
         filter[discriminatorKey] = collection;
@@ -915,13 +899,11 @@ class MongoClient {
       collection = this.models[collection]._modelName;
     } else {
       throw new Error(
-        'The collection ' +
-          collection +
-          'does not exist and is not registered.',
+        "The collection " + collection + "does not exist and is not registered."
       );
     }
 
-    payload = this._applyTimestamps(payload, model, 'update');
+    payload = this._applyTimestamps(payload, model, "update");
 
     // Ensure index are created
     if (this._indexes[collection] && this._indexes[collection].length > 0) {
@@ -933,13 +915,13 @@ class MongoClient {
       model._preHooks,
       payload,
       tenant,
-      filter,
+      filter
     );
     const _postHooksAux = this._applyHooks(
       model._postHooks,
       payload,
       tenant,
-      filter,
+      filter
     );
 
     // Running pre update hooks
@@ -978,20 +960,20 @@ class MongoClient {
    * @returns {Promise}
    */
   async aggregate(tenant, collection, pipeline = [], options = {}) {
-    if (!tenant && typeof tenant != 'string')
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
+        "Should specify the tenant name (String), got: " + tenant
       );
-    if (!collection && typeof collection != 'string')
+    if (!collection && typeof collection != "string")
       throw new Error(
-        'Should specify the collection name (String), got: ' + collection,
+        "Should specify the collection name (String), got: " + collection
       );
 
     // Assign default options to perform the aggregate query
     const aggregateOptions = Object.assign(
       {},
       defaultAggregateOptions,
-      options,
+      options
     );
 
     const moltyClassEnabled = aggregateOptions.moltyClass;
@@ -1005,13 +987,12 @@ class MongoClient {
       const { _discriminator } = this.models[collection];
 
       if (_discriminator) {
-        const { discriminatorKey } = this.models[
-          collection
-        ]._schemaOptions.inheritOptions;
+        const { discriminatorKey } =
+          this.models[collection]._schemaOptions.inheritOptions;
 
-        if (pipeline[0]['$match'] && pipeline[0]['$match'].discriminatorKey)
+        if (pipeline[0]["$match"] && pipeline[0]["$match"].discriminatorKey)
           throw new Error(
-            'You can not include a specific value for the "discriminatorKey" on the query.',
+            'You can not include a specific value for the "discriminatorKey" on the query.'
           );
 
         discriminator = collection;
@@ -1021,9 +1002,7 @@ class MongoClient {
       collection = this.models[collection]._modelName;
     } else {
       throw new Error(
-        'The collection ' +
-          collection +
-          'does not exist and is not registered.',
+        "The collection " + collection + "does not exist and is not registered."
       );
     }
 
@@ -1101,22 +1080,22 @@ class MongoClient {
    * @returns {Promise}
    */
   async deleteOne(tenant, collection, filter, options = {}) {
-    if (!tenant && typeof tenant != 'string')
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
+        "Should specify the tenant name (String), got: " + tenant
       );
-    if (!collection && typeof collection != 'string')
+    if (!collection && typeof collection != "string")
       throw new Error(
-        'Should specify the collection name (String), got: ' + collection,
+        "Should specify the collection name (String), got: " + collection
       );
-    if (!filter && typeof filter != 'object')
-      throw new Error('Should specify the filter options, got: ' + filter);
+    if (!filter && typeof filter != "object")
+      throw new Error("Should specify the filter options, got: " + filter);
 
     // Assign default options to perform the deleteOne query
     const deleteOneOptions = Object.assign(
       {},
       defaultDeleteOneOptions,
-      options,
+      options
     );
 
     const moltyClassEnabled = deleteOneOptions.moltyClass;
@@ -1129,13 +1108,12 @@ class MongoClient {
       const { _discriminator } = this.models[collection];
 
       if (_discriminator) {
-        const { discriminatorKey } = this.models[
-          collection
-        ]._schemaOptions.inheritOptions;
+        const { discriminatorKey } =
+          this.models[collection]._schemaOptions.inheritOptions;
 
         if (filter[discriminatorKey])
           throw new Error(
-            'You can not include a specific value for the "discriminatorKey" on the query.',
+            'You can not include a specific value for the "discriminatorKey" on the query.'
           );
 
         filter[discriminatorKey] = collection;
@@ -1145,9 +1123,7 @@ class MongoClient {
       collection = this.models[collection]._modelName;
     } else {
       throw new Error(
-        'The collection ' +
-          collection +
-          'does not exist and is not registered.',
+        "The collection " + collection + "does not exist and is not registered."
       );
     }
 
@@ -1162,7 +1138,7 @@ class MongoClient {
       model._postHooks,
       {},
       tenant,
-      filter,
+      filter
     );
 
     // Running pre delete hooks
@@ -1201,22 +1177,22 @@ class MongoClient {
    * @returns {Promise}
    */
   async deleteMany(tenant, collection, filter, options = {}) {
-    if (!tenant && typeof tenant != 'string')
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
+        "Should specify the tenant name (String), got: " + tenant
       );
-    if (!collection && typeof collection != 'string')
+    if (!collection && typeof collection != "string")
       throw new Error(
-        'Should specify the collection name (String), got: ' + collection,
+        "Should specify the collection name (String), got: " + collection
       );
-    if (!filter && typeof filter != 'object')
-      throw new Error('Should specify the filter options, got: ' + filter);
+    if (!filter && typeof filter != "object")
+      throw new Error("Should specify the filter options, got: " + filter);
 
     // Assign default options to perform the deleteOne query
     const deleteManyOptions = Object.assign(
       {},
       defaultDeleteManyOptions,
-      options,
+      options
     );
 
     const moltyClassEnabled = deleteManyOptions.moltyClass;
@@ -1229,13 +1205,12 @@ class MongoClient {
       const { _discriminator } = this.models[collection];
 
       if (_discriminator) {
-        const { discriminatorKey } = this.models[
-          collection
-        ]._schemaOptions.inheritOptions;
+        const { discriminatorKey } =
+          this.models[collection]._schemaOptions.inheritOptions;
 
         if (filter[discriminatorKey])
           throw new Error(
-            'You can not include a specific value for the "discriminatorKey" on the query.',
+            'You can not include a specific value for the "discriminatorKey" on the query.'
           );
 
         filter[discriminatorKey] = collection;
@@ -1245,9 +1220,7 @@ class MongoClient {
       collection = this.models[collection]._modelName;
     } else {
       throw new Error(
-        'The collection ' +
-          collection +
-          'does not exist and is not registered.',
+        "The collection " + collection + "does not exist and is not registered."
       );
     }
 
@@ -1262,7 +1235,7 @@ class MongoClient {
       model._postHooks,
       {},
       tenant,
-      filter,
+      filter
     );
 
     // Running pre delete hooks
@@ -1300,16 +1273,16 @@ class MongoClient {
    * @returns {Promise}
    */
   async createIndexes(tenant, collection, fields) {
-    if (!tenant && typeof tenant != 'string')
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
+        "Should specify the tenant name (String), got: " + tenant
       );
-    if (!collection && typeof collection != 'string')
+    if (!collection && typeof collection != "string")
       throw new Error(
-        'Should specify the collection name (String), got: ' + collection,
+        "Should specify the collection name (String), got: " + collection
       );
-    if (!fields && typeof fields != 'object')
-      throw new Error('Should specify the field name (Array), got: ' + fields);
+    if (!fields && typeof fields != "object")
+      throw new Error("Should specify the field name (Array), got: " + fields);
 
     // Checking if indexes are already set for this tenant and this collection
     if (this.tenants[tenant] && this.tenants[tenant][collection]) return;
@@ -1317,12 +1290,43 @@ class MongoClient {
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
 
+    // Checking if indexes already exist in the DB
+    const indexes = await conn
+      .db(tenant, this._tenantsOptions)
+      .collection(collection)
+      .indexes();
+
+    const fieldsFiltered = [];
+    let indexAlreadyExist = false;
+    for (const field of fields) {
+      const keys = Object.keys(field.key);
+      for (const index of indexes) {
+        const indexKeys = index.weights
+          ? Object.keys(index.weights)
+          : Object.keys(index.key);
+        if (keys.every((key) => indexKeys.includes(key))) {
+          indexAlreadyExist = true;
+          break;
+        }
+      }
+
+      if (!indexAlreadyExist) {
+        fieldsFiltered.push(field);
+      }
+
+      indexAlreadyExist = false;
+    }
+
+    if (fieldsFiltered.length <= 0) {
+      return;
+    }
+
     return new Promise(async (resolve, reject) => {
       try {
         const result = await conn
           .db(tenant, this._tenantsOptions)
           .collection(collection)
-          .createIndexes(fields);
+          .createIndexes(fieldsFiltered);
 
         // Set Indexes for this tenant and this collection are already set
         this.tenants[tenant] = {
@@ -1347,9 +1351,9 @@ class MongoClient {
    * @returns {Promise}
    */
   async dropDatabase(tenant) {
-    if (!tenant && typeof tenant != 'string')
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
+        "Should specify the tenant name (String), got: " + tenant
       );
 
     // Acquiring db instance
@@ -1379,14 +1383,14 @@ class MongoClient {
    * @returns {Promise}
    */
   async dropCollection(collection, tenant) {
-    if (!tenant && typeof tenant != 'string')
+    if (!tenant && typeof tenant != "string")
       throw new Error(
-        'Should specify the tenant name (String), got: ' + tenant,
+        "Should specify the tenant name (String), got: " + tenant
       );
 
-    if (!collection && typeof collection != 'string')
+    if (!collection && typeof collection != "string")
       throw new Error(
-        'Should specify the collection name (String), got: ' + collection,
+        "Should specify the collection name (String), got: " + collection
       );
 
     // Acquiring db instance
@@ -1417,7 +1421,7 @@ class MongoClient {
    */
   async executeDbAdminCommand(command, tenant = null, options = {}) {
     if (Object.keys(command).length <= 0)
-      throw new Error('command field should not be empty');
+      throw new Error("command field should not be empty");
 
     // Acquiring db instance
     const conn = await this._connectionManager.acquire();
